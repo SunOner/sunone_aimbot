@@ -151,7 +151,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 yolov8s.pt
-runs/detect/train17/weights/best.engine
-runs/detect/train17/weights/best.onnx
-runs/detect/train17/weights/best.pt
-runs/detect/train17/weights/last.pt
+runs/
+tools/
+utils/
