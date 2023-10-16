@@ -56,7 +56,7 @@ def init():
     aim_y_down = int(screen_y_center + aim_y / 2)
     avg_postprocess_speed, avg_count, avg_last = 0, 0, 0
     
-    model = YOLO("best.engine")
+    model = YOLO("only_destiny2.engine")
     if show_window:
         cv2.namedWindow(debug_window_name)
 
