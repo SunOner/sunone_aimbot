@@ -5,7 +5,7 @@
 1. Open CV2 (To debug images) [install from here](https://pypi.org/project/opencv-python/) [or compile with GPU support from this guide](https://www.youtube.com/watch?v=HsuKxjQhFU0&ab_channel=NicolaiNielsen)
 1. NVIDIA TensorRT (To speed up the process of searching for objects up to 13 times) [Install Guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
 1. Ultralytics [link](https://github.com/ultralytics/ultralytics)
-1. Pytorch [link](https://pytorch.org/)
+1. Pytorch with GPU support [link](https://pytorch.org/)
 1. Numpy
 1. Win32 tools for python
 - Tested on:
