@@ -6,8 +6,8 @@
 1. NVIDIA TensorRT (To speed up the process of searching for objects up to 13 times) [Install Guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
 1. Ultralytics [link](https://github.com/ultralytics/ultralytics)
 -Tested on:
-1. YOLOv8.0.198
-1. Opencv 4.8.1
-1. Nvidia CUDNN 8.9.4.25
-1. Nvidia Cuda 12.1
-1. Python 3.11.6 (Anaconda env and not anaconda)
+2. YOLOv8.0.198
+2. Opencv 4.8.1
+2. Nvidia CUDNN 8.9.4.25
+2. Nvidia Cuda 12.1
+2. Python 3.11.6 (Anaconda env and not anaconda)
