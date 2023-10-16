@@ -5,7 +5,7 @@
 1. Open CV2 (To debug images) [install from here](https://pypi.org/project/opencv-python/) [or compile with GPU support from this guide](https://www.youtube.com/watch?v=HsuKxjQhFU0&ab_channel=NicolaiNielsen)
 1. NVIDIA TensorRT (To speed up the process of searching for objects up to 13 times) [Install Guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
 1. Ultralytics [link](https://github.com/ultralytics/ultralytics)
--Tested on:
+- Tested on:
 2. YOLOv8.0.198
 2. Opencv 4.8.1
 2. Nvidia CUDNN 8.9.4.25
