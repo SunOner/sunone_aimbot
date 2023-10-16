@@ -14,4 +14,12 @@
 1. Python 3.11.6 (Anaconda env and not anaconda)
 1. Pytorch 2.1.0.dev20230519+cu121
 - Options:
-> options.py
+> options.py file
+1. auto_aim Automatic targeting of enemies without pressing keys
+1. auto_shot Automatic targeting of enemies and automatic shooting at it
+1. head_correction Automatic calculation of aiming between the detected head and the body of the enemy
+1. y_portion correction of y coordinates inside the detected box
+1. show_window Show cv2 window
+1. show_speed Show speed inside cv2 window
+1. debug_window_scale_percent adjusting the cv2 window size
+1. debug_window_name cv2 window title
