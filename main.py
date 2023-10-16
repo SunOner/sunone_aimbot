@@ -3,31 +3,57 @@ from ultralytics import YOLO
 import numpy as np
 import torch
 import cv2
-import win32api, win32con
-from grabscreen import grab_screen
+import win32gui, win32ui, win32con, win32api
 from PID import PID
 import ghub_mouse as ghub
 from math import *
 from options import *
 from cv2 import cuda
 
+def grab_screen(region=None):
+
+    hwin = win32gui.FindWindow("aboba", None)
+    if region:
+            left, top, x2, y2 = region
+            width = x2 - left
+            height = y2 - top
+    else:
+        width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
+        height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
+        left = win32api.GetSystemMetrics(win32con.SM_XVIRTUALSCREEN)
+        top = win32api.GetSystemMetrics(win32con.SM_YVIRTUALSCREEN)
+    hwindc = win32gui.GetWindowDC(hwin)
+    srcdc = win32ui.CreateDCFromHandle(hwindc)
+    memdc = srcdc.CreateCompatibleDC()
+    bmp = win32ui.CreateBitmap()
+    bmp.CreateCompatibleBitmap(srcdc, width, height)
+    memdc.SelectObject(bmp)
+    memdc.BitBlt((0, 0), (width, height), srcdc, (left, top), win32con.SRCCOPY)
+    
+    signedIntsArray = bmp.GetBitmapBits(True)
+    img = np.frombuffer(signedIntsArray, dtype='uint8')
+    img.shape = (height, width, 4)
+
+    srcdc.DeleteDC()
+    memdc.DeleteDC()
+    win32gui.ReleaseDC(hwin, hwindc)
+    win32gui.DeleteObject(bmp.GetHandle())
+
+    return img
+
 screen_x, screen_y, window_x, window_y = 1280 / 2, 720 / 2, 2560 / 2, 1440 / 2
 screen_x_center, screen_y_center = screen_x / 2, screen_y / 2
 
 pid = PID(0.000000000000000001, 10000000, -10000000, 0.45, 0.0000000001, 0)
-grab_window_location = (
-    int(screen_x),
-    int(screen_y),
-    int(2560 - screen_x),
-    int(1440 - screen_y))
+window_region = (int(screen_x), int(screen_y), int(2560 - screen_x), int(1440 - screen_y))
 edge_x = screen_x_center - window_x / 2
 edge_y = screen_y_center - window_y / 2
 
 @torch.no_grad()
 def init():
     # if show_window:
-        # cuda.printCudaDeviceInfo(0)
-        # cv2.cuda.setDevice(0)
+    #     cuda.printCudaDeviceInfo(0)
+    #     cv2.cuda.setDevice(0)
     np.bool = np.bool_
     aim_x = 640
     aim_y = 480
@@ -42,7 +68,7 @@ def init():
         cv2.namedWindow(debug_window_name)
 
     while True:
-        img = grab_screen(grab_window_location)
+        img = grab_screen(window_region)
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
         
         result = model.predict(
