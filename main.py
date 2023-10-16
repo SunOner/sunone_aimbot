@@ -1,17 +1,14 @@
-import time
 from ultralytics import YOLO
 import numpy as np
 import torch
 import cv2
 import win32gui, win32ui, win32con, win32api
-from PID import PID
 import ghub_mouse as ghub
 from math import *
 from options import *
-from cv2 import cuda
+from ext_tools.mouse_calc import mouse_calc
 
-def grab_screen(region=None):
-
+def screen_grab(region=None):
     hwin = win32gui.FindWindow("aboba", None)
     if region:
             left, top, x2, y2 = region
@@ -43,17 +40,13 @@ def grab_screen(region=None):
 
 screen_x, screen_y, window_x, window_y = 1280 / 2, 720 / 2, 2560 / 2, 1440 / 2
 screen_x_center, screen_y_center = screen_x / 2, screen_y / 2
-
-pid = PID(0.000000000000000001, 10000000, -10000000, 0.45, 0.0000000001, 0)
+pid = mouse_calc(0.000000000000000001, 10000000, -10000000, 0.45, 0.0000000001, 0)
 window_region = (int(screen_x), int(screen_y), int(2560 - screen_x), int(1440 - screen_y))
 edge_x = screen_x_center - window_x / 2
 edge_y = screen_y_center - window_y / 2
 
 @torch.no_grad()
 def init():
-    # if show_window:
-    #     cuda.printCudaDeviceInfo(0)
-    #     cv2.cuda.setDevice(0)
     np.bool = np.bool_
     aim_x = 640
     aim_y = 480
@@ -63,12 +56,12 @@ def init():
     aim_y_down = int(screen_y_center + aim_y / 2)
     avg_postprocess_speed, avg_count, avg_last = 0, 0, 0
     
-    model = YOLO("C:/Users/sun/source/repos/yolov8_trt/runs/detect/train17/weights/best.engine")
+    model = YOLO("best.engine")
     if show_window:
         cv2.namedWindow(debug_window_name)
 
     while True:
-        img = grab_screen(window_region)
+        img = screen_grab(window_region)
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
         
         result = model.predict(
@@ -171,8 +164,8 @@ def init():
                     if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
                         final_x = target_xywh_x - screen_x_center
                         final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
-                        pid_x = int(pid.calculate(final_x, 0))
-                        pid_y = int(pid.calculate(final_y, 0))
+                        pid_x = int(pid.calculate_mouse(final_x, 0))
+                        pid_y = int(pid.calculate_mouse(final_y, 0))
                         if show_window: cv2.line(annotated_frame, (int(screen_x_center * 2), int(screen_y_center * 2)), (int(screen_x_center * 2) + int(pid_x * 2), int(screen_y_center * 2) + int(pid_y * 2)), (255, 0, 0), 2)
 
                     if auto_aim == False:
@@ -207,8 +200,3 @@ def init():
 
 if __name__ == "__main__":
     init()
-
-
-# cv2.rectangle(annotated_frame, (640, 320), (480, 240), (0,255,0), 2)
-# cv2.circle(annotated_frame,target_point_1_pos, radius=3, color=(255, 0, 0), thickness=-1)
-# cv2.putText(annotated_frame, str(target_point_1_text), target_point_1_pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
