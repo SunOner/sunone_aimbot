@@ -56,14 +56,18 @@ def init():
     aim_y_down = int(screen_y_center + aim_y / 2)
     avg_postprocess_speed, avg_count, avg_last = 0, 0, 0
     
-    model = YOLO("only_destiny2.engine")
+    model = YOLO("models/all_1.engine")
     if show_window:
         cv2.namedWindow(debug_window_name)
 
     while True:
         img = screen_grab(window_region)
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-        
+        clss = []
+        if head_correction == True:
+            clss = [0, 1, 7]
+        else:
+            clss = [0, 1]
         result = model.predict(
             img,
             stream=False,
@@ -77,9 +81,9 @@ def init():
             show=False,
             boxes=False,
             half=False,
-            max_det=100,
+            max_det=20,
             vid_stride=False,
-            classes=[0,1,7],
+            classes=clss,
             verbose=False,
             show_labels=False,
             show_conf=False)
@@ -117,13 +121,11 @@ def init():
             if len(frame.boxes):
                 wrapped_array_body = []
                 wrapped_array_head = []
-                # result_cls = frame.boxes.cls
-                # result_conf = frame.boxes.conf
-                result_xywh = frame.boxes.xywh
-
                 target_distance_list = []
                 target_xywh_list = []
-                
+
+                result_xywh = frame.boxes.xywh
+
                 min_index = 0
                 head_min_index = 0
                 if head_correction == True:
@@ -163,7 +165,7 @@ def init():
 
                     if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
                         final_x = target_xywh_x - screen_x_center
-                        final_y = target_xywh_y - screen_y_center - y_portion * target_xywh[3]
+                        final_y = target_xywh_y - screen_y_center - y_offset * target_xywh[3]
                         pid_x = int(pid.calculate_mouse(final_x, 0))
                         pid_y = int(pid.calculate_mouse(final_y, 0))
                         if show_window: cv2.line(annotated_frame, (int(screen_x_center * 2), int(screen_y_center * 2)), (int(screen_x_center * 2) + int(pid_x * 2), int(screen_y_center * 2) + int(pid_y * 2)), (255, 0, 0), 2)
