@@ -1,0 +1,5 @@
+ultralytics==8.0.199
+torch==2.1.0
+opencv-python==4.8.1.78
+numpy==1.26.1
+pywin32==306
