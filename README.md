@@ -16,6 +16,7 @@
 1. Nvidia Cuda 12.1
 1. Python 3.11.6 (Anaconda env and not anaconda)
 1. Pytorch 2.1.0.dev20230519+cu121
+1. Numpy 1.26.0
 - Options:
 > options.py file
 1. auto_aim Automatic targeting of enemies without pressing keys
