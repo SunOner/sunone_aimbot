@@ -6,6 +6,7 @@
 1. NVIDIA TensorRT (To speed up the process of searching for objects up to 13 times) [Install Guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
 1. Ultralytics [link](https://github.com/ultralytics/ultralytics)
 1. Pytorch with GPU support [link](https://pytorch.org/)
+1. TensorRT-8.6.1.6 (For *.engine files support)
 1. Numpy
 1. Win32 tools for python
 - Tested on:
@@ -17,7 +18,6 @@
 1. Python 3.11.6 (Anaconda env and not anaconda)
 1. Pytorch 2.1.0.dev20230519+cu121
 1. Numpy 1.26.0
-1. TensorRT-8.6.1.6 (For *.engine files support)
 - Options:
 > options.py file
 1. auto_aim Automatic targeting of enemies without pressing keys
