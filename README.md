@@ -6,7 +6,10 @@
 1. NVIDIA TensorRT (To speed up the process of searching for objects up to 13 times) [Install Guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html)
 1. Ultralytics [link](https://github.com/ultralytics/ultralytics)
 1. Pytorch [link](https://pytorch.org/)
+1. Numpy
+1. Win32 tools for python
 - Tested on:
+1. Windows 10-11
 1. YOLOv8.0.198
 1. Opencv 4.8.1
 1. Nvidia CUDNN 8.9.4.25
@@ -23,3 +26,7 @@
 1. show_speed Show speed inside cv2 window
 1. debug_window_scale_percent adjusting the cv2 window size
 1. debug_window_name cv2 window title
+- AI models:
+1. *.pt is default model
+1. *.onnx faster than *.pt
+1. *.engine is final exported model, faster than the two previously described.
