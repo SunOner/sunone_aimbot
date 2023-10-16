@@ -36,7 +36,8 @@ The YOLOv8 Aimbot has been tested on the following environment:
 ## Options
 
 The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
-
+- screen_height: monitor height
+- screen_width: monitor width
 - auto_aim: Enables automatic targeting of enemies without pressing keys.
 - auto_shot: Enables automatic targeting of enemies and automatic shooting at them.
 - head_correction: Automatically calculates aiming between the detected head and the body of the enemy.

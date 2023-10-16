@@ -1,7 +1,10 @@
+screen_height = 2560
+screen_width = 1440
+
 auto_aim = False
 auto_shot = False
 head_correction = False
-y_portion = 0.35
+y_offset = 0.35
 
 show_window = False
 show_speed = False

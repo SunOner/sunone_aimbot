@@ -38,7 +38,7 @@ def screen_grab(region=None):
 
     return img
 
-screen_x, screen_y, window_x, window_y = 1280 / 2, 720 / 2, 2560 / 2, 1440 / 2
+screen_x, screen_y, window_x, window_y = 1280 / 2, 720 / 2, screen_height / 2, screen_width / 2
 screen_x_center, screen_y_center = screen_x / 2, screen_y / 2
 pid = mouse_calc(0.000000000000000001, 10000000, -10000000, 0.45, 0.0000000001, 0)
 window_region = (int(screen_x), int(screen_y), int(2560 - screen_x), int(1440 - screen_y))
