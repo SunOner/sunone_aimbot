@@ -31,3 +31,5 @@
 1. *.pt is default model
 1. *.onnx faster than *.pt
 1. *.engine is final exported model, faster than the two previously described.
+- TODO
+- [ ] screen issue(add auto screen parser), work great only on 2560x1440 resolution
