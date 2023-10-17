@@ -1,6 +1,3 @@
-import win32gui, win32api, win32con, win32ui
-import numpy as np
-
 class mouse_calc:
     def __init__(self, dt, max, min, Kp, Ki, Kd):
         self.dt = dt
