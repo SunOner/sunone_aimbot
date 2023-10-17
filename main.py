@@ -33,35 +33,33 @@ def screen_grab(region):
     win32gui.DeleteObject(bmp.GetHandle())
 
     return img
-
-screen_x, screen_y, window_x, window_y = screen_height / 2 / 2, screen_width / 2 / 2, screen_height / 2, screen_width / 2
-screen_x_center, screen_y_center = screen_x / 2, screen_y / 2
+region = Calculate_screen_offset()
+screen_x_center, screen_y_center = screen_height / 2, screen_width / 2
 pid = mouse_calc(0.000000000000000001, 10000000, -10000000, 0.45, 0.0000000001, 0)
-window_region = (int(screen_x), int(screen_y), int(screen_height - screen_x), int(screen_width - screen_y))
-edge_x = screen_x_center - window_x / 2
-edge_y = screen_y_center - window_y / 2
+edge_x = screen_x_center - screen_height / 4
+edge_y = screen_y_center - screen_width / 4
 
 @torch.no_grad()
 def init():
     np.bool = np.bool_
-    aim_x = screen_height / 4
-    aim_y = screen_width / 4
-    aim_x_left = int(screen_x_center - aim_x / 2)
-    aim_x_right = int(screen_x_center + aim_x / 2)
-    aim_y_up = int(screen_y_center - aim_y / 2)
-    aim_y_down = int(screen_y_center + aim_y / 2)
+    aim_x_left = int(screen_x_center - screen_height / 2)
+    aim_x_right = int(screen_x_center + screen_height / 2)
+    aim_y_up = int(screen_y_center - screen_width / 2)
+    aim_y_down = int(screen_y_center + screen_width / 2)
+
     avg_postprocess_speed, avg_count, avg_last = 0, 0, 0
+
     if show_window and show_fps:
         prev_frame_time = 0
         new_frame_time = 0
 
-    model = YOLO("models/all_1.engine")
+    model = YOLO(model_path)
 
     if show_window:
         cv2.namedWindow(debug_window_name)
 
     while True:
-        img = screen_grab(window_region)
+        img = screen_grab(region)
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
         clss = []
         if head_correction == True:
@@ -71,6 +69,7 @@ def init():
         result = model(
             img,
             stream=False,
+            cfg='coco8.yaml',
             stream_buffer=False,
             agnostic_nms=False,
             save=False,
@@ -169,9 +168,11 @@ def init():
                     if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
                         final_x = target_xywh_x - screen_x_center
                         final_y = target_xywh_y - screen_y_center - y_offset * target_xywh[3]
+
+                        
                         pid_x = int(pid.calculate_mouse(final_x, 0))
                         pid_y = int(pid.calculate_mouse(final_y, 0))
-                        if show_window: cv2.line(annotated_frame, (int(screen_x_center * 2), int(screen_y_center * 2)), (int(screen_x_center * 2) + int(pid_x * 2), int(screen_y_center * 2) + int(pid_y * 2)), (255, 0, 0), 2)
+                        if show_window: cv2.line(annotated_frame, (int(screen_x_center / 2), int(screen_y_center / 2)), (int(screen_x_center / 2) + int(pid_x * 2), int(screen_y_center / 2) + int(pid_y * 2)), (255, 0, 0), 2)
 
                     if auto_aim == False:
                         if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
