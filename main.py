@@ -48,8 +48,8 @@ edge_y = screen_y_center - window_y / 2
 @torch.no_grad()
 def init():
     np.bool = np.bool_
-    aim_x = 640
-    aim_y = 480
+    aim_x = screen_height / 4
+    aim_y = screen_width / 4
     aim_x_left = int(screen_x_center - aim_x / 2)
     aim_x_right = int(screen_x_center + aim_x / 2)
     aim_y_up = int(screen_y_center - aim_y / 2)
@@ -86,7 +86,8 @@ def init():
             classes=clss,
             verbose=False,
             show_labels=False,
-            show_conf=False)
+            show_conf=False,
+            task='detect')
         if(show_window):
             height = int(img.shape[0] * debug_window_scale_percent / 100)
             width = int(img.shape[1] * debug_window_scale_percent / 100)
