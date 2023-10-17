@@ -6,8 +6,9 @@ auto_shot = False
 head_correction = False
 y_offset = 0.35
 
-show_window = False
+show_window = True
 show_speed = False
+show_fps = True
 debug_window_scale_percent = 100
 debug_window_name = 'RT'
 

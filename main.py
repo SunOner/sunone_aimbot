@@ -7,18 +7,14 @@ import ghub_mouse as ghub
 from math import *
 from options import *
 from ext_tools.mouse_calc import mouse_calc
+import time
 
-def screen_grab(region=None):
+def screen_grab(region):
     hwin = win32gui.FindWindow("aboba", None)
-    if region:
-            left, top, x2, y2 = region
-            width = x2 - left
-            height = y2 - top
-    else:
-        width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
-        height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
-        left = win32api.GetSystemMetrics(win32con.SM_XVIRTUALSCREEN)
-        top = win32api.GetSystemMetrics(win32con.SM_YVIRTUALSCREEN)
+    left, top, x2, y2 = region
+    width = x2 - left
+    height = y2 - top
+
     hwindc = win32gui.GetWindowDC(hwin)
     srcdc = win32ui.CreateDCFromHandle(hwindc)
     memdc = srcdc.CreateCompatibleDC()
@@ -55,8 +51,12 @@ def init():
     aim_y_up = int(screen_y_center - aim_y / 2)
     aim_y_down = int(screen_y_center + aim_y / 2)
     avg_postprocess_speed, avg_count, avg_last = 0, 0, 0
-    
+    if show_window and show_fps:
+        prev_frame_time = 0
+        new_frame_time = 0
+
     model = YOLO("models/all_1.engine")
+
     if show_window:
         cv2.namedWindow(debug_window_name)
 
@@ -68,7 +68,7 @@ def init():
             clss = [0, 1, 7]
         else:
             clss = [0, 1]
-        result = model.predict(
+        result = model(
             img,
             stream=False,
             stream_buffer=False,
@@ -88,14 +88,14 @@ def init():
             show_labels=False,
             show_conf=False,
             task='detect')
+        
         if(show_window):
             height = int(img.shape[0] * debug_window_scale_percent / 100)
             width = int(img.shape[1] * debug_window_scale_percent / 100)
             dim = (width, height)
-            
 
         annotated_frame = result[0].plot()
-        
+
         for frame in result:
             if show_window and show_speed == True:
                 speed_preprocess, speed_inference, speed_postprocess = frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess']
@@ -119,6 +119,7 @@ def init():
                     avg_last = avg_postprocess_speed
                     avg_count = 0
                     avg_postprocess_speed = 0
+
             if len(frame.boxes):
                 wrapped_array_body = []
                 wrapped_array_head = []
@@ -129,6 +130,7 @@ def init():
 
                 min_index = 0
                 head_min_index = 0
+
                 if head_correction == True:
                     head_distance_list = []
                     head_xywh_list = []
@@ -188,7 +190,11 @@ def init():
                                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,pid_x, pid_y, 0, 0)
                         except:
                                 pass
-
+        if show_window and show_fps:
+            new_frame_time = time.time()
+            fps = 1/(new_frame_time-prev_frame_time)
+            prev_frame_time = new_frame_time
+            cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
         if win32api.GetAsyncKeyState(win32con.VK_F2):
             if show_window:
                 cv2.destroyWindow(debug_window_name)
