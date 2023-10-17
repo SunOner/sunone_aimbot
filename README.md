@@ -55,12 +55,6 @@ The repository provides multiple AI models for different purposes:
 - *.onnx: Faster than *.pt model.
 - *.engine: Final exported model, which is faster than the previous two.
 
-## TODO
-
-Here are some pending tasks and improvements:
-
-- [ ] Screen resolution issue: Implement auto screen resolution detection to make the aim bot work seamlessly on various screen sizes, currently optimized for 2560x1440 resolution.
-
 Feel free to contribute and make this aim bot even more powerful and versatile!
 
 ## License
