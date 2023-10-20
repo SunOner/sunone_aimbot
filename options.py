@@ -19,7 +19,7 @@ show_speed = False
 show_fps = True
 debug_window_scale_percent = 100
 debug_window_name = 'RT'
-model_path='models/all_1.engine'
+model_path='models/all_1.pt' #default model
 
 #TEMP#
 aim_x = 0
