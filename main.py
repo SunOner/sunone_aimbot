@@ -34,10 +34,10 @@ def screen_grab(region):
 
     return img
 region = Calculate_screen_offset()
-screen_x_center, screen_y_center = screen_height / 2, screen_width / 2
+screen_x_center, screen_y_center = screen_width / 2, screen_height / 2
 pid = mouse_calc(0.000000000000000001, 10000000, -10000000, 0.45, 0.0000000001, 0)
-edge_x = screen_x_center - screen_height / 4
-edge_y = screen_y_center - screen_width / 4
+edge_x = screen_x_center - screen_width / 2
+edge_y = screen_y_center - screen_height / 2
 
 @torch.no_grad()
 def init():
@@ -85,8 +85,7 @@ def init():
             classes=clss,
             verbose=False,
             show_labels=False,
-            show_conf=False,
-            task='detect')
+            show_conf=False)
         
         if(show_window):
             height = int(img.shape[0] * debug_window_scale_percent / 100)
@@ -172,7 +171,7 @@ def init():
                         
                         pid_x = int(pid.calculate_mouse(final_x, 0))
                         pid_y = int(pid.calculate_mouse(final_y, 0))
-                        if show_window: cv2.line(annotated_frame, (int(screen_x_center / 2), int(screen_y_center / 2)), (int(screen_x_center / 2) + int(pid_x * 2), int(screen_y_center / 2) + int(pid_y * 2)), (255, 0, 0), 2)
+                        if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(pid_x * 2), int(screen_y_center) + int(pid_y * 2)), (255, 0, 0), 2)
 
                     if auto_aim == False:
                         if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
