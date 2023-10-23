@@ -32,6 +32,7 @@ The YOLOv8 Aimbot has been tested on the following environment:
 - Python Version: 3.11.6 (Anaconda and non-Anaconda environments)
 - PyTorch Version: 2.1.0.dev20230519+cu121
 - NumPy Version: 1.26.0
+- Dxcam pip install dxcam[cv2]
 
 ## Options
 
@@ -71,9 +72,16 @@ The repository provides multiple AI models for different purposes:
 - *.pt: Default AI model.
 - *.onnx: Faster than *.pt model.
 - *.engine: Final exported model, which is faster than the previous two.
+## Hot keys
+
+- Right mouse button: Capturing a target.
+- F2: Exit.
 
 Feel free to contribute and make this aim bot even more powerful and versatile!
 
+## Export .pt model to .engine
+
+- Run "yolo export model="path_to_model\model.pt" format=engine half=true device=0"
 ## Acknowledgments
 
 We'd like to express our gratitude to the open-source community, the Ultralytics team, and the developers of the YOLOv8 model for making this project possible.
