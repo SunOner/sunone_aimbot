@@ -6,41 +6,54 @@ import win32gui, win32ui, win32con, win32api
 import ghub_mouse as ghub
 from math import *
 from options import *
-from ext_tools.mouse_calc import mouse_calc
 import time
+import dxcam
 
-def screen_grab(region):
-    hwin = win32gui.FindWindow("aboba", None)
-    left, top, x2, y2 = region
-    width = x2 - left
-    height = y2 - top
-
-    hwindc = win32gui.GetWindowDC(hwin)
-    srcdc = win32ui.CreateDCFromHandle(hwindc)
-    memdc = srcdc.CreateCompatibleDC()
-    bmp = win32ui.CreateBitmap()
-    bmp.CreateCompatibleBitmap(srcdc, width, height)
-    memdc.SelectObject(bmp)
-    memdc.BitBlt((0, 0), (width, height), srcdc, (left, top), win32con.SRCCOPY)
-    
-    signedIntsArray = bmp.GetBitmapBits(True)
-    img = np.frombuffer(signedIntsArray, dtype='uint8')
-    img.shape = (height, width, 4)
-
-    srcdc.DeleteDC()
-    memdc.DeleteDC()
-    win32gui.ReleaseDC(hwin, hwindc)
-    win32gui.DeleteObject(bmp.GetHandle())
-
-    return img
 region = Calculate_screen_offset()
+if Dxcam_capture:
+    dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
+
 screen_x_center, screen_y_center = screen_width / 2, screen_height / 2
-pid = mouse_calc(0.000000000000000001, 10000000, -10000000, 0.45, 0.0000000001, 0)
 edge_x = screen_x_center - screen_width / 2
 edge_y = screen_y_center - screen_height / 2
 
+if Windows_capture:
+    def windows_grab_screen(region):
+        hwin = win32gui.FindWindow("aboba", None)
+        left, top, x2, y2 = region
+        width = x2 - left
+        height = y2 - top
+
+        hwindc = win32gui.GetWindowDC(hwin)
+        srcdc = win32ui.CreateDCFromHandle(hwindc)
+        memdc = srcdc.CreateCompatibleDC()
+        bmp = win32ui.CreateBitmap()
+        bmp.CreateCompatibleBitmap(srcdc, width, height)
+        memdc.SelectObject(bmp)
+        memdc.BitBlt((0, 0), (width, height), srcdc, (left, top), win32con.SRCCOPY)
+        
+        signedIntsArray = bmp.GetBitmapBits(True)
+        img = np.frombuffer(signedIntsArray, dtype='uint8')
+        img.shape = (height, width, 4)
+
+        srcdc.DeleteDC()
+        memdc.DeleteDC()
+        win32gui.ReleaseDC(hwin, hwindc)
+        win32gui.DeleteObject(bmp.GetHandle())
+
+        return img
+
 @torch.no_grad()
 def init():
+    global screen_height
+    global screen_width
+    if Dxcam_capture:
+        dx.start(region, target_fps=dxcam_capture_fps)
+    if Obs_capture:
+        obs_camera = cv2.VideoCapture(Obs_camera_id)
+        screen_width  = obs_camera.get(cv2.CAP_PROP_FRAME_WIDTH)
+        screen_height = obs_camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
     np.bool = np.bool_
     aim_x_left = int(screen_x_center - screen_height / 2)
     aim_x_right = int(screen_x_center + screen_height / 2)
@@ -59,8 +72,13 @@ def init():
         cv2.namedWindow(debug_window_name)
 
     while True:
-        img = screen_grab(region)
-        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+        if Dxcam_capture:
+            img = dx.get_latest_frame()
+        if Obs_capture:
+            ret_val, img = obs_camera.read()
+        if Windows_capture:
+            img = windows_grab_screen(region)
+            img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
         clss = []
         if head_correction == True:
             clss = [0, 1, 7]
@@ -70,30 +88,31 @@ def init():
             img,
             stream=False,
             cfg='coco8.yaml',
-            stream_buffer=False,
-            agnostic_nms=False,
+            stream_buffer=True,
+            agnostic_nms=True,
             save=False,
             imgsz=640,
-            conf=0.35,
-            iou=0.7,
+            conf=0.40,
+            iou=0.2,
             device=0,
             show=False,
             boxes=False,
-            half=False,
-            max_det=20,
+            half=True,
+            max_det=1,
             vid_stride=False,
             classes=clss,
             verbose=False,
             show_labels=False,
             show_conf=False)
         
-        if(show_window):
+        if show_window:
             height = int(img.shape[0] * debug_window_scale_percent / 100)
             width = int(img.shape[1] * debug_window_scale_percent / 100)
             dim = (width, height)
 
         annotated_frame = result[0].plot()
-
+        final_x = 0
+        final_y = 0
         for frame in result:
             if show_window and show_speed == True:
                 speed_preprocess, speed_inference, speed_postprocess = frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess']
@@ -167,37 +186,25 @@ def init():
                     if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
                         final_x = target_xywh_x - screen_x_center
                         final_y = target_xywh_y - screen_y_center - y_offset * target_xywh[3]
-
-                        
-                        pid_x = int(pid.calculate_mouse(final_x, 0))
-                        pid_y = int(pid.calculate_mouse(final_y, 0))
-                        if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(pid_x * 2), int(screen_y_center) + int(pid_y * 2)), (255, 0, 0), 2)
-
-                    if auto_aim == False:
-                        if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
-                            try:
-                                ghub.mouse_xy(pid_x, pid_y)
-                                if auto_shot == True:
-                                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,pid_x, pid_y, 0, 0)
-                                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,pid_x, pid_y, 0, 0)
-                            except:
-                                pass
-                    else:
-                        try:
-                            ghub.mouse_xy(pid_x, pid_y)
-                            if auto_shot == True:
-                                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,pid_x, pid_y, 0, 0)
-                                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,pid_x, pid_y, 0, 0)
-                        except:
-                                pass
+                        if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
+        
+        if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
+            try:
+                ghub.mouse_xy(int(final_x / mouse_sensitivity), int(final_y / mouse_sensitivity))
+                final_x, final_y = 0, 0
+            except:
+                pass
         if show_window and show_fps:
             new_frame_time = time.time()
             fps = 1/(new_frame_time-prev_frame_time)
             prev_frame_time = new_frame_time
             cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+
         if win32api.GetAsyncKeyState(win32con.VK_F2):
             if show_window:
                 cv2.destroyWindow(debug_window_name)
+                if Dxcam_capture:
+                    dx.stop()
             quit(0)
 
         if show_window:

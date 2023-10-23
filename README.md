@@ -36,17 +36,34 @@ The YOLOv8 Aimbot has been tested on the following environment:
 ## Options
 
 The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
-- screen_height: monitor height
-- screen_width: monitor width
-- auto_aim: Enables automatic targeting of enemies without pressing keys.
-- auto_shot: Enables automatic targeting of enemies and automatic shooting at them.
+- original_screen_width: The current horizontal resolution of the monitor.
+- original_screen_height: The current vertical resolution of the monitor.
+
+- screen_width: Horizontal resolution of the object search window.
+- screen_height: Vertical resolution of the object search window.
+
+- Dxcam_capture: Use [dxcam](https://github.com/ra1nty/DXcam) to capture images from the screen.
+- dxcam_capture_fps: Specific fps value for screen capture.
+- dxcam_monitor_id: Id of the monitor from which the images will be captured.
+- dxcam_gpu_id: Id of the GPU to be used for image capture
+- dxcam_max_buffer_len: [Video Buffer](https://github.com/ra1nty/DXcam#video-buffer)
+
+- Obs_capture: Use [Obs](https://github.com/obsproject/obs-studio) to capture images from the screen.
+- Obs_camera_id: Virtual Camera ID.
+
+- Windows_capture: Use the old capture method.
+
 - head_correction: Automatically calculates aiming between the detected head and the body of the enemy.
 - y_portion: Allows correction of y coordinates inside the detected box.
+
+- mouse_sensitivity: The sensitivity of the mouse, the higher the value, the less the shaking of the sight.
+
 - show_window: Shows the OpenCV2 window for visual feedback.
 - show_speed: Displays speed information inside the OpenCV2 window.
 - debug_window_scale_percent: Adjusts the size of the OpenCV2 window.
 - debug_window_name: Specifies the title of the OpenCV2 window.
 
+- model_path: Model path.
 ## AI Models
 
 The repository provides multiple AI models for different purposes:

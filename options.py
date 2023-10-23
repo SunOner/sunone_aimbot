@@ -1,20 +1,40 @@
-# Your original screen resolution at the moment:
-original_screen_width = 2560
-original_screen_height = 1440
-# Object Search screen resolution
+# Your screen resolution
+original_screen_width = 1920
+original_screen_height = 1080
+
+# Object Search window resolution
 screen_width = 640
-screen_height = 360
+screen_height = 480
 
-auto_aim = False
-auto_shot = False
+# dxcam Capture method
+Dxcam_capture = True
+dxcam_capture_fps = 144
+dxcam_monitor_id = 0
+dxcam_gpu_id = 0
+dxcam_max_buffer_len = 64
+
+# Obs capture method
+Obs_capture = False
+Obs_camera_id = 1
+
+# Windows capture method
+Windows_capture = False
+
+# Aim settings
 head_correction = False
-y_offset = 0.37
+y_offset = 0.35
 
-show_window = False
+# Mouse settings (More, less mouse shaking)
+mouse_sensitivity = 3
+
+# Cv2 debug window settings
+show_window = True
 show_speed = False
-show_fps = True
+show_fps = False
 debug_window_scale_percent = 100
 debug_window_name = 'RT'
+
+# AI settings
 model_path='models/all_1.pt'
 
 #TEMP#
