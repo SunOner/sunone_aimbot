@@ -74,10 +74,6 @@ The repository provides multiple AI models for different purposes:
 
 Feel free to contribute and make this aim bot even more powerful and versatile!
 
-## License
-
-This project is under the [MIT License](LICENSE). Please review the license terms before using or contributing to the project.
-
 ## Acknowledgments
 
 We'd like to express our gratitude to the open-source community, the Ultralytics team, and the developers of the YOLOv8 model for making this project possible.
