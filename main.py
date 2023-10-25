@@ -191,9 +191,15 @@ def init():
         if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
             try:
                 ghub.mouse_xy(int(final_x / mouse_sensitivity), int(final_y / mouse_sensitivity))
-                final_x, final_y = 0, 0
             except:
                 pass
+
+        if auto_aim and final_x and final_y:
+            try:
+                ghub.mouse_xy(int(final_x / mouse_sensitivity), int(final_y / mouse_sensitivity))
+            except:
+                pass
+            
         if show_window and show_fps:
             new_frame_time = time.time()
             fps = 1/(new_frame_time-prev_frame_time)

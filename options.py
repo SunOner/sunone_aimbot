@@ -23,6 +23,7 @@ Windows_capture = False
 # Aim settings
 head_correction = False
 y_offset = 0.35
+auto_aim = False
 
 # Mouse settings (More, less mouse shaking)
 mouse_sensitivity = 3
