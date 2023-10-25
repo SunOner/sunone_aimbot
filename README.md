@@ -70,7 +70,7 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 - debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
-- model_path: Model path.
+- model_path `str`: Model path.
 
 ## AI Models
 
