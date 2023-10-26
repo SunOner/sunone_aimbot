@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import cv2
 import win32gui, win32ui, win32con, win32api
-import ghub_mouse as ghub
 from options import *
 import time
 import dxcam
@@ -148,8 +147,8 @@ def init():
                         targets.append(Target(cls=cls,x=frame.boxes.xywh[cls][0].item(), y=frame.boxes.xywh[cls][1].item(), w=frame.boxes.xywh[cls][2].item(), h=frame.boxes.xywh[cls][3].item()))
 
                 for s in targets:
-                    final_x = int((s.x - screen_x_center) / 4)
-                    final_y = int((s.y - screen_y_center- y_offset * s.h) / 4)
+                    final_x = int((s.x - screen_x_center) / mouse_sensitivity)
+                    final_y = int((s.y - screen_y_center- y_offset * s.h) / mouse_sensitivity)
                     if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
                     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
                         try:

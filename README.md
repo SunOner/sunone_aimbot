@@ -59,9 +59,7 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 
 - Windows_capture `bool`: Use the old capture method.
 
-- head_correction `bool`: Automatically calculates aiming between the detected head and the body of the enemy.
 - y_offset `float`: Allows correction of y coordinates inside the detected box.
-- auto_aim `bool`: Automatic targeting.
 
 - mouse_sensitivity `float`: The sensitivity of the mouse, the higher the value, the less the shaking of the sight.
 
