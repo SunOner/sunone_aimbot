@@ -4,11 +4,20 @@ import torch
 import cv2
 import win32gui, win32ui, win32con, win32api
 import ghub_mouse as ghub
-from math import *
 from options import *
 import time
 import dxcam
+import math
 
+class Target:
+    def __init__(self, cls, x, y, w, h):
+        self.cls = cls
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.distance = math.sqrt((self.x - screen_x_center)**2 + (self.y - screen_y_center)**2)
+        
 region = Calculate_screen_offset()
 if Dxcam_capture:
     dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
@@ -47,6 +56,7 @@ if Windows_capture:
 def init():
     global screen_height
     global screen_width
+    
     if Dxcam_capture:
         dx.start(region, target_fps=dxcam_capture_fps)
     if Obs_capture:
@@ -55,10 +65,6 @@ def init():
         screen_height = obs_camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     np.bool = np.bool_
-    aim_x_left = int(screen_x_center - screen_height / 2)
-    aim_x_right = int(screen_x_center + screen_height / 2)
-    aim_y_up = int(screen_y_center - screen_width / 2)
-    aim_y_down = int(screen_y_center + screen_width / 2)
 
     avg_postprocess_speed, avg_count, avg_last = 0, 0, 0
 
@@ -79,15 +85,10 @@ def init():
         if Windows_capture:
             img = windows_grab_screen(region)
             img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-        clss = []
-        if head_correction == True:
-            clss = [0, 1, 7]
-        else:
-            clss = [0, 1]
         result = model(
             img,
             stream=False,
-            cfg='coco8.yaml',
+            cfg='game.yaml',
             stream_buffer=True,
             agnostic_nms=True,
             save=False,
@@ -98,9 +99,9 @@ def init():
             show=False,
             boxes=False,
             half=True,
-            max_det=1,
+            max_det=10,
             vid_stride=False,
-            classes=clss,
+            classes=range(9),
             verbose=False,
             show_labels=False,
             show_conf=False)
@@ -111,9 +112,8 @@ def init():
             dim = (width, height)
 
         annotated_frame = result[0].plot()
-        final_x = 0
-        final_y = 0
-        for frame in result:
+        
+        for frame in result: # current frame
             if show_window and show_speed == True:
                 speed_preprocess, speed_inference, speed_postprocess = frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess']
                 cv2.putText(annotated_frame, 'preprocess:', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
@@ -138,73 +138,35 @@ def init():
                     avg_postprocess_speed = 0
 
             if len(frame.boxes):
-                wrapped_array_body = []
-                wrapped_array_head = []
-                target_distance_list = []
-                target_xywh_list = []
+                final_x = 0
+                final_y = 0
+                targets = []
+                
+                for cls_num in frame.boxes.cls:
+                    cls = int(cls_num.item())
+                    if cls == 0:
+                        targets.append(Target(cls=cls,x=frame.boxes.xywh[cls][0].item(), y=frame.boxes.xywh[cls][1].item(), w=frame.boxes.xywh[cls][2].item(), h=frame.boxes.xywh[cls][3].item()))
 
-                result_xywh = frame.boxes.xywh
+                for s in targets:
+                    final_x = int((s.x - screen_x_center) / 4)
+                    final_y = int((s.y - screen_y_center- y_offset * s.h) / 4)
+                    if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
+                    if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
+                        try:
+                            win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, final_x, final_y, 0, 0)
+                            final_x = 0
+                            final_y = 0
+                        except:
+                            pass
 
-                min_index = 0
-                head_min_index = 0
-
-                if head_correction == True:
-                    head_distance_list = []
-                    head_xywh_list = []
-
-                wrapper_i = 0
-                for c in frame.boxes.cls:
-                    cls = int(c.item())
-                    if cls == 0 or cls == 1:
-                        wrapped_array_body.append(result_xywh[wrapper_i])
-                    if cls == 7:
-                        wrapped_array_head.append(result_xywh[wrapper_i])
-                    wrapper_i  = wrapper_i + 1
-                if head_correction == True:
-                    for head in wrapped_array_head:
-                        head_xywh_list.append(head)
-                        head_distance = abs(edge_x + head[0] - screen_x_center)
-                        head_distance_list.append(head_distance)
-                        head_min_index = head_distance_list.index(min(head_distance_list))
-
-                for target in wrapped_array_body:
-                    target_xywh_list.append(target)
-                    
-                    target_distance = abs(edge_x + target[0] - screen_x_center)
-                    target_distance_list.append(target_distance)
-
-                    min_index = target_distance_list.index(min(target_distance_list))
-                    target_xywh = target_xywh_list[min_index]
-                    if head_min_index and head_correction == True:
-                        head_xywh = head_xywh_list[head_min_index]
-                        target_xywh_x = int(target_xywh[0] + head_xywh[0] / 2) + edge_x
-                        target_xywh_y = int(target_xywh[1] + head_xywh[1] / 2) + edge_y
-                    else:
-                        target_xywh_x = target_xywh[0] + edge_x
-                        target_xywh_y = target_xywh[1] + edge_y
-
-                    if aim_x_left < target_xywh_x < aim_x_right and aim_y_up < target_xywh_y < aim_y_down:
-                        final_x = target_xywh_x - screen_x_center
-                        final_y = target_xywh_y - screen_y_center - y_offset * target_xywh[3]
-                        if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
-        
-        if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
-            try:
-                ghub.mouse_xy(int(final_x / mouse_sensitivity), int(final_y / mouse_sensitivity))
-            except:
-                pass
-
-        if auto_aim and final_x and final_y:
-            try:
-                ghub.mouse_xy(int(final_x / mouse_sensitivity), int(final_y / mouse_sensitivity))
-            except:
-                pass
-            
         if show_window and show_fps:
             new_frame_time = time.time()
             fps = 1/(new_frame_time-prev_frame_time)
             prev_frame_time = new_frame_time
-            cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+            if show_speed:
+                cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+            else:
+                cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
         if win32api.GetAsyncKeyState(win32con.VK_F2):
             if show_window:

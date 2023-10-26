@@ -2,7 +2,7 @@
 
 ## Overview
 
-YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model has been trained on more than 9,000 images from popular first-person shooter games like Warface, Destiny 2, and Battlefield 2042.
+YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ Before you get started, make sure you have the following prerequisites installed
 
 1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python` or compile it with GPU support using [this guide](https://www.youtube.com/watch?v=HsuKxjQhFU0&ab_channel=NicolaiNielsen).
 
-2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html).
+2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options.
 
 3. Ultralytics: Required library available at [GitHub Ultralytics](https://github.com/ultralytics/ultralytics) `pip install ultralytics`.
 
@@ -22,9 +22,9 @@ Before you get started, make sure you have the following prerequisites installed
 
 7. NVIDIA CUDA Version 12.0 or higher.
 
-8. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]`. For quick screen capture. (I'm using this).
+8. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this).
 
-9. Optional: Obs studio for quick screen capture from obs studio (via virtual camera).
+9. Optional: OBS Studio for quick screen capture from obs studio (via virtual camera).
 
 ## Tested Environment
 
@@ -80,6 +80,8 @@ The repository provides multiple AI models for different purposes:
 - *.onnx: Faster than *.pt model.
 - *.engine: Final exported model, which is faster than the previous two.
 
+- My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start.
+
 ## Hot keys
 
 - Right mouse button: Aiming at the target.
@@ -88,3 +90,7 @@ The repository provides multiple AI models for different purposes:
 ## Export .pt model to .engine
 
 - Run "yolo export model="path_to_model\model.pt" format=engine half=true device=0"
+
+## Support the project
+
+- Support this project by training a model for a variety of games and improving algorithms. [DonationAlerts](https://www.donationalerts.com/r/sunxds).
