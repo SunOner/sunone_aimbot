@@ -15,15 +15,13 @@ class Target:
         self.y = y
         self.w = w
         self.h = h
-        self.distance = math.sqrt((self.x - screen_x_center)**2 + (self.y - screen_y_center)**2)
+        self.distance = math.sqrt((self.x - screen_x_center)**8 + (self.y - screen_y_center)**8)
         
 region = Calculate_screen_offset()
 if Dxcam_capture:
     dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
 
 screen_x_center, screen_y_center = screen_width / 2, screen_height / 2
-edge_x = screen_x_center - screen_width / 2
-edge_y = screen_y_center - screen_height / 2
 
 if Windows_capture:
     def windows_grab_screen(region):
@@ -71,7 +69,7 @@ def init():
         prev_frame_time = 0
         new_frame_time = 0
 
-    model = YOLO(model_path)
+    model = YOLO(model_path, task='detect')
 
     if show_window:
         cv2.namedWindow(debug_window_name)
@@ -146,6 +144,8 @@ def init():
                     if cls == 0:
                         targets.append(Target(cls=cls,x=frame.boxes.xywh[cls][0].item(), y=frame.boxes.xywh[cls][1].item(), w=frame.boxes.xywh[cls][2].item(), h=frame.boxes.xywh[cls][3].item()))
 
+                targets.sort(key=lambda x: x.distance, reverse=False)
+                
                 for s in targets:
                     final_x = int((s.x - screen_x_center) / mouse_sensitivity)
                     final_y = int((s.y - screen_y_center- y_offset * s.h) / mouse_sensitivity)

@@ -78,7 +78,7 @@ The repository provides multiple AI models for different purposes:
 - *.onnx: Faster than *.pt model.
 - *.engine: Final exported model, which is faster than the previous two.
 
-- My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start.
+- My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start. The error may also occur due to the fact that I exported the model in a different version of TensorRT, it's better to just export the model yourself.
 
 ## Hot keys
 
@@ -87,7 +87,7 @@ The repository provides multiple AI models for different purposes:
 
 ## Export .pt model to .engine
 
-- Run "yolo export model="path_to_model\model.pt" format=engine half=true device=0"
+- Run "yolo export model="model_path/*.pt" format=engine half=true device=0 workspace=8 imgsz=640"
 
 ## Support the project
 

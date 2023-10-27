@@ -22,7 +22,7 @@ Windows_capture = False
 
 # Aim settings
 head_correction = False
-y_offset = 0.35
+y_offset = 0.38
 auto_aim = False
 
 # Mouse settings (More, less mouse shaking)
@@ -36,7 +36,7 @@ debug_window_scale_percent = 100
 debug_window_name = 'RT'
 
 # AI settings
-model_path='models/sunxds_0.1.engine'
+model_path='models/sunxds_0.2.engine'
 
 #TEMP#
 aim_x = 0
