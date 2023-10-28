@@ -15,7 +15,7 @@ class Target:
         self.y = y
         self.w = w
         self.h = h
-        self.distance = math.sqrt((self.x - screen_x_center)**8 + (self.y - screen_y_center)**8)
+        self.distance = float(math.sqrt((self.x - screen_x_center)**8 + (self.y - screen_y_center)**8))
         
 region = Calculate_screen_offset()
 if Dxcam_capture:
@@ -87,16 +87,16 @@ def init():
             stream=False,
             cfg='game.yaml',
             stream_buffer=True,
-            agnostic_nms=True,
+            agnostic_nms=False,
             save=False,
             imgsz=640,
             conf=0.40,
-            iou=0.2,
+            iou=0.7,
             device=0,
             show=False,
             boxes=False,
             half=True,
-            max_det=10,
+            max_det=6,
             vid_stride=False,
             classes=range(9),
             verbose=False,
@@ -139,10 +139,12 @@ def init():
                 final_y = 0
                 targets = []
                 
+                i = 0
                 for cls_num in frame.boxes.cls:
                     cls = int(cls_num.item())
                     if cls == 0:
-                        targets.append(Target(cls=cls,x=frame.boxes.xywh[cls][0].item(), y=frame.boxes.xywh[cls][1].item(), w=frame.boxes.xywh[cls][2].item(), h=frame.boxes.xywh[cls][3].item()))
+                        targets.append(Target(cls=cls,x=frame.boxes.xywh[i][0].item(), y=frame.boxes.xywh[i][1].item(), w=frame.boxes.xywh[i][2].item(), h=frame.boxes.xywh[i][3].item()))
+                        i = i + 1
 
                 targets.sort(key=lambda x: x.distance, reverse=False)
                 
