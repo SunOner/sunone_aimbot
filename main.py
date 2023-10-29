@@ -16,7 +16,10 @@ class Target:
         self.w = w
         self.h = h
         self.distance = float(math.sqrt((self.x - screen_x_center)**8 + (self.y - screen_y_center)**8))
-        
+
+def win32_raw_mouse_move(x, y):
+    win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
+
 region = Calculate_screen_offset()
 if Dxcam_capture:
     dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
@@ -148,17 +151,15 @@ def init():
 
                 targets.sort(key=lambda x: x.distance, reverse=False)
                 
-                try:
+                try: # intercepting an array
                     final_x = int((targets[0].x - screen_x_center) / mouse_sensitivity)
                     final_y = int((targets[0].y - screen_y_center- y_offset * targets[0].h) / mouse_sensitivity)
                     if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
-                    if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
-                        try:
-                            win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, final_x, final_y, 0, 0)
-                            final_x = 0
-                            final_y = 0
-                        except:
-                            pass
+                    
+                    if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and auto_aim == False:
+                        win32_raw_mouse_move(final_x, final_y)
+                    if auto_aim:
+                        win32_raw_mouse_move(final_x, final_y)
                 except:
                     pass
 
