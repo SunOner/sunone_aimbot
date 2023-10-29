@@ -148,9 +148,9 @@ def init():
 
                 targets.sort(key=lambda x: x.distance, reverse=False)
                 
-                for s in targets:
-                    final_x = int((s.x - screen_x_center) / mouse_sensitivity)
-                    final_y = int((s.y - screen_y_center- y_offset * s.h) / mouse_sensitivity)
+                try:
+                    final_x = int((targets[0].x - screen_x_center) / mouse_sensitivity)
+                    final_y = int((targets[0].y - screen_y_center- y_offset * targets[0].h) / mouse_sensitivity)
                     if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
                     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON):
                         try:
@@ -159,6 +159,8 @@ def init():
                             final_y = 0
                         except:
                             pass
+                except:
+                    pass
 
         if show_window and show_fps:
             new_frame_time = time.time()
