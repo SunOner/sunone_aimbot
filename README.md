@@ -10,7 +10,7 @@ Before you get started, make sure you have the following prerequisites installed
 
 1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python` or compile it with GPU support using [this guide](https://www.youtube.com/watch?v=HsuKxjQhFU0&ab_channel=NicolaiNielsen).
 
-2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options.
+2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options. See 'export' block of code.
 
 3. Ultralytics: Required library available at [GitHub Ultralytics](https://github.com/ultralytics/ultralytics) `pip install ultralytics`.
 
@@ -18,11 +18,11 @@ Before you get started, make sure you have the following prerequisites installed
 
 5. NumPy: You can typically install NumPy using pip: `pip install numpy`.
 
-6. Win32 Tools for Python: These are needed for Windows-specific functionality.
+6. Win32 Tools for Python: These are needed for Windows-specific functionality. `pip install pywin32`.
 
-7. NVIDIA CUDA Version 12.0 or higher.
+7. NVIDIA CUDA Version 12.1.
 
-8. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this).
+8. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
 
 9. Optional: OBS Studio for quick screen capture from obs studio (via virtual camera).
 
@@ -31,13 +31,16 @@ Before you get started, make sure you have the following prerequisites installed
 The YOLOv8 Aimbot has been tested on the following environment:
 
 - Operating Systems: Windows 10-11
-- YOLO Version: YOLOv8.0.198
+- YOLO Version: YOLOv8.0.202
 - OpenCV Version: OpenCV 4.8.1
 - NVIDIA cuDNN Version: 8.9.4.25
 - NVIDIA CUDA Version: 12.1
 - Python Version: 3.11.6 (Anaconda and non-Anaconda environments)
 - PyTorch Version: 2.1.0.dev20230519+cu121
+- TensorRT 8.6.1
 - NumPy Version: 1.26.0
+
+- Tested GPUs: RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060
 
 ## Options
 
@@ -88,6 +91,15 @@ The repository provides multiple AI models for different purposes:
 ## Export .pt model to .engine
 
 - Run "yolo export model="model_path/*.pt" format=engine half=true device=0 workspace=8 imgsz=640"
+
+
+## Notes / Recommendations
+
+- Limit the maximum value of frames per second in the game in which you will use it. Do not overload the graphics card.
+- Do not set high graphics settings in games.
+- Limit the browser (try not to watch YouTube while playing and working AI at the same time, for example (of course if you don't have a super duper graphics card)) and so on, which loads the video card.
+- Try to use TensorRT for acceleration. `.pt` model is good, but does not have as much speed as `.engine`.
+- If the program is running, everything is detected, but the mouse itself is not aimed at the target, then try running the program as an administrator.
 
 ## Support the project
 
