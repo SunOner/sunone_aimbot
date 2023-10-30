@@ -4,23 +4,27 @@ import torch
 import cv2
 import win32gui, win32ui, win32con, win32api
 from options import *
+from targets import *
 import time
 import dxcam
 import math
+from shapely.geometry import Polygon
 
-class Target:
-    def __init__(self, cls, x, y, w, h):
-        self.cls = cls
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.distance = float(math.sqrt((self.x - screen_x_center)**8 + (self.y - screen_y_center)**8))
+def calculate_iou(box_1, box_2):
+    poly_1 = Polygon(box_1)
+    poly_2 = Polygon(box_2)
+    iou = poly_1.intersection(poly_2).area / poly_1.union(poly_2).area
+    return iou
 
 def win32_raw_mouse_move(x, y):
     win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
 
+def win32_raw_mouse_click(x, y):
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+
 region = Calculate_screen_offset()
+
 if Dxcam_capture:
     dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
 
@@ -93,13 +97,13 @@ def init():
             agnostic_nms=False,
             save=False,
             imgsz=640,
-            conf=0.40,
+            conf=0.35,
             iou=0.7,
             device=0,
             show=False,
             boxes=False,
             half=True,
-            max_det=6,
+            max_det=20,
             vid_stride=False,
             classes=range(9),
             verbose=False,
@@ -140,26 +144,49 @@ def init():
             if len(frame.boxes):
                 final_x = 0
                 final_y = 0
-                targets = []
                 
-                i = 0
+                players = []
+                heads = []
+                
+                player_i = 0
+                head_i = 0
                 for cls_num in frame.boxes.cls:
                     cls = int(cls_num.item())
                     if cls == 0:
-                        targets.append(Target(cls=cls,x=frame.boxes.xywh[i][0].item(), y=frame.boxes.xywh[i][1].item(), w=frame.boxes.xywh[i][2].item(), h=frame.boxes.xywh[i][3].item()))
-                        i = i + 1
+                        players.append(Player(x=frame.boxes.xywh[player_i][0].item(), y=frame.boxes.xywh[player_i][1].item(), w=frame.boxes.xywh[player_i][2].item(), h=frame.boxes.xywh[player_i][3].item(), xyxy=frame.boxes.xyxy[player_i]))
+                        player_i = player_i + 1
+                    if cls == 7 and head_correction:
+                        heads.append(Head(x=frame.boxes.xywh[head_i][0].item(), y=frame.boxes.xywh[head_i][1].item(), w=frame.boxes.xywh[head_i][2].item(), h=frame.boxes.xywh[head_i][3].item(), xyxy=frame.boxes.xyxy[head_i]))
+                        head_i = head_i + 1
 
-                targets.sort(key=lambda x: x.distance, reverse=False)
+                players.sort(key=lambda x: x.distance, reverse=False)
+                if head_correction: heads.sort(key=lambda x: x.distance, reverse=False)
                 
                 try: # intercepting an array
-                    final_x = int((targets[0].x - screen_x_center) / mouse_sensitivity)
-                    final_y = int((targets[0].y - screen_y_center- y_offset * targets[0].h) / mouse_sensitivity)
+                    if head_correction == False:
+                        final_x = int((players[0].x - screen_x_center) / mouse_sensitivity)
+                        final_y = int((players[0].y - screen_y_center - y_offset * players[0].h) / mouse_sensitivity)
+                    else:
+                        player_box = ((players[0].xyxy[0].item(), players[0].xyxy[1].item()), (players[0].xyxy[2].item(), players[0].xyxy[1].item()), (players[0].xyxy[2].item(), players[0].xyxy[3].item()), (players[0].xyxy[0].item(), players[0].xyxy[3].item()))
+                        head_box = ((heads[0].xyxy[0].item(), heads[0].xyxy[1].item()), (heads[0].xyxy[2].item(), heads[0].xyxy[1].item()), (heads[0].xyxy[2].item(), heads[0].xyxy[3].item()), (heads[0].xyxy[0].item(), heads[0].xyxy[3].item()))
+                        if len(player_box) and len(head_box):
+                            calculated_iou = calculate_iou(head_box, player_box)
+                            if calculated_iou:
+                                final_x = int((heads[0].x - screen_x_center) / mouse_sensitivity)
+                                final_y = int((heads[0].y - screen_y_center - 0.45 * heads[0].h) / mouse_sensitivity)
+                        else:
+                            final_x = int((players[0].x - screen_x_center) / mouse_sensitivity)
+                            final_y = int((players[0].y - screen_y_center - y_offset * players[0].h) / mouse_sensitivity)
                     if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
                     
                     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and auto_aim == False:
                         win32_raw_mouse_move(final_x, final_y)
+                        if mouse_auto_shoot:
+                            win32_raw_mouse_click(final_x, final_y)
                     if auto_aim:
                         win32_raw_mouse_move(final_x, final_y)
+                        if mouse_auto_shoot:
+                            win32_raw_mouse_click(final_x, final_y)
                 except:
                     pass
 
