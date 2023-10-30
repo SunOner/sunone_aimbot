@@ -3,12 +3,12 @@ original_screen_width = 1920
 original_screen_height = 1080
 
 # Object Search window resolution
-screen_width = 640
-screen_height = 480
+screen_width = 300
+screen_height = 200
 
 # dxcam Capture method
 Dxcam_capture = True
-dxcam_capture_fps = 60
+dxcam_capture_fps = 120
 dxcam_monitor_id = 0
 dxcam_gpu_id = 0
 dxcam_max_buffer_len = 64
@@ -22,15 +22,16 @@ Windows_capture = False
 
 # Aim settings
 head_correction = True
-y_offset = 0.35
+body_y_offset = 0.35
+head_y_offset = 0.35
 
 # Mouse settings 
-mouse_sensitivity = 2 # More, less mouse shaking
+mouse_sensitivity = 4 # More, less mouse shaking
 mouse_auto_shoot = False
 auto_aim = False
 
 # Cv2 debug window settings
-show_window = True
+show_window = False
 show_speed = False
 show_fps = True
 debug_window_scale_percent = 100

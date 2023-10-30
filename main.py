@@ -165,7 +165,7 @@ def init():
                 try: # intercepting an array
                     if head_correction == False:
                         final_x = int((players[0].x - screen_x_center) / mouse_sensitivity)
-                        final_y = int((players[0].y - screen_y_center - y_offset * players[0].h) / mouse_sensitivity)
+                        final_y = int((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_sensitivity)
                     else:
                         player_box = ((players[0].xyxy[0].item(), players[0].xyxy[1].item()), (players[0].xyxy[2].item(), players[0].xyxy[1].item()), (players[0].xyxy[2].item(), players[0].xyxy[3].item()), (players[0].xyxy[0].item(), players[0].xyxy[3].item()))
                         head_box = ((heads[0].xyxy[0].item(), heads[0].xyxy[1].item()), (heads[0].xyxy[2].item(), heads[0].xyxy[1].item()), (heads[0].xyxy[2].item(), heads[0].xyxy[3].item()), (heads[0].xyxy[0].item(), heads[0].xyxy[3].item()))
@@ -173,10 +173,10 @@ def init():
                             calculated_iou = calculate_iou(head_box, player_box)
                             if calculated_iou:
                                 final_x = int((heads[0].x - screen_x_center) / mouse_sensitivity)
-                                final_y = int((heads[0].y - screen_y_center - 0.45 * heads[0].h) / mouse_sensitivity)
+                                final_y = int((heads[0].y - screen_y_center - head_y_offset * heads[0].h) / mouse_sensitivity)
                         else:
                             final_x = int((players[0].x - screen_x_center) / mouse_sensitivity)
-                            final_y = int((players[0].y - screen_y_center - y_offset * players[0].h) / mouse_sensitivity)
+                            final_y = int((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_sensitivity)
                     if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(final_x), int(screen_y_center) + int(final_y)), (255, 0, 0), 2)
                     
                     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and auto_aim == False:
