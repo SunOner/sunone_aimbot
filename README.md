@@ -42,7 +42,7 @@ The YOLOv8 Aimbot has been tested on the following environment:
 - TensorRT 8.6.1
 - NumPy Version: 1.26.0
 
-- Tested GPUs: RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060
+- Tested GPUs: RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060.
 
 ## Options
 
@@ -64,7 +64,10 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 
 - Windows_capture `bool`: Use the old capture method.
 
-- y_offset `float`: Allows correction of y coordinates inside the detected box.
+- head_correction `bool`: If there is a head in the detected object, then it is aimed at the head.
+- body_y_offset `float`: Allows correction of y coordinates inside the body detected box.
+- head_y_offset `float`: Allows correction of y coordinates inside the head detected box.
+
 - mouse_auto_shoot `bool`: Automatic shooting.
 - auto_aim `bool`: Automatic targeting.
 - mouse_sensitivity `float`: The sensitivity of the mouse, the higher the value, the less the shaking of the sight.
