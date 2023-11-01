@@ -6,7 +6,7 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 
 ## Requirements
 
-Before you get started, make sure you have the following prerequisites installed:
+Before you get started, make sure you have the following prerequisites installed and pay attention to the versions, this may cause errors in launching the aimbot:
 
 1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python`. Or install DDxcam right away with cv2 support (See point 8).
 
