@@ -9,8 +9,12 @@ import time
 import dxcam
 import asyncio
 
-def check_target_in_scope(distane): # TODO
-    if distane <= 60:
+def check_target_in_scope(distance): # TODO
+    if head_correction:
+        distance = distance * head_y_offset
+    else:
+        distance = distance * body_y_offset
+    if distance <= 25:
         return True
     else:
         return False
@@ -38,8 +42,8 @@ def Aiming(players, heads): # TODO
             x = int((((players[0].x - screen_x_center) / mouse_smoothing) + ((heads[0].x - screen_x_center) / mouse_smoothing) * 3) / 4)
             y = int((((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_smoothing) + ((heads[0].y - screen_y_center - head_y_offset * heads[0].h) / mouse_smoothing) * 3) / 4)
         else:
-            x = int(((players[0].x - screen_x_center) / mouse_smoothing))
-            y = int(((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_smoothing))
+            x = int((players[0].x - screen_x_center) / mouse_smoothing)
+            y = int((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_smoothing)
 
         fDst = 0
         if head_correction:
