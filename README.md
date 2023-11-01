@@ -8,7 +8,7 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 
 Before you get started, make sure you have the following prerequisites installed:
 
-1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python` or compile it with GPU support using [this guide](https://www.youtube.com/watch?v=HsuKxjQhFU0&ab_channel=NicolaiNielsen).
+1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python`. Or install DDxcam right away with cv2 support (See point 8).
 
 2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options. See 'export' block of code.
 
