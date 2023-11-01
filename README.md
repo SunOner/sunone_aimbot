@@ -106,6 +106,7 @@ The repository provides multiple AI models for different purposes:
 - Limit the browser (try not to watch YouTube while playing and working AI at the same time, for example (of course if you don't have a super duper graphics card)) and so on, which loads the video card.
 - Try to use TensorRT for acceleration. `.pt` model is good, but does not have as much speed as `.engine`.
 - If the program is running, everything is detected, but the mouse itself is not aimed at the target, then try running the program as an administrator.
+- Turn off the cv2 debug window, this saves system resources.
 
 ## Support the project
 
