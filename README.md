@@ -22,11 +22,9 @@ Before you get started, make sure you have the following prerequisites installed
 
 7. NVIDIA CUDA Version 12.1.
 
-8. Shapely: To calculate the intersection of boxes. `pip install shapely`.
+8. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
 
-9. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
-
-10. Optional: OBS Studio for quick screen capture from obs studio (via virtual camera).
+9. Optional: OBS Studio for quick screen capture from obs studio (via virtual camera).
 
 ## Tested Environment
 
@@ -68,9 +66,11 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box.
 - head_y_offset `float`: Allows correction of y coordinates inside the head detected box.
 
+- mouse_smoothing `float`: Smoothing when moving the mouse.
 - mouse_auto_shoot `bool`: Automatic shooting.
-- auto_aim `bool`: Automatic targeting.
-- mouse_sensitivity `float`: The sensitivity of the mouse, the higher the value, the less the shaking of the sight.
+- mouse_auto_shoot_timer `bool`: Adds a delay before firing.
+- mouse_auto_shoot_sleep_time `float`: Delay before firing in seconds and milliseconds.
+- mouse_auto_aim `bool`: Automatic targeting.
 
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
 - show_speed `bool`: Displays speed information inside the OpenCV2 window.

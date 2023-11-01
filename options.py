@@ -3,12 +3,12 @@ original_screen_width = 1920
 original_screen_height = 1080
 
 # Object Search window resolution
-screen_width = 300
-screen_height = 200
+screen_width = 480
+screen_height = 300
 
 # dxcam Capture method
 Dxcam_capture = True
-dxcam_capture_fps = 120
+dxcam_capture_fps = 30 # More value, more mouse swing
 dxcam_monitor_id = 0
 dxcam_gpu_id = 0
 dxcam_max_buffer_len = 64
@@ -22,18 +22,20 @@ Windows_capture = False
 
 # Aim settings
 head_correction = True
-body_y_offset = 0.35
-head_y_offset = 0.35
+body_y_offset = 0.37
+head_y_offset = 0.37
 
 # Mouse settings 
-mouse_sensitivity = 4 # More, less mouse shaking
+mouse_smoothing = 1 # 1 is default
 mouse_auto_shoot = False
-auto_aim = False
+mouse_auto_shoot_timer = False
+mouse_auto_shoot_sleep_time = 0.2
+mouse_auto_aim = False
 
 # Cv2 debug window settings
 show_window = False
 show_speed = False
-show_fps = True
+show_fps = False
 debug_window_scale_percent = 100
 debug_window_name = 'RT'
 
@@ -46,3 +48,6 @@ def Calculate_screen_offset():
     width = left + screen_width
     height = top + screen_height
     return (int(left), int(top), int(width), int(height))
+
+players = []
+heads = []
