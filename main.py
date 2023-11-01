@@ -44,17 +44,17 @@ def Aiming(players, heads): # TODO
         else:
             x = int((players[0].x - screen_x_center) / mouse_smoothing)
             y = int((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_smoothing)
-
         fDst = 0
         if head_correction:
             fDst = heads[0].distance
         else:
             fDst = players[0].distance
-        
         if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
             win32_raw_mouse_move(x=x, y=y, dst=fDst)
         if mouse_auto_aim:
-            win32_raw_mouse_move(x, y, dst=fDst)
+            win32_raw_mouse_move(x=x, y=y, dst=fDst)
+        if show_window:
+            return (x, y)
     except:
         pass
 
@@ -195,7 +195,13 @@ def init():
 
             if len(frame.boxes):
                 append_targets(frame.boxes.cls, frame.boxes.xywh)
-                Aiming(players=players, heads=heads)
+                debug_lines = Aiming(players=players, heads=heads)
+
+                try:
+                    if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(debug_lines[0]), int(screen_y_center) + int(debug_lines[1])), (255, 0, 0), 2)
+                except:
+                    pass
+                
                 players = []
                 heads = []
                 
