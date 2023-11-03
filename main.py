@@ -120,8 +120,6 @@ def init():
         obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, screen_width)
         obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, screen_height)
 
-    np.bool = np.bool_
-
     avg_postprocess_speed, avg_count, avg_last = 0, 0, 0
 
     if show_window and show_fps:
