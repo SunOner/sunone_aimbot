@@ -117,8 +117,8 @@ def init():
         dx.start(region, target_fps=dxcam_capture_fps)
     if Obs_capture:
         obs_camera = cv2.VideoCapture(Obs_camera_id)
-        screen_width  = obs_camera.get(cv2.CAP_PROP_FRAME_WIDTH)
-        screen_height = obs_camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, screen_width)
+        obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, screen_height)
 
     np.bool = np.bool_
 
@@ -201,7 +201,7 @@ def init():
                     if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(debug_lines[0]), int(screen_y_center) + int(debug_lines[1])), (255, 0, 0), 2)
                 except:
                     pass
-                
+
                 players = []
                 heads = []
                 
