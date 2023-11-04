@@ -8,12 +8,12 @@ from targets import *
 import time
 import dxcam
 import asyncio
+import tensorrt as trt
+from cuda import cuda, cudart
 
 def check_target_in_scope(distance): # TODO
-    if head_correction:
-        distance = distance * head_y_offset
-    else:
-        distance = distance * body_y_offset
+    distance = distance * (head_y_offset + body_y_offset / 2)
+
     if distance <= 25:
         return True
     else:
@@ -36,41 +36,66 @@ async def win32_raw_mouse_click(x, y):
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
 
-def Aiming(players, heads): # TODO
-    try:
-        if head_correction:
-            x = int((((players[0].x - screen_x_center) / mouse_smoothing) + ((heads[0].x - screen_x_center) / mouse_smoothing) * 3) / 4)
-            y = int((((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_smoothing) + ((heads[0].y - screen_y_center - head_y_offset * heads[0].h) / mouse_smoothing) * 3) / 4)
-        else:
-            x = int((players[0].x - screen_x_center) / mouse_smoothing)
-            y = int((players[0].y - screen_y_center - body_y_offset * players[0].h) / mouse_smoothing)
-        fDst = 0
-        if head_correction:
-            fDst = heads[0].distance
-        else:
-            fDst = players[0].distance
+def Aiming(): # TODO
+        shooting_queue = []
+        try:
+            shooting_queue.append((players[0].x - screen_x_center, players[0].y - screen_y_center - body_y_offset * players[0].h, players[0].distance))
+        except: pass
+        try:
+            shooting_queue.append((bots[0].x - screen_x_center, bots[0].y - screen_y_center - body_y_offset * bots[0].h, bots[0].distance))
+        except: pass
+        try:
+            if hideout_targets: shooting_queue.append((hideout_target_human[0].x - screen_x_center, hideout_target_human[0].y - screen_y_center - body_y_offset * hideout_target_human[0].h, hideout_target_human[0].distance))
+        except: pass
+        try:
+            if hideout_targets: shooting_queue.append((hideout_target_balls[0].x - screen_x_center, hideout_target_balls[0].y - screen_y_center - body_y_offset * hideout_target_balls[0].h, hideout_target_balls[0].distance))
+        except: pass
+        try:
+            shooting_queue.append((heads[0].x - screen_x_center, heads[0].y - screen_y_center - body_y_offset * heads[0].h, heads[0].distance))
+        except: pass
+
+        shooting_queue.sort(key=lambda x: x[2], reverse=False)
+
         if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-            win32_raw_mouse_move(x=x, y=y, dst=fDst)
+            try: win32_raw_mouse_move(x=int(shooting_queue[0][0]), y=int(shooting_queue[0][1]), dst=shooting_queue[0][2])
+            except: pass
+            
         if mouse_auto_aim:
-            win32_raw_mouse_move(x=x, y=y, dst=fDst)
-        if show_window:
-            return (x, y)
-    except:
-        pass
+            win32_raw_mouse_move(x=int(shooting_queue[0][0]), y=int(shooting_queue[0][1]), dst=shooting_queue[0][2])
+        try:
+            if show_window: return (shooting_queue[0][0], shooting_queue[0][1])
+        except: pass
 
 def append_targets(clss, xywhs):
     player_i = 0
     head_i = 0
+    bot_i = 0
+    hideout_target_human_i = 0
+    hideout_target_balls_i = 0
+
     for cls_num in clss:
         cls = int(cls_num.item())
-        if cls == 0:
-            players.append(Player(x=xywhs[player_i][0].item(), y=xywhs[player_i][1].item(), w=xywhs[player_i][2].item(), h=xywhs[player_i][3].item()))
-            player_i = player_i + 1
-        if cls == 7:
-            heads.append(Head(x=xywhs[head_i][0].item(), y=xywhs[head_i][1].item(), w=xywhs[head_i][2].item(), h=xywhs[head_i][3].item()))
-            head_i = head_i + 1
+        match cls:
+            case 0:
+                players.append(Player(x=xywhs[player_i][0].item(), y=xywhs[player_i][1].item(), w=xywhs[player_i][2].item(), h=xywhs[player_i][3].item()))
+                player_i = player_i + 1
+            case 1:
+                bots.append(Bot(x=xywhs[bot_i][0].item(), y=xywhs[bot_i][1].item(), w=xywhs[bot_i][2].item(), h=xywhs[bot_i][3].item()))
+                bot_i = bot_i + 1
+            case 5:
+                if hideout_targets: hideout_target_human.append(Hideout_target_human(x=xywhs[hideout_target_human_i][0].item(), y=xywhs[hideout_target_human_i][1].item(), w=xywhs[hideout_target_human_i][2].item(), h=xywhs[hideout_target_human_i][3].item()))
+                if hideout_targets: hideout_target_human_i = hideout_target_human_i + 1
+            case 6:
+                if hideout_targets: hideout_target_balls.append(Hideout_target_balls(x=xywhs[hideout_target_balls_i][0].item(), y=xywhs[hideout_target_balls_i][1].item(), w=xywhs[hideout_target_balls_i][2].item(), h=xywhs[hideout_target_balls_i][3].item()))
+                if hideout_targets: hideout_target_balls_i = hideout_target_balls_i + 1
+            case 7:
+                heads.append(Hideout_target_balls(x=xywhs[head_i][0].item(), y=xywhs[head_i][1].item(), w=xywhs[head_i][2].item(), h=xywhs[head_i][3].item()))
+                head_i = head_i + 1
 
     players.sort(key=lambda x: x.distance, reverse=False)
+    bots.sort(key=lambda x: x.distance, reverse=False)
+    if hideout_targets: hideout_target_human.sort(key=lambda x: x.distance, reverse=False)
+    if hideout_targets: hideout_target_balls.sort(key=lambda x: x.distance, reverse=False)
     heads.sort(key=lambda x: x.distance, reverse=False)
 
 region = Calculate_screen_offset()
@@ -112,6 +137,9 @@ def init():
     global screen_width
     global players
     global heads
+    global bots
+    global hideout_target_human
+    global hideout_target_balls
     
     if Dxcam_capture:
         dx.start(region, target_fps=dxcam_capture_fps)
@@ -193,7 +221,7 @@ def init():
 
             if len(frame.boxes):
                 append_targets(frame.boxes.cls, frame.boxes.xywh)
-                debug_lines = Aiming(players=players, heads=heads)
+                debug_lines = Aiming()
 
                 try:
                     if show_window: cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(screen_x_center) + int(debug_lines[0]), int(screen_y_center) + int(debug_lines[1])), (255, 0, 0), 2)
@@ -202,6 +230,9 @@ def init():
 
                 players = []
                 heads = []
+                bots= []
+                hideout_target_human = []
+                hideout_target_balls = []
                 
         if show_window and show_fps:
             new_frame_time = time.time()

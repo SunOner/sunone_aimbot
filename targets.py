@@ -8,9 +8,32 @@ class Player:
         self.w = w
         self.h = h
         self.distance = math.sqrt((self.x - screen_x_center)**2 + (self.y - screen_y_center)**2)
-
         
+class Bot:
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.distance = math.sqrt((self.x - screen_x_center)**2 + (self.y - screen_y_center)**2)
+
 class Head:
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.distance = math.sqrt((self.x - screen_x_center)**2 + (self.y - screen_y_center)**2)
+
+class Hideout_target_human:
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.distance = math.sqrt((self.x - screen_x_center)**2 + (self.y - screen_y_center)**2)
+
+class Hideout_target_balls:
     def __init__(self, x, y, w, h):
         self.x = x
         self.y = y
