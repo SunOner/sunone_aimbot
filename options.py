@@ -40,7 +40,7 @@ debug_window_scale_percent = 100
 debug_window_name = 'RT'
 
 # AI settings
-model_path='models/sunxds_0.2.engine'
+model_path='models/sunxds_0.2.1.engine'
 
 def Calculate_screen_offset():
     left = original_screen_width / 2 - screen_width / 2
