@@ -9,7 +9,6 @@ import time
 import dxcam
 import asyncio
 import tensorrt as trt
-from cuda import cuda, cudart
 
 def check_target_in_scope(distance): # TODO
     distance = distance * (head_y_offset + body_y_offset / 2)
