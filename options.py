@@ -3,8 +3,8 @@ original_screen_width = 1920
 original_screen_height = 1080
 
 # Object Search window resolution
-screen_width = 480
-screen_height = 300
+screen_width = 800
+screen_height = 600
 
 # dxcam Capture method
 Dxcam_capture = True
@@ -23,7 +23,7 @@ Windows_capture = False
 # Aim settings
 body_y_offset = 0.35
 head_y_offset = 0.35
-hideout_targets = True
+hideout_targets = False
 
 # Mouse settings 
 mouse_smoothing = 1 # 1 is default
@@ -33,14 +33,15 @@ mouse_auto_shoot_sleep_time = 0.2
 mouse_auto_aim = False
 
 # Cv2 debug window settings
-show_window = True
+show_window = False
 show_speed = False
 show_fps = False
 debug_window_scale_percent = 100
-debug_window_name = 'RT'
+debug_window_name = 'Calculator'
 
 # AI settings
-model_path='models/sunxds_0.2.1.pt'
+model_path='models/sunxds_0.2.1_nano.pt'
+model_image_size = 320 # if nano = 320 else 640
 
 def Calculate_screen_offset():
     left = original_screen_width / 2 - screen_width / 2

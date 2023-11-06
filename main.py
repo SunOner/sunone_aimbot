@@ -174,7 +174,7 @@ def init():
             stream_buffer=True,
             agnostic_nms=False,
             save=False,
-            imgsz=640,
+            imgsz=320,
             conf=0.35,
             iou=0.001,
             device=0,
