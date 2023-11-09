@@ -7,7 +7,7 @@ import time
 from options import *
 from targets import *
 from screen import *
-from frame import get_new_frame, speed, debug_draw_distance_line
+from frame import get_new_frame, speed
 from mouse import win32_raw_mouse_move
 
 # def
@@ -131,8 +131,7 @@ def init():
 
             if len(frame.boxes):
                 append_targets(frame.boxes.cls, frame.boxes.xywh)
-                debug_lines = Aiming()
-                annotated_frame = debug_draw_distance_line(annotated_frame, debug_lines)
+                Aiming()
 
                 players = []
                 heads = []

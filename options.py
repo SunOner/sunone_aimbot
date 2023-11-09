@@ -16,6 +16,7 @@ dxcam_max_buffer_len = 64
 # Obs capture method
 Obs_capture = False
 Obs_camera_id = 1
+Obs_capture_fps = 30 # More value, more mouse swing
 
 # Windows capture method
 native_Windows_capture = False
