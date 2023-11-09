@@ -60,17 +60,16 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 - Obs_capture `bool`: Use [Obs](https://github.com/obsproject/obs-studio) to capture images from the screen.
 - Obs_camera_id `int`: Virtual Camera ID.
 
-- Windows_capture `bool`: Use the old capture method.
+- native_Windows_capture `bool`: Use the windows native capture method.
 
-- head_correction `bool`: If there is a head in the detected object, then it is aimed at the head.
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box.
 - head_y_offset `float`: Allows correction of y coordinates inside the head detected box.
+- hideout_targets `bool`: Allows shooting at targets on the range (for example, in warface or aimlabs).
 
 - mouse_smoothing `float`: Smoothing when moving the mouse.
 - mouse_auto_shoot `bool`: Automatic shooting.
-- mouse_auto_shoot_timer `bool`: Adds a delay before firing.
-- mouse_auto_shoot_sleep_time `float`: Delay before firing in seconds and milliseconds.
 - mouse_auto_aim `bool`: Automatic targeting.
+- mouse_native `bool`: Use windows native mouse input.
 
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
 - show_speed `bool`: Displays speed information inside the OpenCV2 window.
@@ -78,6 +77,7 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
 - model_path `str`: Model path.
+- model_image_size `int`: Model image size. (_nano models use 320 resolution, regular models use 640 resolution.)
 
 ## AI Models
 
