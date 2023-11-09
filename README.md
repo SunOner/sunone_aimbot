@@ -59,6 +59,7 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 
 - Obs_capture `bool`: Use [Obs](https://github.com/obsproject/obs-studio) to capture images from the screen.
 - Obs_camera_id `int`: Virtual Camera ID.
+- Obs_capture_fps `int`: Specific fps value for screen capture.
 
 - native_Windows_capture `bool`: Use the windows native capture method.
 
