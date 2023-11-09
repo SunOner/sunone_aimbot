@@ -28,8 +28,6 @@ hideout_targets = True
 # Mouse settings 
 mouse_smoothing = 1 # 1 is default
 mouse_auto_shoot = False
-mouse_auto_shoot_timer = False # TODO
-mouse_auto_shoot_sleep_time = 0.2
 mouse_auto_aim = False
 mouse_native = False
 
