@@ -4,18 +4,18 @@ from screen import check_target_in_scope
 from options import mouse_auto_shoot, mouse_auto_shoot_timer, mouse_auto_shoot_sleep_time, mouse_native
 import ghub_mouse as ghub
 
-def win32_raw_mouse_move(x, y, dst=None):
+def win32_raw_mouse_move(x, y, target_x=None, target_y=None, target_w=None, target_h=None):
     if mouse_native:
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
     else:
         ghub.mouse_xy(x, y)
+    if target_x is not None and target_y is not None:
+        bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
 
-    bDst = check_target_in_scope(dst)
-
-    if mouse_auto_shoot and bDst:
+    if mouse_auto_shoot and bScope:
         asyncio.run(win32_raw_mouse_click(x=x, y=y))
         
-    if mouse_auto_shoot and bDst:
+    if mouse_auto_shoot and bScope:
         asyncio.run(win32_raw_mouse_click(x=x, y=y))
 
 async def win32_raw_mouse_click(x, y):

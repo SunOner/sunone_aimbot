@@ -36,9 +36,15 @@ def windows_grab_screen(region):
 
     return img
 
-def check_target_in_scope(distance): # TODO
-    distance = distance * (head_y_offset + body_y_offset / 2)
-    if distance < 45 and distance > -45:
+def check_target_in_scope(target_x, target_y, target_w, target_h):
+    x = screen_width / 2
+    y = screen_height / 2
+    x1 = target_x - target_w
+    x2 = target_x + target_w
+    y1 = target_y - target_h
+    y2 = target_y + target_h
+    if (x > x1 and x < x2 and y > y1 and y < y2) :
         return True
-    else:
+    else :
         return False
+    

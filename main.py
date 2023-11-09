@@ -8,7 +8,7 @@ from options import *
 from targets import *
 from screen import *
 from frame import get_new_frame, speed, debug_draw_distance_line
-from mouse import win32_raw_mouse_click, win32_raw_mouse_move
+from mouse import win32_raw_mouse_move
 
 # def
 players = []
@@ -20,30 +20,30 @@ hideout_target_balls = []
 def Aiming(): # TODO
         shooting_queue = []
         try:
-            shooting_queue.append((players[0].x - screen_x_center, players[0].y - screen_y_center - body_y_offset * players[0].h, players[0].distance))
+            shooting_queue.append((players[0].x - screen_x_center, players[0].y - screen_y_center - body_y_offset * players[0].h, players[0].distance, players[0].x, players[0].y, players[0].w, players[0].h))
         except: pass
         try:
-            shooting_queue.append((bots[0].x - screen_x_center, bots[0].y - screen_y_center - body_y_offset * bots[0].h, bots[0].distance))
+            shooting_queue.append((bots[0].x - screen_x_center, bots[0].y - screen_y_center - body_y_offset * bots[0].h, bots[0].distance, bots[0].x, bots[0].y, bots[0].w, bots[0].h))
         except: pass
         try:
-            if hideout_targets: shooting_queue.append((hideout_target_human[0].x - screen_x_center, hideout_target_human[0].y - screen_y_center - body_y_offset * hideout_target_human[0].h, hideout_target_human[0].distance))
+            if hideout_targets: shooting_queue.append((hideout_target_human[0].x - screen_x_center, hideout_target_human[0].y - screen_y_center - body_y_offset * hideout_target_human[0].h, hideout_target_human[0].distance, hideout_target_human[0].x, hideout_target_human[0].y, hideout_target_human[0].w, hideout_target_human[0].h))
         except: pass
         try:
-            if hideout_targets: shooting_queue.append((hideout_target_balls[0].x - screen_x_center, hideout_target_balls[0].y - screen_y_center - body_y_offset * hideout_target_balls[0].h, hideout_target_balls[0].distance))
+            if hideout_targets: shooting_queue.append((hideout_target_balls[0].x - screen_x_center, hideout_target_balls[0].y - screen_y_center - body_y_offset * hideout_target_balls[0].h, hideout_target_balls[0].distance, hideout_target_balls[0].x, hideout_target_balls[0].y, hideout_target_balls[0].w, hideout_target_balls[0].h))
         except: pass
         try:
-            shooting_queue.append((heads[0].x - screen_x_center, heads[0].y - screen_y_center - head_y_offset * heads[0].h, heads[0].distance))
+            shooting_queue.append((heads[0].x - screen_x_center, heads[0].y - screen_y_center - head_y_offset * heads[0].h, heads[0].distance, heads[0].x, heads[0].y, heads[0].w, heads[0].h))
         except: pass
 
         shooting_queue.sort(key=lambda x: x[2], reverse=False)
 
         if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-            try: win32_raw_mouse_move(x=int(shooting_queue[0][0]), y=int(shooting_queue[0][1]), dst=shooting_queue[0][2])
+            try: win32_raw_mouse_move(x=int(shooting_queue[0][0]), y=int(shooting_queue[0][1]), target_x=shooting_queue[0][3], target_y=shooting_queue[0][4], target_w=shooting_queue[0][5], target_h=shooting_queue[0][6])
             except: pass
             
         if mouse_auto_aim:
             try:
-                win32_raw_mouse_move(x=int(shooting_queue[0][0]), y=int(shooting_queue[0][1]), dst=shooting_queue[0][2])
+                win32_raw_mouse_move(x=int(shooting_queue[0][0]), y=int(shooting_queue[0][1]), target_x=shooting_queue[0][3], target_y=shooting_queue[0][4], target_w=shooting_queue[0][5], target_h=shooting_queue[0][6])
             except: pass
         try:
             return (int(shooting_queue[0][0]), int(shooting_queue[0][1]), shooting_queue[0][2])
@@ -124,6 +124,7 @@ def init():
             dim = (width, height)
 
             annotated_frame = result[0].plot()
+
         for frame in result: # current frame
             if show_window and show_speed == True:
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
