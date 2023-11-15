@@ -111,4 +111,4 @@ The repository provides multiple AI models for different purposes:
 
 ## Support the project
 
-- Support this project by training a model for a variety of games and improving algorithms. [DonationAlerts](https://www.donationalerts.com/r/sunxds).
+- I will post new models [here](https://boosty.to/sunone).
