@@ -72,18 +72,18 @@ def mouse_close():  # for import
     if gmok:
         return gm.mouse_close()
 
-def win32_raw_mouse_move(x, y, target_x=None, target_y=None, target_w=None, target_h=None):
-    if mouse_native:
+def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, target_w=None, target_h=None):
+    if mouse_native == True and x is not None and y is not None:
         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
-    else:
+    if mouse_native == False and x is not None and y is not None:
         mouse_xy(x, y)
     if target_x is not None and target_y is not None:
         bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
 
-    if mouse_auto_shoot and bScope:
+    if mouse_auto_shoot and bScope and x is not None and y is not None:
         win32_raw_mouse_click(x=x, y=y)
         
-    if mouse_auto_shoot and bScope:
+    if mouse_auto_shoot and bScope and x is not None and y is not None:
         win32_raw_mouse_click(x=x, y=y)
 
 def win32_raw_mouse_click(x, y):

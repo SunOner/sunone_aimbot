@@ -22,8 +22,7 @@ Obs_capture_fps = 30 # More value, more mouse swing
 native_Windows_capture = False
 
 # Aim settings
-body_y_offset = 0.36
-head_y_offset = 0.36
+body_y_offset = 0.35
 hideout_targets = True
 
 # Mouse settings 
@@ -33,12 +32,12 @@ mouse_auto_aim = False
 mouse_native = False
 
 # Cv2 debug window settings
-show_window = True
+show_window = False
 show_speed = False
 show_fps = False
 debug_window_scale_percent = 100
 debug_window_name = 'Calculator'
 
 # AI settings
-model_path='models/sunxds_0.2.1_nano.pt'
-model_image_size = 320 # if nano = 320 else 640
+model_path='models/sunxds_0.2.1_nano_320.pt'
+model_image_size = 320
