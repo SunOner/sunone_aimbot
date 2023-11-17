@@ -64,7 +64,6 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 - native_Windows_capture `bool`: Use the windows native capture method.
 
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box.
-- head_y_offset `float`: Allows correction of y coordinates inside the head detected box.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example, in warface or aimlabs).
 
 - mouse_smoothing `float`: Smoothing when moving the mouse.
@@ -78,7 +77,7 @@ The behavior of the aim bot can be configured via the `options.py` file. Here ar
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
 - model_path `str`: Model path.
-- model_image_size `int`: Model image size. (_nano models use 320 resolution, regular models use 640 resolution.)
+- model_image_size `int`: Model image size.
 
 ## AI Models
 
