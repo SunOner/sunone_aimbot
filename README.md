@@ -33,7 +33,7 @@ Before you get started, make sure you have the following prerequisites installed
 The YOLOv8 Aimbot has been tested on the following environment:
 
 - Operating Systems: Windows 10-11
-- YOLO Version: YOLOv8.0.210
+- YOLO Version: YOLOv8.0.212
 - OpenCV Version: OpenCV 4.8.1
 - NVIDIA cuDNN Version: 8.9.4.25
 - NVIDIA CUDA Version: 12.1
@@ -72,8 +72,8 @@ Windows capture method:
 - native_Windows_capture `bool`: Use the windows native capture method.
 
 Aim settings:
-- body_y_offset `float`: Allows correction of y coordinates inside the body detected box.
-- hideout_targets `bool`: Allows shooting at targets on the range (for example, in warface or aimlabs).
+- body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
+- hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
 
 Mouse settings:
 - mouse_smoothing `float`: Smoothing when moving the mouse.
