@@ -47,39 +47,56 @@ The YOLOv8 Aimbot has been tested on the following environment:
 ## Options
 
 The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
+
+Screen resolution:
 - original_screen_width `int`: The current horizontal resolution of the monitor.
 - original_screen_height `int`: The current vertical resolution of the monitor.
 
+Object Search window resolution:
 - screen_width `int`: Horizontal resolution of the object search window.
 - screen_height `int`: Vertical resolution of the object search window.
 
+Dxcam capture method:
 - Dxcam_capture `bool`: Use [dxcam](https://github.com/ra1nty/DXcam) to capture images from the screen.
 - dxcam_capture_fps `int`: Specific fps value for screen capture.
 - dxcam_monitor_id `int`: Id of the monitor from which the images will be captured.
 - dxcam_gpu_id `int`: Id of the GPU to be used for image capture
 - dxcam_max_buffer_len `int`: [Video Buffer](https://github.com/ra1nty/DXcam#video-buffer)
 
+Obs capture method:
 - Obs_capture `bool`: Use [Obs](https://github.com/obsproject/obs-studio) to capture images from the screen.
 - Obs_camera_id `int`: Virtual Camera ID.
 - Obs_capture_fps `int`: Specific fps value for screen capture.
 
+Windows capture method:
 - native_Windows_capture `bool`: Use the windows native capture method.
 
+Aim settings:
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example, in warface or aimlabs).
 
+Mouse settings:
 - mouse_smoothing `float`: Smoothing when moving the mouse.
 - mouse_auto_shoot `bool`: Automatic shooting.
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_native `bool`: Use windows native mouse input.
 
+AI options:
+- AI_image_size `int`: Model image size.
+- AI_conf = `float`: How many percent is AI sure that this is the right goal.
+- AI_iou = `float`: Intersection over union (IoU) threshold for NMS.
+- AI_device = `int` or `str`: Device to run on, i.e. cuda AI_device=0/1/2/3 or device='cpu'.
+- AI_half = `bool`: Use half precision (FP16).
+- AI_max_det = `int`: Maximum number of detections per frame.
+- AI_verbose = `bool`: Debug output.
+
+Cv2 debug window settings:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
 - show_speed `bool`: Displays speed information inside the OpenCV2 window.
 - debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
 - model_path `str`: Model path.
-- model_image_size `int`: Model image size.
 
 ## AI Models
 
