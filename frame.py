@@ -10,6 +10,9 @@ def get_new_frame():
     global dx
     global obs_camera
     if Dxcam_capture and dx is None:
+        if native_Windows_capture or Obs_capture:
+            print('Use only one capture method!')
+            exit(0)
         dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
         if dx.is_capturing == False:
             dx.start(Calculate_screen_offset(), target_fps=dxcam_capture_fps)
@@ -17,6 +20,9 @@ def get_new_frame():
         img = dx.get_latest_frame()
 
     if Obs_capture and obs_camera is None:
+        if Dxcam_capture or native_Windows_capture:
+            print('Use only one capture method!')
+            exit(0)
         obs_camera = cv2.VideoCapture(Obs_camera_id)
         obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, screen_width)
         obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, screen_height)
@@ -25,6 +31,9 @@ def get_new_frame():
         ret_val, img = obs_camera.read()
         
     if native_Windows_capture:
+        if Obs_capture or Dxcam_capture:
+            print('Use only one capture method!')
+            exit(0)
         img = windows_grab_screen(Calculate_screen_offset())
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
