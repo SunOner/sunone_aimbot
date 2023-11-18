@@ -23,11 +23,11 @@ def get_new_frame():
         obs_camera.set(cv2.CAP_PROP_FPS, Obs_capture_fps)
     if Obs_capture and obs_camera is not None:
         ret_val, img = obs_camera.read()
+        
     if native_Windows_capture:
         img = windows_grab_screen(Calculate_screen_offset())
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
-    
     return img
 
 def speed(annotated_frame, speed_preprocess, speed_inference, speed_postprocess):

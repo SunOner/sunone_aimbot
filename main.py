@@ -1,8 +1,9 @@
 from ultralytics import YOLO
 import torch
 import cv2
-import win32con, win32api
 import time
+import win32con, win32api
+import asyncio
 from options import *
 from targets import *
 from screen import *
@@ -29,14 +30,14 @@ def append_targets(boxes):
         shooting_queue.sort(key=lambda x: x.distance, reverse=False)
     
     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-            try: win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x), y=int(shooting_queue[0].mouse_y), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h)
+            try: asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x), y=int(shooting_queue[0].mouse_y), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
             except: pass
             
     if mouse_auto_shoot == True and mouse_auto_aim == False:
-        win32_raw_mouse_move(x=None, y=None, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h)
+        asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
     if mouse_auto_aim:
         try:
-            win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x), y=int(shooting_queue[0].mouse_y), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h)
+            asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x), y=int(shooting_queue[0].mouse_y), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
         except: pass
 
 @torch.no_grad()
@@ -83,7 +84,7 @@ def init():
 
             annotated_frame = result[0].plot()
 
-        for frame in result: # current frame
+        for frame in result:
             if show_window and show_speed == True:
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
 
