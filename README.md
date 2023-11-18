@@ -22,7 +22,7 @@ Before you get started, make sure you have the following prerequisites installed
 
 7. NVIDIA CUDA Version 12.1.
 
-8. Asyncio: Automatic shooting. `pip install asyncio`.
+8. Asyncio: For automatic shooting. `pip install asyncio`.
 
 9. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
 
