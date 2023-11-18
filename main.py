@@ -30,20 +30,18 @@ def append_targets(boxes):
         shooting_queue.sort(key=lambda x: x.distance, reverse=False)
     
     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-            try: asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x), y=int(shooting_queue[0].mouse_y), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
+            try: asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x / mouse_smoothing), y=int(shooting_queue[0].mouse_y / mouse_smoothing), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
             except: pass
             
     if mouse_auto_shoot == True and mouse_auto_aim == False:
         asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
     if mouse_auto_aim:
         try:
-            asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x), y=int(shooting_queue[0].mouse_y), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
+            asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x / mouse_smoothing), y=int(shooting_queue[0].mouse_y / mouse_smoothing), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
         except: pass
 
 @torch.no_grad()
 def init():
-    global screen_height, screen_width
-
     if show_window and show_fps:
         prev_frame_time = 0
         new_frame_time = 0

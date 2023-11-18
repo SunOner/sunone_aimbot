@@ -42,7 +42,7 @@ The YOLOv8 Aimbot has been tested on the following environment:
 - TensorRT 8.6.1
 - NumPy Version: 1.26.0
 
-- Tested GPUs: RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060.
+- Tested GPUs: RTX 3090, RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060.
 
 ## Options
 
@@ -77,7 +77,7 @@ Aim settings:
 
 Mouse settings:
 - mouse_smoothing `float`: Smoothing when moving the mouse.
-- mouse_auto_shoot `bool`: Automatic shooting.
+- mouse_auto_shoot `bool`: Automatic shooting. (Not working in some games).
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_native `bool`: Use windows native mouse input.
 
