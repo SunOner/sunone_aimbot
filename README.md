@@ -82,6 +82,7 @@ Mouse settings:
 - mouse_native `bool`: Use windows native mouse input.
 
 AI options:
+- AI_model_path `str`: AI model path.
 - AI_image_size `int`: Model image size.
 - AI_conf = `float`: How many percent is AI sure that this is the right goal.
 - AI_iou = `float`: Intersection over union (IoU) threshold for NMS.
@@ -95,8 +96,6 @@ Cv2 debug window settings:
 - show_speed `bool`: Displays speed information inside the OpenCV2 window.
 - debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
-
-- model_path `str`: Model path.
 
 ## AI Models
 

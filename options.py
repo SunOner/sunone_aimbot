@@ -32,6 +32,7 @@ mouse_auto_aim = False
 mouse_native = False
 
 # AI options
+AI_model_path = 'models/sunxds_0.2.1_nano_320.pt'
 AI_image_size = 320
 AI_conf = 0.40
 AI_iou = 0.1
@@ -46,6 +47,3 @@ show_speed = False
 show_fps = False
 debug_window_scale_percent = 100
 debug_window_name = 'Calculator'
-
-# AI settings
-model_path='models/sunxds_0.2.1_nano_320.pt'

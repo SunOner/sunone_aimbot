@@ -48,7 +48,7 @@ def init():
         prev_frame_time = 0
         new_frame_time = 0
 
-    model = YOLO(model_path, task='detect')
+    model = YOLO(AI_model_path, task='detect')
 
     if show_window:
         cv2.namedWindow(debug_window_name)
