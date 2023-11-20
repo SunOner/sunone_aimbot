@@ -114,8 +114,7 @@ The repository provides multiple AI models for different purposes:
 
 ## Export .pt model to .engine
 
-- Run "yolo export model="model_path/*.pt" format=engine half=true device=0 workspace=8 imgsz=640"
-
+- Run `yolo export model="model_path/*.pt" format=engine half=true device=0 workspace=8 imgsz=640`
 
 ## Notes / Recommendations
 
@@ -125,7 +124,7 @@ The repository provides multiple AI models for different purposes:
 - Try to use TensorRT for acceleration. `.pt` model is good, but does not have as much speed as `.engine`.
 - If the program is running, everything is detected, but the mouse itself is not aimed at the target, then try running the program as an administrator.
 - Turn off the cv2 debug window, this saves system resources.
-- Do not increase the object Search window resolution, this may affect your search speed.
+- Do not increase the object search window resolution, this may affect your search speed.
 
 ## Support the project
 
