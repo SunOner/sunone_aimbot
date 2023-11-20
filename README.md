@@ -125,6 +125,7 @@ The repository provides multiple AI models for different purposes:
 - Try to use TensorRT for acceleration. `.pt` model is good, but does not have as much speed as `.engine`.
 - If the program is running, everything is detected, but the mouse itself is not aimed at the target, then try running the program as an administrator.
 - Turn off the cv2 debug window, this saves system resources.
+- Do not increase the object Search window resolution, this may affect your search speed.
 
 ## Support the project
 
