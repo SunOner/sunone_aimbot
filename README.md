@@ -26,7 +26,7 @@ Before you get started, make sure you have the following prerequisites installed
 
 9. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
 
-10. Optional: OBS Studio for quick screen capture from obs studio (via virtual camera).
+10. Optional: OBS Studio for quick screen capture via virtual camera.
 
 ## Tested Environment
 
