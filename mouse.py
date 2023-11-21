@@ -84,12 +84,12 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
 
     if target_x is not None and target_y is not None and mouse_auto_shoot == True:
         bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
-    if bScope == False:
+    if mouse_auto_shoot == True and bScope == False:
         mouse_up()
 
     if mouse_auto_shoot and bScope and x is not None and y is not None:
         await win32_raw_mouse_click(x=x, y=y)
-    else:
+    elif mouse_auto_shoot == False and bScope == False:
         mouse_up()
 
 async def win32_raw_mouse_click(x, y):
