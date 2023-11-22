@@ -8,6 +8,9 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot:
 
+- Run the command to install the libraries `pip install -r requirements.txt`.
+- I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
+
 1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python`. Or install DDxcam right away with cv2 support (See point 8).
 
 2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options. See 'export' block of code.
@@ -24,9 +27,10 @@ Before you get started, make sure you have the following prerequisites installed
 
 8. Asyncio: For automatic shooting. `pip install asyncio`.
 
-9. Optional: [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
+9. [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
 
-10. Optional: OBS Studio for quick screen capture via virtual camera.
+10. Screeninfo: `pip install screeninfo`.
+11. Optional: OBS Studio for quick screen capture via virtual camera.
 
 ## Tested Environment
 
@@ -42,7 +46,7 @@ The YOLOv8 Aimbot has been tested on the following environment:
 - TensorRT 8.6.1
 - NumPy Version: 1.26.0
 
-- Tested GPUs: RTX 3090, RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060.
+- Tested GPUs: RTX 3090, RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060, GTX 750-ti.
 
 ## Options
 

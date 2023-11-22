@@ -1,35 +1,93 @@
 from options import *
-import ultralytics
-from cv2 import __version__
-import tensorrt
-import numpy
-import dxcam
+
+try:
+    from screeninfo import get_monitors
+except:
+    print('install screeninfo: pip install screeninfo')
+    exit(0)
+
+try:   
+    import ultralytics
+except:
+    print('install ultralytics: pip install ultralytics')
+    exit(0)
+
+if '.engine' in AI_model_path:
+    import tensorrt
+
+try:
+    import numpy
+except:
+    print('install numpy: pip install numpy')
+    exit(0)
+
+if Dxcam_capture == True:
+    try:
+        import dxcam
+    except:
+        print('Install dxcam: pip install dxcam[cv2]')
+        exit(0)
+
 import importlib.metadata
 import os
+
+try:
+    from cv2 import __version__
+except:
+    print('install cv2: pip install opencv-python')
+    exit(0)
 
 def run_checks():
     ultralytics.utils.checks.collect_system_info()
 
-    print('\nCuda support: {0}'.format(ultralytics.utils.checks.cuda_is_available()))
+    cuda_support = ultralytics.utils.checks.cuda_is_available()
+    if cuda_support == True:
+        print('\nCuda support True')
+    else:
+        print('Cuda is not supported. Please reinstall pytorch with GPU support. https://pytorch.org/get-started/locally/\nIf you have reinstalled but there is no GPU support, Google how to solve this problem.')
 
     print('OpenCV version: {0}'.format(__version__))
 
-    print('TensorRT version: {0}'.format(tensorrt.__version__))
+    if '.engine' in AI_model_path:
+        print('TensorRT version: {0}'.format(tensorrt.__version__))
+    else:
+        print(ultralytics.YOLO(AI_model_path, task='detect').info())
 
     print('numpy version: {0}'.format(numpy.version.version))
 
-    print('DXcam devices info:\n{0}'.format(dxcam.output_info()))
+    if Dxcam_capture:
+        print('DXcam devices info:\n{0}'.format(dxcam.output_info()))
 
-    print('asyncio version: {0}'.format(importlib.metadata.version('asyncio')))
+    try:
+        print('asyncio version: {0}'.format(importlib.metadata.version('asyncio')))
+    except:
+        print('Please install asyncio: pip install asyncio')
 
-    print('Options file:\n')
+    print('Options file checks:\n')
 
     print('original_screen_width', original_screen_width)
     print('original_screen_height', original_screen_height, '\n')
 
+    desktop_size = get_monitors()
+    for m in desktop_size:
+        if m.is_primary:
+            if original_screen_width != m.width:
+                print('Please open options.py and edit original_screen_width to', m.width)
+                exit(0)
+            if original_screen_height != m.height:
+                print('Please open options.py and edit original_screen_height to', m.height)
+                exit(0)
+
     print('screen_width', screen_width)
     print('screen_height', screen_height, '\n')
 
+    if screen_width >= original_screen_width:
+        print('Please decrease the screen_width value to increase the performance of the application.')
+        exit(0)
+    if screen_height >= original_screen_height:
+        print('Please decrease the screen_height value to increase the performance of the application.')
+        exit(0)
+        
     print('Dxcam_capture', Dxcam_capture)
     print('dxcam_capture_fps', dxcam_capture_fps)
     print('dxcam_monitor_id', dxcam_monitor_id)

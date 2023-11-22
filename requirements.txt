@@ -1,0 +1,7 @@
+cuda_python
+dxcam[cv2]
+numpy
+pywin32
+ultralytics
+screeninfo
+asyncio
