@@ -13,7 +13,7 @@ Before you get started, make sure you have the following prerequisites installed
 
 1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python`. Or install DDxcam right away with cv2 support (See point 8).
 
-2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options. See 'export' block of code.
+2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options in code. See 'export' block of code or [this part](https://github.com/SunOner/yolov8_aimbot#export-pt-model-to-engine).
 
 3. Ultralytics: Required library available at [GitHub Ultralytics](https://github.com/ultralytics/ultralytics) `pip install ultralytics`.
 
@@ -25,11 +25,12 @@ Before you get started, make sure you have the following prerequisites installed
 
 7. NVIDIA CUDA Version 12.1.
 
-8. Asyncio: For automatic shooting. `pip install asyncio`.
+8. Asyncio: `pip install asyncio`.
 
 9. [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
 
 10. Screeninfo: `pip install screeninfo`.
+
 11. Optional: OBS Studio for quick screen capture via virtual camera.
 
 ## Tested Environment
