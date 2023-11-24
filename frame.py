@@ -1,14 +1,24 @@
-from options import *
-from screen import *
+import threading
 import cv2
 import dxcam
+import time
+from screeninfo import get_monitors
+from screen import *
+from options import *
 
 dx = None
 obs_camera = None
 
+def thread_hook(args):
+    if 'DXCamera' in str(args.thread) and 'cannot join current thread' in str(args.exc_value):
+        print('It looks like the game is currently in fullscreen mode, please switch the game to windowed mode or windowless mode.')
+
 def get_new_frame():
     global dx
     global obs_camera
+
+    threading.excepthook = thread_hook
+
     if Dxcam_capture and dx is None:
         if native_Windows_capture or Obs_capture:
             print('Use only one capture method!')
