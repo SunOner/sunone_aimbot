@@ -144,7 +144,7 @@ The repository provides multiple AI models for different purposes:
 - If the program is running, everything is detected, but the mouse itself is not aimed at the target, then try running the program as an administrator.
 - Turn off the cv2 debug window, this saves system resources.
 - Do not increase the object search window resolution, this may affect your search speed.
-
+- If you have started the application and nothing happens, it may be working, close it with the F2 key and change the show_window setting to True in the file options.py to make sure that the application is working.
 ## Support the project
 
 - I will post new models [here](https://boosty.to/sunone).
