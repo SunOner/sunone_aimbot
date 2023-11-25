@@ -30,10 +30,11 @@ def append_targets(boxes):
         shooting_queue.sort(key=lambda x: x.distance, reverse=False)
     
     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-        try: asyncio.run(win32_raw_mouse_move(x=shooting_queue[0].mouse_x / mouse_smoothing, y=shooting_queue[0].mouse_y / mouse_smoothing, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h, distance=shooting_queue[0].distance))
-        except: pass
+        asyncio.run(win32_raw_mouse_move(x=shooting_queue[0].mouse_x / mouse_smoothing, y=shooting_queue[0].mouse_y / mouse_smoothing, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h, distance=shooting_queue[0].distance))
+    
     if mouse_auto_shoot == True and mouse_auto_aim == False:
         asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
+    6
     if mouse_auto_aim:
         try:
             asyncio.run(win32_raw_mouse_move(x=shooting_queue[0].mouse_x / mouse_smoothing, y=shooting_queue[0].mouse_y / mouse_smoothing, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
@@ -89,6 +90,7 @@ def init():
         for frame in result:
             if show_window and show_speed == True:
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
+
             if len(frame.boxes):
                 append_targets(frame.boxes)
 

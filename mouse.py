@@ -1,7 +1,11 @@
 import math
+import time
+from turtle import pd
 from screen import check_target_in_scope
-from options import mouse_auto_shoot
+from options import mouse_auto_shoot, mouse_native
 import asyncio
+import win32con, win32api
+import numpy as np
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
 
@@ -76,14 +80,19 @@ def mouse_close():
         return gm.mouse_close()
 
 async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, target_w=None, target_h=None, distance=None):
-    if distance > 2:
-        x = x / math.sqrt(distance) * 2
-        y = y / math.sqrt(distance) * 2
+    bScope = False
+    
+    if distance > 1:
+        x = x
+        y = y
     else:
         x = None
         y = None
 
-    if x is not None and y is not None:
+    if mouse_native == True and x is not None and y is not None:
+        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
+
+    if mouse_native == False and x is not None and y is not None:
         mouse_xy(int(x), int(y))
 
     if target_x is not None and target_y is not None and mouse_auto_shoot == True:
@@ -93,8 +102,25 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
 
     if mouse_auto_shoot and bScope and x is not None and y is not None:
         await win32_raw_mouse_click(x=int(x), y=int(y))
-    elif mouse_auto_shoot == False and bScope == False:
-        mouse_up()
+    # elif mouse_auto_shoot == False and bScope == False:
+        # mouse_up()
 
 async def win32_raw_mouse_click(x, y):
+    if mouse_native:
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
+    else:
         await mouse_down()
+
+def calculate_mouse_speed(x, y):
+    global x0, y0, t0
+    if x0 is not None and y0 is not None and t0 is not None:
+        dx = x - x0
+        dy = y - y0
+        dt = time.time() - t0
+        v_x = dx / dt
+        v_y = dy / dt
+        return (v_x, v_y)
+    x0, y0, t0 = x, y, time.time()
+
+x0, y0, t0 = None, None, None
