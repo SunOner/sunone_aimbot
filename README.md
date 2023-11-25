@@ -126,14 +126,15 @@ The repository provides multiple AI models for different purposes:
 <br></br>
 `format=engine`: TensorRT model format.
 <br></br>
+`half=true`: Use Half-precision floating-point format.
+<br></br>
 `device=0`: GPU id.
 <br></br>
 `workspace=8`: GPU max video memory.
 <br></br>
 `imgsz=320`: Model image size.
 <br></br>
-`verbose=False`: Debug stuff.
-<br></br>
+`verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
 ## Notes / Recommendations
 
 - Limit the maximum value of frames per second in the game in which you will use it. Do not overload the graphics card.
