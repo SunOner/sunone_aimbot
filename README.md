@@ -121,12 +121,12 @@ The repository provides multiple AI models for different purposes:
 ## Export .pt model to .engine
 
 - Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 workspace=8 imgsz=320 verbose=False`
-_ `model="model_path/*.pt"`; Path to model.
-_ `format=engine`: TensorRT model format.
-_ `device=0`: GPU id.
-_ `workspace=8`: GPU max video memory.
-_ `imgsz=320`: Model image size.
-_ `verbose=False`: Debug stuff.
+`model="model_path/*.pt"`; Path to model.
+`format=engine`: TensorRT model format.
+`device=0`: GPU id.
+`workspace=8`: GPU max video memory.
+`imgsz=320`: Model image size.
+`verbose=False`: Debug stuff.
 ## Notes / Recommendations
 
 - Limit the maximum value of frames per second in the game in which you will use it. Do not overload the graphics card.
