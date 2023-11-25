@@ -46,7 +46,12 @@ def init():
         new_frame_time = 0
 
     model = YOLO(AI_model_path, task='detect')
-
+    
+    if '.engine' in AI_model_path:
+        print('Engine loaded')
+    else:
+        print('Model loaded.', model.info())
+    
     if show_window:
         cv2.namedWindow(debug_window_name)
 
