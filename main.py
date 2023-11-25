@@ -30,13 +30,13 @@ def append_targets(boxes):
         shooting_queue.sort(key=lambda x: x.distance, reverse=False)
     
     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-        try: asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x / mouse_smoothing), y=int(shooting_queue[0].mouse_y / mouse_smoothing), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
+        try: asyncio.run(win32_raw_mouse_move(x=shooting_queue[0].mouse_x / mouse_smoothing, y=shooting_queue[0].mouse_y / mouse_smoothing, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h, distance=shooting_queue[0].distance))
         except: pass
     if mouse_auto_shoot == True and mouse_auto_aim == False:
         asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
     if mouse_auto_aim:
         try:
-            asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x / mouse_smoothing), y=int(shooting_queue[0].mouse_y / mouse_smoothing), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
+            asyncio.run(win32_raw_mouse_move(x=shooting_queue[0].mouse_x / mouse_smoothing, y=shooting_queue[0].mouse_y / mouse_smoothing, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
         except: pass
 
 @torch.no_grad()
@@ -46,7 +46,7 @@ def init():
         new_frame_time = 0
 
     model = YOLO(AI_model_path, task='detect')
-    
+
     if '.engine' in AI_model_path:
         print('Engine loaded')
     else:
@@ -56,10 +56,10 @@ def init():
         cv2.namedWindow(debug_window_name)
 
     while True:
-        img = get_new_frame()
+        frame = get_new_frame()
         
         result = model.predict(
-            source=img,
+            source=frame,
             stream=True,
             cfg='game.yaml',
             imgsz=AI_image_size,
@@ -71,7 +71,7 @@ def init():
             device=AI_device,
             show=False,
             boxes=False,
-            half=AI_half,
+            half=True,
             max_det=AI_max_det,
             vid_stride=False,
             classes=range(9),
@@ -80,11 +80,11 @@ def init():
             show_conf=False)
         
         if show_window:
-            height = int(img.shape[0] * debug_window_scale_percent / 100)
-            width = int(img.shape[1] * debug_window_scale_percent / 100)
+            height = int(frame.shape[0] * debug_window_scale_percent / 100)
+            width = int(frame.shape[1] * debug_window_scale_percent / 100)
             dim = (width, height)
             
-            annotated_frame = img
+            annotated_frame = frame
 
         for frame in result:
             if show_window and show_speed == True:
@@ -92,7 +92,7 @@ def init():
             if len(frame.boxes):
                 append_targets(frame.boxes)
 
-                if show_window:
+                if show_window and show_boxes:
                     annotated_frame = draw_boxes(annotated_frame=annotated_frame, xyxy=frame.boxes.xyxy)
 
         if show_window and show_fps:

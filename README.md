@@ -38,7 +38,7 @@ Before you get started, make sure you have the following prerequisites installed
 The YOLOv8 Aimbot has been tested on the following environment:
 
 - Operating Systems: Windows 10-11
-- YOLO Version: YOLOv8.0.212
+- YOLO Version: YOLOv8.0.217
 - OpenCV Version: OpenCV 4.8.1
 - NVIDIA cuDNN Version: 8.9.4.25
 - NVIDIA CUDA Version: 12.1
@@ -92,13 +92,14 @@ AI options:
 - AI_conf = `float`: How many percent is AI sure that this is the right goal.
 - AI_iou = `float`: Intersection over union (IoU) threshold for NMS.
 - AI_device = `int` or `str`: Device to run on, i.e. cuda AI_device=0/1/2/3 or device='cpu'.
-- AI_half = `bool`: Use half precision (FP16).
 - AI_max_det = `int`: Maximum number of detections per frame.
-- AI_verbose = `bool`: Debug output.
 
 Cv2 debug window settings:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
 - show_speed `bool`: Displays speed information inside the OpenCV2 window.
+- show_fps `bool`: Displays FPS in the corner.
+- show_boxes `bool`: Displays detectable objects.
+- show_labels `bool`: Displays the name of the detected object. (TODO)
 - debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 

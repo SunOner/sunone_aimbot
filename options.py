@@ -8,7 +8,7 @@ screen_height = 300
 
 # dxcam Capture method
 Dxcam_capture = True
-dxcam_capture_fps = 30 # More value, more mouse swing
+dxcam_capture_fps = 60
 dxcam_monitor_id = 0
 dxcam_gpu_id = 0
 dxcam_max_buffer_len = 64
@@ -16,7 +16,7 @@ dxcam_max_buffer_len = 64
 # Obs capture method
 Obs_capture = False
 Obs_camera_id = 1
-Obs_capture_fps = 30 # More value, more mouse swing
+Obs_capture_fps = 60
 
 # Windows capture method
 native_Windows_capture = False
@@ -37,12 +37,13 @@ AI_image_size = 320
 AI_conf = 0.40
 AI_iou = 0.1
 AI_device = 0
-AI_half = True
 AI_max_det = 10
 
 # Cv2 debug window settings
 show_window = False
 show_speed = False
 show_fps = False
+show_boxes = True
+# show_labels = True :TODO
 debug_window_scale_percent = 100
 debug_window_name = 'Calculator'
