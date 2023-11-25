@@ -39,7 +39,6 @@ AI_iou = 0.1
 AI_device = 0
 AI_half = True
 AI_max_det = 10
-AI_verbose = False
 
 # Cv2 debug window settings
 show_window = False

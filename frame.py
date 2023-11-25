@@ -45,7 +45,6 @@ def get_new_frame():
             print('Use only one capture method!')
             exit(0)
         img = windows_grab_screen(Calculate_screen_offset())
-        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
     return img
 
@@ -58,4 +57,10 @@ def speed(annotated_frame, speed_preprocess, speed_inference, speed_postprocess)
 
     cv2.putText(annotated_frame, 'postprocess:', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
     cv2.putText(annotated_frame, str(speed_postprocess), (150, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+    return annotated_frame
+
+def draw_boxes(annotated_frame, xyxy):
+    for xys in xyxy:
+        if xys is not None:
+            annotated_frame = cv2.rectangle(annotated_frame, (int(xys[0].item()), int(xys[1].item())), (int(xys[2].item()), int(xys[3].item())), (0, 200, 0), 0)
     return annotated_frame

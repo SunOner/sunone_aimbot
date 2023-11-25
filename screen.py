@@ -1,3 +1,4 @@
+import cv2
 from options import *
 import win32gui, win32ui, win32con, win32api
 import numpy as np
@@ -28,7 +29,7 @@ def windows_grab_screen(region):
     signedIntsArray = bmp.GetBitmapBits(True)
     img = np.frombuffer(signedIntsArray, dtype='uint8')
     img.shape = (height, width, 4)
-
+    img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
     srcdc.DeleteDC()
     memdc.DeleteDC()
     win32gui.ReleaseDC(hwin, hwindc)

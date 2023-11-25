@@ -1,6 +1,9 @@
+import math
+import time
 import win32con, win32api
 from screen import check_target_in_scope
 from options import mouse_auto_shoot, mouse_native
+from main import screen_x_center, screen_y_center
 import asyncio
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
@@ -94,7 +97,7 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
 
 async def win32_raw_mouse_click(x, y):
     if mouse_native:
-        await win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
-        await win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
     else:
-        await mouse_down(1)
+        await mouse_down()

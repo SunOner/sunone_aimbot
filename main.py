@@ -7,7 +7,7 @@ import asyncio
 from options import *
 from targets import *
 from screen import *
-from frame import get_new_frame, speed
+from frame import get_new_frame, speed, draw_boxes
 from mouse import win32_raw_mouse_move
 
 def append_targets(boxes):
@@ -30,9 +30,8 @@ def append_targets(boxes):
         shooting_queue.sort(key=lambda x: x.distance, reverse=False)
     
     if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-            try: asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x / mouse_smoothing), y=int(shooting_queue[0].mouse_y / mouse_smoothing), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
-            except: pass
-            
+        try: asyncio.run(win32_raw_mouse_move(x=int(shooting_queue[0].mouse_x / mouse_smoothing), y=int(shooting_queue[0].mouse_y / mouse_smoothing), target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
+        except: pass
     if mouse_auto_shoot == True and mouse_auto_aim == False:
         asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h))
     if mouse_auto_aim:
@@ -54,12 +53,12 @@ def init():
     while True:
         img = get_new_frame()
         
-        result = model(
-            img,
-            stream=False,
+        result = model.predict(
+            source=img,
+            stream=True,
             cfg='game.yaml',
             imgsz=AI_image_size,
-            stream_buffer=True,
+            stream_buffer=False,
             agnostic_nms=False,
             save=False,
             conf=AI_conf,
@@ -71,7 +70,7 @@ def init():
             max_det=AI_max_det,
             vid_stride=False,
             classes=range(9),
-            verbose=AI_verbose,
+            verbose=False,
             show_labels=False,
             show_conf=False)
         
@@ -79,15 +78,17 @@ def init():
             height = int(img.shape[0] * debug_window_scale_percent / 100)
             width = int(img.shape[1] * debug_window_scale_percent / 100)
             dim = (width, height)
-
-            annotated_frame = result[0].plot()
+            
+            annotated_frame = img
 
         for frame in result:
             if show_window and show_speed == True:
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
-
             if len(frame.boxes):
                 append_targets(frame.boxes)
+
+                if show_window:
+                    annotated_frame = draw_boxes(annotated_frame=annotated_frame, xyxy=frame.boxes.xyxy)
 
         if show_window and show_fps:
             new_frame_time = time.time()
