@@ -57,7 +57,7 @@ def run_checks():
 
     if Dxcam_capture:
         print('DXcam devices info:\n{0}'.format(dxcam.output_info()))
-
+    # TODO: ADD OBS_CAPTURE CHECKS
     try:
         print('asyncio version: {0}'.format(importlib.metadata.version('asyncio')))
     except:
@@ -87,7 +87,7 @@ def run_checks():
     if screen_height >= original_screen_height:
         print('Please decrease the screen_height value to increase the performance of the application.')
         exit(0)
-        
+
     print('Dxcam_capture', Dxcam_capture)
     print('dxcam_capture_fps', dxcam_capture_fps)
     print('dxcam_monitor_id', dxcam_monitor_id)
@@ -115,7 +115,6 @@ def run_checks():
     print('AI_device', AI_device)
     print('AI_half', AI_half)
     print('AI_max_det', AI_max_det)
-    print('AI_verbose', AI_verbose, '\n')
 
     print('show_window', show_window)
     print('show_speed', show_speed)
