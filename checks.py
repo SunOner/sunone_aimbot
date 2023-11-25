@@ -106,19 +106,18 @@ def run_checks():
     print('mouse_smoothing', mouse_smoothing)
     print('mouse_auto_shoot', mouse_auto_shoot)
     print('mouse_auto_aim', mouse_auto_aim)
-    print('mouse_native', mouse_native, '\n')
 
     print('AI_model_path', AI_model_path)
     print('AI_image_size', AI_image_size)
     print('AI_conf', AI_conf)
     print('AI_iou', AI_iou)
     print('AI_device', AI_device)
-    print('AI_half', AI_half)
     print('AI_max_det', AI_max_det)
 
     print('show_window', show_window)
     print('show_speed', show_speed)
     print('show_fps', show_fps)
+    print('show_boxes', show_boxes)
     print('debug_window_scale_percent', debug_window_scale_percent)
     print('debug_window_name', debug_window_name, '\n')
 

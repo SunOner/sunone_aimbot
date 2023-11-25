@@ -1,14 +1,10 @@
 import math
-import time
-import win32con, win32api
 from screen import check_target_in_scope
-from options import mouse_auto_shoot, mouse_native
-from main import screen_x_center, screen_y_center
+from options import mouse_auto_shoot
 import asyncio
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
 
-x0, y0, t0 = None, None, None
 basedir = path.dirname(path.abspath(__file__))
 dlldir = path.join(basedir, 'ghub_mouse.dll')
 dlldir2 = path.join(basedir, 'LogitechGkey.dll')
@@ -84,12 +80,10 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
         x = x / math.sqrt(distance) * 2
         y = y / math.sqrt(distance) * 2
     else:
-        pass
+        x = None
+        y = None
 
-    if mouse_native == True and x is not None and y is not None:
-        await win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
-
-    if mouse_native == False and x is not None and y is not None:
+    if x is not None and y is not None:
         mouse_xy(int(x), int(y))
 
     if target_x is not None and target_y is not None and mouse_auto_shoot == True:
@@ -103,8 +97,4 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
         mouse_up()
 
 async def win32_raw_mouse_click(x, y):
-    if mouse_native:
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
-    else:
         await mouse_down()
