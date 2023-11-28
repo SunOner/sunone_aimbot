@@ -59,8 +59,39 @@ def speed(annotated_frame, speed_preprocess, speed_inference, speed_postprocess)
     cv2.putText(annotated_frame, str(speed_postprocess), (150, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
     return annotated_frame
 
-def draw_boxes(annotated_frame, xyxy):
-    for xys in xyxy:
-        if xys is not None:
-            annotated_frame = cv2.rectangle(annotated_frame, (int(xys[0].item()), int(xys[1].item())), (int(xys[2].item()), int(xys[3].item())), (0, 200, 0), 0)
+def draw_helpers(annotated_frame, boxes):
+    for item in boxes:
+        if item is not None:
+            for xyxy in item.xyxy:
+                if show_boxes:
+                    annotated_frame = cv2.rectangle(annotated_frame, (int(xyxy[0].item()), int(xyxy[1].item())), (int(xyxy[2].item()), int(xyxy[3].item())), (0, 200, 0), 0)
+                    if show_labels:
+                        str_cls = ''
+                        for cls in item.cls:
+                            match cls:
+                                case 0:
+                                    str_cls = 'player'
+                                case 1:
+                                    str_cls = 'bot'
+                                case 2:
+                                    str_cls = 'weapon'
+                                case 3:
+                                    str_cls = 'teammate_nickname'
+                                case 4:
+                                    str_cls = 'dead_body'
+                                case 5:
+                                    str_cls = 'hideout_target_human'
+                                case 6:
+                                    str_cls = 'hideout_target_balls'
+                                case 7:
+                                    str_cls = 'head'
+                                case 8:
+                                    str_cls = 'smoke'
+                                case 9:
+                                    str_cls = 'fire'
+                            if show_conf == False:
+                                annotated_frame = cv2.putText(annotated_frame, str_cls, (int(xyxy[0].item()), int(xyxy[1].item() - 5)), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 200, 0), 1, cv2.LINE_AA)
+                    if show_conf:
+                        for conf in item.conf:
+                            annotated_frame = cv2.putText(annotated_frame, str('{} {:.2f}'.format(str_cls,conf.item())), (int(xyxy[0].item()), int(xyxy[1].item() - 5)), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 200, 0), 1, cv2.LINE_AA)
     return annotated_frame

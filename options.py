@@ -40,11 +40,11 @@ AI_device = 0
 AI_max_det = 10
 
 # Cv2 debug window settings
-show_window = False
+show_window = True
 show_speed = False
 show_fps = False
 show_boxes = True
-# show_labels = True :TODO
-# show_conf = True :TODO
+show_labels = True
+show_conf = True
 debug_window_scale_percent = 100
 debug_window_name = 'Calculator'
