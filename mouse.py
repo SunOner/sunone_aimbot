@@ -102,8 +102,6 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
 
     if mouse_auto_shoot and bScope and x is not None and y is not None:
         await win32_raw_mouse_click(x=int(x), y=int(y))
-    # elif mouse_auto_shoot == False and bScope == False:
-        # mouse_up()
 
 async def win32_raw_mouse_click(x, y):
     if mouse_native:
