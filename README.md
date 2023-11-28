@@ -38,7 +38,7 @@ Before you get started, make sure you have the following prerequisites installed
 The YOLOv8 Aimbot has been tested on the following environment:
 
 - Operating Systems: Windows 10-11
-- YOLO Version: YOLOv8.0.217
+- YOLO Version: YOLOv8.0.219
 - OpenCV Version: OpenCV 4.8.1
 - NVIDIA cuDNN Version: 8.9.4.25
 - NVIDIA CUDA Version: 12.1
