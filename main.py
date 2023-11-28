@@ -70,13 +70,12 @@ def init():
             conf=AI_conf,
             iou=AI_iou,
             device=AI_device,
-            show=False,
-            boxes=False,
             half=True,
             max_det=AI_max_det,
             vid_stride=False,
             classes=range(9),
             verbose=False,
+            show_boxes=False,
             show_labels=False,
             show_conf=False)
         
