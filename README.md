@@ -99,7 +99,8 @@ Cv2 debug window settings:
 - show_speed `bool`: Displays speed information inside the OpenCV2 window.
 - show_fps `bool`: Displays FPS in the corner.
 - show_boxes `bool`: Displays detectable objects.
-- show_labels `bool`: Displays the name of the detected object. (TODO)
+- show_labels `bool`: Displays the name of the detected object.
+- show_conf `bool`: Displays object confidence threshold for detection.
 - debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
