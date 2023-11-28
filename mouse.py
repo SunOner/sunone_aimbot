@@ -1,11 +1,8 @@
-import math
 import time
-from turtle import pd
 from screen import check_target_in_scope
 from options import mouse_auto_shoot, mouse_native
 import asyncio
 import win32con, win32api
-import numpy as np
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
 

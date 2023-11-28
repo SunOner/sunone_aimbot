@@ -32,7 +32,7 @@ mouse_auto_aim = False
 mouse_native = True
 
 # AI options
-AI_model_path = 'models/sunxds_0.2.1_nano_320.pt'
+AI_model_path = 'models/sunxds_0.2.1_nano_320.pt' # You can find new improved models here https://boosty.to/sunone
 AI_image_size = 320
 AI_conf = 0.35
 AI_iou = 0.1
