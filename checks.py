@@ -119,6 +119,8 @@ def run_checks():
     print('show_speed', show_speed)
     print('show_fps', show_fps)
     print('show_boxes', show_boxes)
+    print('show_labels', show_labels)
+    print('show_conf', show_conf)
     print('debug_window_scale_percent', debug_window_scale_percent)
     print('debug_window_name', debug_window_name, '\n')
 
