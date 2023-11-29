@@ -8,7 +8,7 @@ screen_height = 300
 
 # Dxcam Capture method
 Dxcam_capture = True
-dxcam_capture_fps = 30 # 30 fps is OK
+dxcam_capture_fps = 60 # 30 fps is OK
 dxcam_monitor_id = 0
 dxcam_gpu_id = 0
 dxcam_max_buffer_len = 64
@@ -26,10 +26,11 @@ body_y_offset = 0.35
 hideout_targets = True
 
 # Mouse settings 
-mouse_smoothing = 1 # 1 is default
+mouse_smoothing = 2 # 1 is default
 mouse_auto_shoot = False
 mouse_auto_aim = False
 mouse_native = True
+mouse_wild_mouse = True
 
 # AI options
 AI_model_path = 'models/sunxds_0.2.1_nano_320.pt' # You can find new improved models here https://boosty.to/sunone
@@ -40,7 +41,7 @@ AI_device = 0
 AI_max_det = 10
 
 # Cv2 debug window settings
-show_window = True
+show_window = False
 show_speed = False
 show_fps = False
 show_boxes = True

@@ -85,6 +85,7 @@ Mouse settings:
 - mouse_auto_shoot `bool`: Automatic shooting. (Not working in some games).
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_native `bool`: Use windows native mouse input.
+- mouse_wild_mouse `bool`: Simulate human like mouse input.
 
 AI options:
 - AI_model_path `str`: AI model path.

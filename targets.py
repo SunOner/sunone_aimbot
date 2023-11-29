@@ -8,7 +8,7 @@ class Targets:
         if cls == 7:
             self.mouse_y = (y - screen_y_center) / mouse_smoothing
         else:
-            self.mouse_y = y - screen_y_center - body_y_offset * h
+            self.mouse_y = (y - screen_y_center - body_y_offset * h) / mouse_smoothing
         self.distance = math.sqrt((x - screen_x_center)**2 + (y - screen_y_center)**2)
         self.x = x
         self.y = y

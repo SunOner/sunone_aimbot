@@ -1,16 +1,44 @@
+import asyncio
 from ultralytics import YOLO
 import torch
 import cv2
 import time
 import win32con, win32api
-import asyncio
+import threading
+import queue
+import time
 from options import *
 from targets import *
 from screen import *
 from frame import get_new_frame, speed, draw_helpers
-from mouse import win32_raw_mouse_move
+from mouse import win32_raw_mouse_move, wind_mouse
 
-def append_targets(boxes):
+class work_queue(threading.Thread):
+    def __init__(self):
+        super(work_queue, self).__init__()
+        self.queue = queue.Queue()
+        self.daemon = True
+        self.queue.maxsize = AI_max_det
+        self.start()
+
+    def run(self):
+        while True:
+            item = self.queue.get()
+
+            if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
+                asyncio.run(win32_raw_mouse_move(x=item[0], y=item[1], target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
+
+            if mouse_auto_shoot == True and mouse_auto_aim == False:
+                asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
+    
+            if mouse_auto_aim:
+                try:
+                    asyncio.run(win32_raw_mouse_move(x=item[0], y=item[1], target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
+                except: pass
+                
+            self.queue.task_done()
+
+def append_queue(boxes, queue_worker):
     shooting_queue = []
     head_target = False
     for box in boxes:
@@ -28,26 +56,19 @@ def append_targets(boxes):
         shooting_queue.sort(key=lambda x: x.cls == 7, reverse=True)
     else:
         shooting_queue.sort(key=lambda x: x.distance, reverse=False)
-    
-    if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-        asyncio.run(win32_raw_mouse_move(x=shooting_queue[0].mouse_x, y=shooting_queue[0].mouse_y, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h, distance=shooting_queue[0].distance))
-    
-    if mouse_auto_shoot == True and mouse_auto_aim == False:
-        asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h), distance=shooting_queue[0].distance)
-    
-    if mouse_auto_aim:
-        try:
-            asyncio.run(win32_raw_mouse_move(x=shooting_queue[0].mouse_x, y=shooting_queue[0].mouse_y, target_x=shooting_queue[0].x, target_y=shooting_queue[0].y, target_w=shooting_queue[0].w, target_h=shooting_queue[0].h, distance=shooting_queue[0].distance))
-        except: pass
+
+    queue_worker.queue.put((shooting_queue[0].mouse_x, shooting_queue[0].mouse_y, shooting_queue[0].x, shooting_queue[0].y, shooting_queue[0].w, shooting_queue[0].h, shooting_queue[0].distance))
 
 @torch.no_grad()
 def init():
     if show_window and show_fps:
         prev_frame_time = 0
         new_frame_time = 0
-
-    model = YOLO(AI_model_path, task='detect')
-
+    try:
+        model = YOLO(AI_model_path, task='detect')
+    except FileNotFoundError:
+        print('Model file not found')
+        quit(0)
     if '.engine' in AI_model_path:
         print('Engine loaded')
     else:
@@ -55,6 +76,9 @@ def init():
     
     if show_window:
         cv2.namedWindow(debug_window_name)
+
+    queue_worker = work_queue()
+    queue_worker.name = 'Work_queue_thread'
 
     while True:
         frame = get_new_frame()
@@ -91,7 +115,7 @@ def init():
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
 
             if len(frame.boxes):
-                append_targets(frame.boxes)
+                append_queue(frame.boxes, queue_worker)
 
                 if show_window and show_boxes:
                     annotated_frame = draw_helpers(annotated_frame=annotated_frame, boxes=frame.boxes)
