@@ -11,28 +11,6 @@ Before you get started, make sure you have the following prerequisites installed
 - [Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide.md)
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 
-1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python`. Or install Dxcam right away with cv2 support (See point 8).
-
-2. NVIDIA TensorRT: Speeds up the process of searching for objects up to 13 times. Install it following the [official guide](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html). You can also view the file `train_game.py` to see how the model can be exported .pt in .engine with options in code. See 'export' block of code or [Export .pt model to .engine part](https://github.com/SunOner/yolov8_aimbot#export-pt-model-to-engine).
-
-3. Ultralytics: Required library available at [GitHub Ultralytics](https://github.com/ultralytics/ultralytics) `pip install ultralytics`.
-
-4. PyTorch with GPU Support: Install PyTorch from [PyTorch's official website](https://pytorch.org/).
-
-5. NumPy: You can typically install NumPy using pip: `pip install numpy`.
-
-6. Win32 Tools for Python: These are needed for Windows-specific functionality. `pip install pywin32`.
-
-7. NVIDIA CUDA Version 12.1.
-
-8. Asyncio: `pip install asyncio`.
-
-9. [Dxcam](https://github.com/ra1nty/DXcam): install using `pip install dxcam[cv2]` for quick screen capture. (I'm using this). Dxcam required cv2.
-
-10. Screeninfo: `pip install screeninfo`.
-
-11. Optional: OBS Studio for quick screen capture via virtual camera.
-
 ## Tested Environment
 
 The YOLOv8 Aimbot has been tested on the following environment:
