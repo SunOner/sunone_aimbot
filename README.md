@@ -2,13 +2,13 @@
 ![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/one.gif)
 ## Overview
 
-YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
+YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 
 ## Requirements
 
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot:
 
-# [Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide.md)
+- [Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide.md)
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 
 1. OpenCV2: Used for debugging images. You can install it using `pip install opencv-python`. Or install Dxcam right away with cv2 support (See point 8).
