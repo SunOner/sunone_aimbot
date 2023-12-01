@@ -27,7 +27,7 @@ The YOLOv8 Aimbot has been tested on the following environment:
 - TensorRT 8.6.1
 - NumPy Version: 1.26.0
 
-- Tested GPUs: RTX 3090, RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060, GTX 750-ti.
+- Tested GPUs: RTX 3090, RTX 3080-ti, RTX 3070, RTX 2080, GTX 1080, GTX 1060, GTX 1050-ti, GTX 750-ti.
 
 ## Options
 
