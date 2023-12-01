@@ -10,7 +10,7 @@
 4. Download and install Cuda 12.1 the reboot PC [link](https://developer.nvidia.com/cuda-12-1-0-download-archive)
 ![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/cuda.png)
 <br></br>
-5. Open cmd and type `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`
+5. Open cmd and type `python -m pip install --upgrade pip`, then type `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`
 <br></br>
 6. Download [TensorRT](https://disk.yandex.ru/d/mgiPzH8fCL83qw) and unpack the files in yolov8_aimbot-main folder.
 <br></br>
