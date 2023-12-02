@@ -8,6 +8,7 @@ except:
 
 try:   
     import ultralytics
+    from ultralytics import YOLO
 except:
     print('install ultralytics: pip install ultralytics')
     exit(0)
@@ -32,9 +33,10 @@ import importlib.metadata
 import os
 
 try:
+    import cv2
     from cv2 import __version__
 except:
-    print('install cv2: pip install opencv-python')
+    print('install cv2: pip install opencv-python \nor\npip install dxcam[cv2]')
     exit(0)
 
 def run_checks():
@@ -63,7 +65,7 @@ def run_checks():
     except:
         print('Please install asyncio: pip install asyncio')
 
-    print('Options file checks:\n')
+    print('********** Options **********:\n')
 
     print('original_screen_width', original_screen_width)
     print('original_screen_height', original_screen_height, '\n')
@@ -90,6 +92,8 @@ def run_checks():
 
     print('Dxcam_capture', Dxcam_capture)
     print('dxcam_capture_fps', dxcam_capture_fps)
+    if dxcam_capture_fps >= 31:
+        print('Warning!\nA large number of frames per second can lead to incorrect mouse operation. If you want to use more frames per second, additionally use the mouse_smoothing option to smooth out mouse movement, this can be useful for smooth mouse movements.')
     print('dxcam_monitor_id', dxcam_monitor_id)
     print('dxcam_gpu_id', dxcam_gpu_id)
     print('dxcam_max_buffer_len', dxcam_max_buffer_len, '\n')
@@ -127,6 +131,37 @@ def run_checks():
     print('Environment variables:\n')
     for key, value in os.environ.items():
         print(f'{key}: {value}')
+    
+    detection_test = detections_check()
+    print(detection_test)
+
+def detections_check():
+    model = YOLO(AI_model_path, task='detect')
+    cap = cv2.VideoCapture('media/tests/test_det.mp4')
+    clss = []
+    while cap.isOpened():
+        success, frame = cap.read()
+
+        if success:
+            result = model(frame, stream=False, show=False, imgsz=320, device=AI_device, verbose=False)
+            for frame in result:
+                clss.append(frame.boxes.cls)
+            annotated_frame = result[0].plot()
+
+            cv2.imshow("Detections test", annotated_frame)
+
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+        else:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+    if len(clss) <= 0:
+        return 'Detection test failed'
+    else:
+        return 'Detection test passed'
 
 if __name__ == "__main__":
     run_checks()

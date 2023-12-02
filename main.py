@@ -11,7 +11,7 @@ from options import *
 from targets import *
 from screen import *
 from frame import get_new_frame, speed, draw_helpers
-from mouse import win32_raw_mouse_move, wind_mouse
+from mouse import win32_raw_mouse_move
 
 class work_queue(threading.Thread):
     def __init__(self):
@@ -69,10 +69,13 @@ def init():
     except FileNotFoundError:
         print('Model file not found')
         quit(0)
+
     if '.engine' in AI_model_path:
         print('Engine loaded')
     else:
         print('Model loaded.', model.info(detailed=False, verbose=False))
+    
+    print('Aimbot is started. Enjoy!')
     
     if show_window:
         cv2.namedWindow(debug_window_name)
