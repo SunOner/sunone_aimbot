@@ -1,5 +1,5 @@
 ##  Yolov8 aimbot Install guide
-0. Installation video instructions: https://youtu.be/qxz_vm806j0
+<video src='https://youtu.be/qxz_vm806j0' width=180/>
 <br></br>
 1. (OPTIONAL FOR CLEAN INSTALL) Uninstall all versions of Python and Cuda then reboot PC.
 <br></br>
