@@ -1,4 +1,6 @@
 ##  Yolov8 aimbot Install guide
+0. Installation video instructions: https://youtu.be/qxz_vm806j0
+<br></br>
 1. (OPTIONAL FOR CLEAN INSTALL) Uninstall all versions of Python and Cuda then reboot PC.
 <br></br>
 2. Download and install python 3.11.6. On startup installer screen enable "Add Python 3.11.6 to PATH" option! [link](https://www.python.org/downloads/)
