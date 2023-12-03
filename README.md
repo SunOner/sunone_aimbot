@@ -90,7 +90,7 @@ Cv2 debug window settings:
 The repository provides multiple AI models for different purposes:
 
 - *.pt: Default AI model.
-- *.onnx: Is CPU model.
+- *.onnx: The model is optimized to run on processors.
 - *.engine: Final exported model, which is faster than the previous two.
 
 - My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start. The error may also occur due to the fact that I exported the model in a different version of TensorRT, it's better to just export the model yourself.
@@ -102,7 +102,7 @@ The repository provides multiple AI models for different purposes:
 
 ## Export .pt model to .engine
 
-- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 workspace=8 imgsz=320 verbose=False`
+- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320`
 <br></br>
 `model="model_path/*.pt"`; Path to model.
 <br></br>
@@ -118,7 +118,6 @@ The repository provides multiple AI models for different purposes:
 <br></br>
 `verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
 ## Notes / Recommendations
-
 - Limit the maximum value of frames per second in the game in which you will use it. Do not overload the graphics card.
 - Do not set high graphics settings in games.
 - Limit the browser (try not to watch YouTube while playing and working AI at the same time, for example (of course if you don't have a super duper graphics card)) and so on, which loads the video card.
