@@ -72,7 +72,9 @@ def init():
 
     if '.engine' in AI_model_path:
         print('Engine loaded')
-    else:
+    if '.onnx' in AI_model_path:
+        print('Onnx loaded.')
+    if '.pt' in AI_model_path:
         print('Model loaded.', model.info(detailed=False, verbose=False))
     
     print('Aimbot is started. Enjoy!')

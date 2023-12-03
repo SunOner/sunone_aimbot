@@ -5,3 +5,6 @@ pywin32
 ultralytics
 screeninfo
 asyncio
+youtube_dl
+onnxruntime
+onnxruntime-gpu
