@@ -47,12 +47,13 @@ def run_checks():
         print('\nCuda support True')
     else:
         print('Cuda is not supported. Please reinstall pytorch with GPU support. https://pytorch.org/get-started/locally/\nIf you have reinstalled but there is no GPU support, Google how to solve this problem.')
+        quit(0)
 
     print('OpenCV version: {0}'.format(__version__))
 
     if '.engine' in AI_model_path:
         print('TensorRT version: {0}'.format(tensorrt.__version__))
-    else:
+    if '.pt' in AI_model_path:
         print(ultralytics.YOLO(AI_model_path, task='detect').info())
 
     print('numpy version: {0}'.format(numpy.version.version))
@@ -143,7 +144,7 @@ def detections_check():
         success, frame = cap.read()
 
         if success:
-            result = model(frame, stream=False, show=False, imgsz=320, device=AI_device, verbose=False)
+            result = model(frame, stream=False, show=False, imgsz=320, device=AI_device, verbose=False, half=True)
             for frame in result:
                 clss.append(frame.boxes.cls)
             annotated_frame = result[0].plot()
