@@ -3,7 +3,7 @@
 <br></br>
 1. (OPTIONAL FOR CLEAN INSTALL) Uninstall all versions of Python and Cuda then reboot PC.
 <br></br>
-2. Update Nvidia driver. Cudnn should be installed instead of video driver updateit should be installed automatically after updating the driver.
+2. Update the Nvidia graphics driver. Cudnn should be installed automatically after updating the driver
 <br></br>
 3. Download and install python 3.11.6. On startup installer screen enable "Add Python 3.11.6 to PATH" option! [link](https://www.python.org/downloads/)
 ![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/python.png)
