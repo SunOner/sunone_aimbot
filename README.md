@@ -8,17 +8,17 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot:
 
-- [EN_Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_en.md)
-- [RU_Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_ru.md)
+- [EN Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_en.md)
+- [RU Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_ru.md)
 
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
-
+- To launch the aimbot after all installations, type `python main.py` in cmd.
 ## Tested Environment
 
 The YOLOv8 Aimbot has been tested on the following environment:
 
 - Operating Systems: Windows 10-11
-- YOLO Version: YOLOv8.0.219
+- YOLO Version: YOLOv8.0.222
 - OpenCV Version: OpenCV 4.8.1
 - NVIDIA cuDNN Version: 8.9.4.25
 - NVIDIA CUDA Version: 12.1
@@ -27,19 +27,29 @@ The YOLOv8 Aimbot has been tested on the following environment:
 - TensorRT 8.6.1
 - NumPy Version: 1.26.0
 
-- Tested GPUs: RTX 3090, RTX 3080-ti, RTX 3070, RTX 3050, RTX 2080, GTX 1080, GTX 1060, GTX 1050-ti, GTX 750-ti.
+| Tested GPUs |
+|----------|
+| RTX 4080 |
+| RTX 4070 |
+| RTX 4060 |
+| RTX 3090 |
+| RTX 3080-ti |
+| RTX 3070 |
+| RTX 3050 |
+| RTX 2080 |
+| GTX 1660 |
+| GTX 1080 |
+| GTX 1060 |
+| GTX 1050-ti |
+| GTX 750-ti |
 
 ## Options
 
 The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
 
-Screen resolution:
-- original_screen_width `int`: The current horizontal resolution of the monitor.
-- original_screen_height `int`: The current vertical resolution of the monitor.
-
 Object Search window resolution:
-- screen_width `int`: Horizontal resolution of the object search window.
-- screen_height `int`: Vertical resolution of the object search window.
+- detection_window_width `int`: Horizontal resolution of the object search window.
+- detection_window_height `int`: Vertical resolution of the object search window.
 
 Dxcam capture method:
 - Dxcam_capture `bool`: Use [dxcam](https://github.com/ra1nty/DXcam) to capture images from the screen.
@@ -59,6 +69,7 @@ Windows capture method:
 Aim settings:
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
+- disable_headshot `bool`: Disable head targerting.
 
 Mouse settings:
 - mouse_smoothing `float`: Smoothing when moving the mouse.
@@ -90,19 +101,19 @@ Cv2 debug window settings:
 The repository provides multiple AI models for different purposes:
 
 - *.pt: Default AI model.
-- *.onnx: Faster than *.pt model.
+- *.onnx: The model is optimized to run on processors.
 - *.engine: Final exported model, which is faster than the previous two.
 
 - My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start. The error may also occur due to the fact that I exported the model in a different version of TensorRT, it's better to just export the model yourself.
 
 ## Hot keys
 
-- Right mouse button: Aiming at the target.
-- F2: Exit.
+- `Right mouse button`: Aiming at the target.
+- `F2`: Exit.
 
 ## Export .pt model to .engine
 
-- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 workspace=8 imgsz=320 verbose=False`
+- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320`
 <br></br>
 `model="model_path/*.pt"`; Path to model.
 <br></br>
@@ -118,7 +129,6 @@ The repository provides multiple AI models for different purposes:
 <br></br>
 `verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
 ## Notes / Recommendations
-
 - Limit the maximum value of frames per second in the game in which you will use it. Do not overload the graphics card.
 - Do not set high graphics settings in games.
 - Limit the browser (try not to watch YouTube while playing and working AI at the same time, for example (of course if you don't have a super duper graphics card)) and so on, which loads the video card.

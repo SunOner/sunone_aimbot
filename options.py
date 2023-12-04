@@ -1,14 +1,10 @@
-# Desktop screen resolution
-original_screen_width = 1920
-original_screen_height = 1080
-
-# Object Search window resolution
-screen_width = 480
-screen_height = 300
+# Detection window resolution. In its current form, this is 20% of the screen resolution.
+detection_window_width = 384
+detection_window_height = 216 
 
 # Dxcam Capture method
 Dxcam_capture = True
-dxcam_capture_fps = 60 # 30 fps is OK
+dxcam_capture_fps = 30 # 30 fps is OK
 dxcam_monitor_id = 0
 dxcam_gpu_id = 0
 dxcam_max_buffer_len = 64
@@ -24,9 +20,10 @@ native_Windows_capture = False
 # Aim settings
 body_y_offset = 0.35
 hideout_targets = True
+disable_headshot = False
 
 # Mouse settings 
-mouse_smoothing = 2 # 1 is default
+mouse_smoothing = 1
 mouse_auto_shoot = False
 mouse_auto_aim = False
 mouse_native = True

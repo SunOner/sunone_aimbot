@@ -11,7 +11,7 @@ from options import *
 from targets import *
 from screen import *
 from frame import get_new_frame, speed, draw_helpers
-from mouse import win32_raw_mouse_move, wind_mouse
+from mouse import win32_raw_mouse_move
 
 class work_queue(threading.Thread):
     def __init__(self):
@@ -40,24 +40,33 @@ class work_queue(threading.Thread):
 
 def append_queue(boxes, queue_worker):
     shooting_queue = []
-    head_target = False
-    for box in boxes:
-        shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
 
-    for x in shooting_queue:
-        if len(shooting_queue) >= 3:
-            head_target = False
-            break
-        if x.cls == 7:
-            head_target = True
+    if disable_headshot == False:
+        head_target = False
+        for box in boxes:
+            shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
+        for x in shooting_queue:
+            if len(shooting_queue) >= 3:
+                head_target = False
+                break
+            if x.cls == 7:
+                head_target = True
+            else:
+                head_target = False
+        if head_target:
+            shooting_queue.sort(key=lambda x: x.cls == 7, reverse=True)
         else:
-            head_target = False
-    if head_target:
-        shooting_queue.sort(key=lambda x: x.cls == 7, reverse=True)
+            shooting_queue.sort(key=lambda x: x.distance, reverse=False)
     else:
+        for box in boxes:
+            if int(box.cls.item()) == 0 or int(box.cls.item()) == 1 or int(box.cls.item()) == 5 or int(box.cls.item()) == 6:
+                shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
         shooting_queue.sort(key=lambda x: x.distance, reverse=False)
 
-    queue_worker.queue.put((shooting_queue[0].mouse_x, shooting_queue[0].mouse_y, shooting_queue[0].x, shooting_queue[0].y, shooting_queue[0].w, shooting_queue[0].h, shooting_queue[0].distance))
+    try:
+        queue_worker.queue.put((shooting_queue[0].mouse_x, shooting_queue[0].mouse_y, shooting_queue[0].x, shooting_queue[0].y, shooting_queue[0].w, shooting_queue[0].h, shooting_queue[0].distance))
+    except:
+        pass
 
 @torch.no_grad()
 def init():
@@ -69,14 +78,20 @@ def init():
     except FileNotFoundError:
         print('Model file not found')
         quit(0)
+
     if '.engine' in AI_model_path:
         print('Engine loaded')
-    else:
+    if '.onnx' in AI_model_path:
+        print('Onnx CPU loaded.')
+    if '.pt' in AI_model_path:
         print('Model loaded.', model.info(detailed=False, verbose=False))
+
+    print('Aimbot is started. Enjoy!\n[Right mouse button] - Aiming at the target\n[F2] - EXIT')
     
     if show_window:
+        print('An open debug window can affect performance.')
         cv2.namedWindow(debug_window_name)
-
+    
     queue_worker = work_queue()
     queue_worker.name = 'Work_queue_thread'
 
