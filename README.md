@@ -69,6 +69,7 @@ Windows capture method:
 Aim settings:
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
+- disable_headshot `bool`: Disable head targerting.
 
 Mouse settings:
 - mouse_smoothing `float`: Smoothing when moving the mouse.

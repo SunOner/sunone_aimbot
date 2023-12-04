@@ -20,6 +20,7 @@ native_Windows_capture = False
 # Aim settings
 body_y_offset = 0.35
 hideout_targets = True
+disable_headshot = False
 
 # Mouse settings 
 mouse_smoothing = 1

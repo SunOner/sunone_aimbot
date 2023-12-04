@@ -34,8 +34,8 @@ def get_new_frame():
             print('Use only one capture method!')
             exit(0)
         obs_camera = cv2.VideoCapture(Obs_camera_id)
-        obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, screen_width)
-        obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, screen_height)
+        obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, detection_window_width)
+        obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, detection_window_height)
         obs_camera.set(cv2.CAP_PROP_FPS, Obs_capture_fps)
     if Obs_capture and obs_camera is not None:
         ret_val, img = obs_camera.read()
