@@ -1,15 +1,17 @@
 import cv2
 from options import *
-import win32gui, win32ui, win32con, win32api
+import win32gui, win32ui, win32con
 import numpy as np
+from screeninfo import get_monitors
 
-screen_x_center, screen_y_center = screen_width / 2, screen_height / 2
+screen_x_center, screen_y_center = detection_window_width / 2, detection_window_height / 2
 
 def Calculate_screen_offset():
-    left = original_screen_width / 2 - screen_width / 2
-    top = original_screen_height / 2 - screen_height / 2
-    width = left + screen_width
-    height = top + screen_height
+    left, top = get_primary_display_resolution()
+    left = left / 2 - detection_window_width / 2
+    top = top / 2 - detection_window_height / 2
+    width = left + detection_window_width
+    height = top + detection_window_height
     return (int(left), int(top), int(width), int(height))
 
 def windows_grab_screen(region):
@@ -38,8 +40,8 @@ def windows_grab_screen(region):
     return img
 
 def check_target_in_scope(target_x, target_y, target_w, target_h):
-    x = screen_width / 2
-    y = screen_height / 2
+    x = detection_window_width / 2
+    y = detection_window_height / 2
     x1 = target_x - target_w
     x2 = target_x + target_w
     y1 = target_y - target_h
@@ -48,4 +50,10 @@ def check_target_in_scope(target_x, target_y, target_w, target_h):
         return True
     else :
         return False
+
+def get_primary_display_resolution():
+    _ = get_monitors()
+    for m in _:
+        if m.is_primary:
+            return m.width, m.height
     

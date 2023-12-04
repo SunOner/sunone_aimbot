@@ -12,7 +12,7 @@ Before you get started, make sure you have the following prerequisites installed
 - [RU Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_ru.md)
 
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
-
+- To launch the aimbot after all installations, type `python main.py` in cmd.
 ## Tested Environment
 
 The YOLOv8 Aimbot has been tested on the following environment:
@@ -30,6 +30,7 @@ The YOLOv8 Aimbot has been tested on the following environment:
 | Tested GPUs |
 |----------|
 | RTX 4080 |
+| RTX 4070 |
 | RTX 4060 |
 | RTX 3090 |
 | RTX 3080-ti |
@@ -45,10 +46,6 @@ The YOLOv8 Aimbot has been tested on the following environment:
 ## Options
 
 The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
-
-Screen resolution:
-- original_screen_width `int`: The current horizontal resolution of the monitor.
-- original_screen_height `int`: The current vertical resolution of the monitor.
 
 Object Search window resolution:
 - screen_width `int`: Horizontal resolution of the object search window.
@@ -110,8 +107,8 @@ The repository provides multiple AI models for different purposes:
 
 ## Hot keys
 
-- Right mouse button: Aiming at the target.
-- F2: Exit.
+- [Right mouse button]: Aiming at the target.
+- [F2]: Exit.
 
 ## Export .pt model to .engine
 

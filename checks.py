@@ -66,30 +66,10 @@ def run_checks():
     except:
         print('Please install asyncio: pip install asyncio')
 
-    print('********** Options **********:\n')
+    print('\n********** Options **********\n')
 
-    print('original_screen_width', original_screen_width)
-    print('original_screen_height', original_screen_height, '\n')
-
-    desktop_size = get_monitors()
-    for m in desktop_size:
-        if m.is_primary:
-            if original_screen_width != m.width:
-                print('Please open options.py and edit original_screen_width to', m.width)
-                exit(0)
-            if original_screen_height != m.height:
-                print('Please open options.py and edit original_screen_height to', m.height)
-                exit(0)
-
-    print('screen_width', screen_width)
-    print('screen_height', screen_height, '\n')
-
-    if screen_width >= original_screen_width:
-        print('Please decrease the screen_width value to increase the performance of the application.')
-        exit(0)
-    if screen_height >= original_screen_height:
-        print('Please decrease the screen_height value to increase the performance of the application.')
-        exit(0)
+    print('screen_width', detection_window_width)
+    print('screen_height', detection_window_height, '\n')
 
     print('Dxcam_capture', Dxcam_capture)
     print('dxcam_capture_fps', dxcam_capture_fps)

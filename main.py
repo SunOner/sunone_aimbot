@@ -73,15 +73,16 @@ def init():
     if '.engine' in AI_model_path:
         print('Engine loaded')
     if '.onnx' in AI_model_path:
-        print('Onnx loaded.')
+        print('Onnx CPU loaded.')
     if '.pt' in AI_model_path:
         print('Model loaded.', model.info(detailed=False, verbose=False))
-    
-    print('Aimbot is started. Enjoy!')
+
+    print('Aimbot is started. Enjoy!\n[Right mouse button] - Aiming at the target\n[F2] - EXIT')
     
     if show_window:
+        print('An open debug window can affect performance.')
         cv2.namedWindow(debug_window_name)
-
+    
     queue_worker = work_queue()
     queue_worker.name = 'Work_queue_thread'
 

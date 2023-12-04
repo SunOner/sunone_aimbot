@@ -1,10 +1,6 @@
-# Desktop screen resolution
-original_screen_width = 1920
-original_screen_height = 1080
-
-# Object Search window resolution. In its current form, this is 20% of the screen resolution.
-screen_width = 384
-screen_height = 216 
+# Detection window resolution. In its current form, this is 20% of the screen resolution.
+detection_window_width = 384
+detection_window_height = 216 
 
 # Dxcam Capture method
 Dxcam_capture = True
