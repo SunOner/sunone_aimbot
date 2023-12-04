@@ -107,8 +107,8 @@ The repository provides multiple AI models for different purposes:
 
 ## Hot keys
 
-- [Right mouse button]: Aiming at the target.
-- [F2]: Exit.
+- `Right mouse button`: Aiming at the target.
+- `F2`: Exit.
 
 ## Export .pt model to .engine
 
