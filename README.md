@@ -48,8 +48,8 @@ The YOLOv8 Aimbot has been tested on the following environment:
 The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
 
 Object Search window resolution:
-- screen_width `int`: Horizontal resolution of the object search window.
-- screen_height `int`: Vertical resolution of the object search window.
+- detection_window_width `int`: Horizontal resolution of the object search window.
+- detection_window_height `int`: Vertical resolution of the object search window.
 
 Dxcam capture method:
 - Dxcam_capture `bool`: Use [dxcam](https://github.com/ra1nty/DXcam) to capture images from the screen.
