@@ -85,7 +85,7 @@ AI options:
 - AI_image_size `int`: Model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_iou `float`: Intersection over union (IoU) threshold for NMS.
-- AI_device `int` or `str`: Device to run on, i.e. cuda AI_device=0/1/2/3 or device='cpu'.
+- AI_device `int` or `str`: Device to run on, i.e. cuda AI_device=0/1/2/3 or AI_device='cpu'.
 - AI_max_det `int`: Maximum number of detections per frame.
 
 Cv2 debug window settings:
