@@ -93,7 +93,7 @@ def init():
     
     queue_worker = work_queue()
     queue_worker.name = 'work_queue_thread'
-    
+
     while True:
         frame = get_new_frame()
 
@@ -118,7 +118,9 @@ def init():
             show_conf=False)
         
         if show_window:
-            dim = (int(frame.shape[0] * debug_window_scale_percent / 100), int(frame.shape[1] * debug_window_scale_percent / 100))
+            height = int(frame.shape[0] * debug_window_scale_percent / 100)
+            width = int(frame.shape[1] * debug_window_scale_percent / 100)
+            dim = (width, height)
             
             annotated_frame = frame
 
