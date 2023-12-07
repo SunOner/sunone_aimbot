@@ -1,11 +1,10 @@
-# YOLOv8 Aimbot
+# **YOLOv8 Aimbot**
 ![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/one.gif)
-## Overview
 
+## Overview
 YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 
 ## Requirements
-
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot:
 
 - [EN Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_en.md)
@@ -13,8 +12,8 @@ Before you get started, make sure you have the following prerequisites installed
 
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 - To launch the aimbot after all installations, type `python main.py` in cmd.
-## Tested Environment
 
+## Tested Environment
 The YOLOv8 Aimbot has been tested on the following environment:
 
 - Operating Systems: Windows 10-11
@@ -44,7 +43,6 @@ The YOLOv8 Aimbot has been tested on the following environment:
 | GTX 750-ti |
 
 ## Options
-
 The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
 
 Object Search window resolution:
@@ -97,7 +95,6 @@ Cv2 debug window settings:
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
 ## AI Models
-
 The repository provides multiple AI models for different purposes:
 
 - *.pt: Default AI model.
@@ -107,12 +104,10 @@ The repository provides multiple AI models for different purposes:
 - My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start. The error may also occur due to the fact that I exported the model in a different version of TensorRT, it's better to just export the model yourself.
 
 ## Hot keys
-
 - `Right mouse button`: Aiming at the target.
 - `F2`: Exit.
 
 ## Export .pt model to .engine
-
 - Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320`
 <br></br>
 `model="model_path/*.pt"`; Path to model.
@@ -128,6 +123,7 @@ The repository provides multiple AI models for different purposes:
 `imgsz=320`: Model image size.
 <br></br>
 `verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
+
 ## Notes / Recommendations
 - Limit the maximum value of frames per second in the game in which you will use it. Do not overload the graphics card.
 - Do not set high graphics settings in games.
@@ -137,6 +133,9 @@ The repository provides multiple AI models for different purposes:
 - Turn off the cv2 debug window, this saves system resources.
 - Do not increase the object search window resolution, this may affect your search speed.
 - If you have started the application and nothing happens, it may be working, close it with the F2 key and change the show_window setting to True in the file options.py to make sure that the application is working.
-## Support the project
 
+## Support the project
 - I will post new models [here](https://boosty.to/sunone).
+
+## License
+This project is licensed under the MIT License. See **[LICENSE](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)** for details
