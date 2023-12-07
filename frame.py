@@ -64,7 +64,7 @@ def draw_helpers(annotated_frame, boxes):
         if item is not None:
             for xyxy in item.xyxy:
                 if show_boxes:
-                    annotated_frame = cv2.rectangle(annotated_frame, (int(xyxy[0].item()), int(xyxy[1].item())), (int(xyxy[2].item()), int(xyxy[3].item())), (0, 200, 0), 0)
+                    annotated_frame = cv2.rectangle(annotated_frame, (int(xyxy[0].item()), int(xyxy[1].item())), (int(xyxy[2].item()), int(xyxy[3].item())), (0, 200, 0), 2)
                     if show_labels:
                         str_cls = ''
                         for cls in item.cls:
@@ -76,7 +76,7 @@ def draw_helpers(annotated_frame, boxes):
                                 case 2:
                                     str_cls = 'weapon'
                                 case 3:
-                                    str_cls = 'teammate_nickname'
+                                    str_cls = 'outline'
                                 case 4:
                                     str_cls = 'dead_body'
                                 case 5:

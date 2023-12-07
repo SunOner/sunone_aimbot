@@ -1,7 +1,6 @@
 import time
 from screen import check_target_in_scope, screen_x_center, screen_y_center
-from options import mouse_auto_shoot, mouse_native, mouse_wild_mouse
-import asyncio
+from options import mouse_auto_shoot, mouse_native, mouse_wild_mouse, mouse_break_force
 import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
@@ -16,6 +15,11 @@ DWORD = c_ulong
 ULONG_PTR = POINTER(DWORD)
 gm = CDLL(dlldir)
 gmok = gm.mouse_open()
+
+x0, y0, t0 = None, None, None
+
+sqrt3 = np.sqrt(3)
+sqrt5 = np.sqrt(5)
 
 class MOUSEINPUT(Structure):
     _fields_ = (('dx', LONG),
@@ -55,15 +59,13 @@ def mouse_xy(x, y):
         return gm.moveR(x, y)
     return SendInput(Mouse(0x0001, x, y))
 
-async def mouse_down(key = 1):
+def mouse_down(key = 1):
     if gmok:
         return gm.press(key)
     if key == 1:
         return SendInput(Mouse(0x0002))
     elif key == 2:
         return SendInput(Mouse(0x0008))
-    await asyncio.sleep(0.01)
-    mouse_up()
 
 def mouse_up(key = 1):
     if gmok:
@@ -79,13 +81,20 @@ def mouse_close():
 
 async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, target_w=None, target_h=None, distance=None):
     bScope = False
-    
-    if distance > 1:
-        x = x
-        y = y
-    else:
-        x = None
-        y = None
+    force = calculate_mouse_braking_force(distance=distance)
+
+    st_x = x
+    st_y = y
+
+    if distance >= 81:
+        x = (x / force) / 4
+        y = (y / force) / 4
+    if distance <= 80 and distance >= 20:
+        x = x / force
+        y = y / force
+    if distance <= 19:
+        x = st_x / 2
+        y = st_y / 2
 
     if mouse_wild_mouse:
         x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
@@ -98,34 +107,20 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
 
     if target_x is not None and target_y is not None and mouse_auto_shoot == True:
         bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
-    if mouse_auto_shoot == True and bScope == False:
-        mouse_up()
 
-    if mouse_auto_shoot and bScope and x is not None and y is not None:
-        await win32_raw_mouse_click(x=int(x), y=int(y))
+    if mouse_auto_shoot and x is not None and y is not None:
+        if bScope:
+            await win32_raw_mouse_click(x=int(x), y=int(y))
+        else:
+            mouse_up()
 
 async def win32_raw_mouse_click(x, y):
     if mouse_native:
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
     else:
-        await mouse_down()
-
-def calculate_mouse_speed(x, y):
-    global x0, y0, t0
-    if x0 is not None and y0 is not None and t0 is not None:
-        dx = x - x0
-        dy = y - y0
-        dt = time.time() - t0
-        v_x = dx / dt
-        v_y = dy / dt
-        return (v_x, v_y)
-    x0, y0, t0 = x, y, time.time()
-
-x0, y0, t0 = None, None, None
-
-sqrt3 = np.sqrt(3)
-sqrt5 = np.sqrt(5)
+        mouse_down()
+        mouse_up()
 
 def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, move_mouse=lambda x,y: None):
     current_x,current_y = start_x,start_y
@@ -159,3 +154,8 @@ def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, m
         return current_x,current_y
     except:
         return 0, 0
+
+def calculate_mouse_braking_force(distance):
+    if distance <= 0:
+        pass
+    return mouse_break_force / distance

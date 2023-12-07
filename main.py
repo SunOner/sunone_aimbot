@@ -24,13 +24,12 @@ class work_queue(threading.Thread):
     def run(self):
         while True:
             item = self.queue.get()
-
+            # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
             if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
                 asyncio.run(win32_raw_mouse_move(x=item[0], y=item[1], target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
-
             if mouse_auto_shoot == True and mouse_auto_aim == False:
                 asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
-    
+
             if mouse_auto_aim:
                 try:
                     asyncio.run(win32_raw_mouse_move(x=item[0], y=item[1], target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
@@ -93,11 +92,11 @@ def init():
         cv2.namedWindow(debug_window_name)
     
     queue_worker = work_queue()
-    queue_worker.name = 'Work_queue_thread'
-
+    queue_worker.name = 'work_queue_thread'
+    
     while True:
         frame = get_new_frame()
-        
+
         result = model.predict(
             source=frame,
             stream=True,
@@ -119,9 +118,7 @@ def init():
             show_conf=False)
         
         if show_window:
-            height = int(frame.shape[0] * debug_window_scale_percent / 100)
-            width = int(frame.shape[1] * debug_window_scale_percent / 100)
-            dim = (width, height)
+            dim = (int(frame.shape[0] * debug_window_scale_percent / 100), int(frame.shape[1] * debug_window_scale_percent / 100))
             
             annotated_frame = frame
 
@@ -150,7 +147,9 @@ def init():
             quit(0)
 
         if show_window:
-            cv2.resizeWindow(debug_window_name, dim)
+            try:
+                cv2.resizeWindow(debug_window_name, dim)
+            except: exit(0)
             resised = cv2.resize(annotated_frame, dim, cv2.INTER_NEAREST)
             cv2.imshow(debug_window_name, resised)
             if cv2.waitKey(1) & 0xFF == ord('q'):
