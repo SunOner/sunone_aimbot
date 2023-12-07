@@ -72,6 +72,7 @@ Aim settings:
 - disable_headshot `bool`: Disable head targerting.
 
 Mouse settings:
+- mouse_break_force `int`: Eliminates unnecessary mouse acceleration.
 - mouse_smoothing `float`: Smoothing when moving the mouse.
 - mouse_auto_shoot `bool`: Automatic shooting. (Not working in some games).
 - mouse_auto_aim `bool`: Automatic targeting.
