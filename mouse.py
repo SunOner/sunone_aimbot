@@ -83,18 +83,18 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
     bScope = False
     force = calculate_mouse_braking_force(distance=distance)
 
-    st_x = x
-    st_y = y
-
-    if distance >= 81:
-        x = (x / force) / 4
-        y = (y / force) / 4
-    if distance <= 80 and distance >= 20:
-        x = x / force
-        y = y / force
-    if distance <= 19:
-        x = st_x / 2
-        y = st_y / 2
+    if mouse_break_force >= 1:
+        st_x = x
+        st_y = y
+        if distance >= 81:
+            x = (x / force) / 4
+            y = (y / force) / 4
+        if distance <= 80 and distance >= 20:
+            x = x / force
+            y = y / force
+        if distance <= 19:
+            x = st_x / 2
+            y = st_y / 2
 
     if mouse_wild_mouse:
         x, y = wind_mouse(screen_x_center, screen_y_center, x,y)

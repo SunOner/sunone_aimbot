@@ -23,7 +23,7 @@ hideout_targets = True
 disable_headshot = False
 
 # Mouse settings
-mouse_break_force = 200
+mouse_break_force = 0
 mouse_smoothing = 1
 mouse_auto_shoot = False
 mouse_auto_aim = False
