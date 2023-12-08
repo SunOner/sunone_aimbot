@@ -9,6 +9,8 @@ Before you get started, make sure you have the following prerequisites installed
 
 - [EN Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_en.md)
 - [RU Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_ru.md)
+- [EN questions](https://github.com/SunOner/yolov8_aimbot/blob/main/questions_en.md)
+- [RU questions](https://github.com/SunOner/yolov8_aimbot/blob/main/questions_ru.md)
 
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 - To launch the aimbot after all installations, type `python main.py` in cmd.
