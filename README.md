@@ -111,7 +111,7 @@ The repository provides multiple AI models for different purposes:
 - `F2`: Exit.
 
 ## Export .pt model to .engine
-- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320`
+- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320` or python export_and_train.py.
 <br></br>
 `model="model_path/*.pt"`; Path to model.
 <br></br>

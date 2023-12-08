@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import os
+from options import AI_model_path, AI_image_size, AI_device
 os.environ['CUDA_MODULE_LOADING'] = 'LAZY'
 
 def init(_task='train', _model=YOLO('yolov8s.pt', task='detect'), _data = 'game.yaml', _imgsz = 320, _epochs = 40, _device = 0, _val = False, _half = True, _cache = False, _batch = -1, _export_after_train = False, _export_format = 'engine', _export_workspace = 8, _export_nms = False):
@@ -47,14 +48,14 @@ def export(model, _format, _device, _half, _workspace, _imgsz, _nms):
 
 if __name__ == "__main__":
     _task = 'export' # train / export / resume / tune
-    _model = YOLO('models/sunxds_0.2.1_nano_320.pt', task='detect') # yolov8n.pt yolov8s.pt yolov8m.pt yolov8h.pt yolov8x.pt
+    _model = YOLO(AI_model_path, task='detect') # pretrained models: yolov8n.pt yolov8s.pt yolov8m.pt yolov8h.pt yolov8x.pt
     _data = 'game.yaml'
-    _imgsz = 320
+    _imgsz = AI_image_size
     _epochs = 40
-    _device = 0
+    _device = AI_device
     _val = False
     _half = True
-    _cache = False
+    _cache = True
     _batch = -1
 
     _export_after_train = True
