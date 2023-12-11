@@ -22,10 +22,10 @@ The YOLOv8 Aimbot has been tested on the following environment:
 - YOLO Version: YOLOv8.0.222
 - OpenCV Version: OpenCV 4.8.1
 - NVIDIA cuDNN Version: 8.9.4.25
-- NVIDIA CUDA Version: 12.1, 10.1
+- NVIDIA CUDA Version: 12.1
 - Python Version: 3.11.6 (Anaconda and non-Anaconda environments)
 - PyTorch Version: 2.1.1+cu121, 2.1.0.dev20230519+cu121
-- TensorRT 8.6.1, 6.0.1
+- TensorRT 8.6.1
 - NumPy Version: 1.26.0
 
 |  Tested GPUs   |
