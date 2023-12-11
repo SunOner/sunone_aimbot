@@ -78,12 +78,12 @@ def init():
         print('Model file not found')
         quit(0)
 
-    if '.engine' in AI_model_path:
-        print('Engine loaded')
+    if '.pt' in AI_model_path:
+        print('PT Model loaded.')
     if '.onnx' in AI_model_path:
         print('Onnx CPU loaded.')
-    if '.pt' in AI_model_path:
-        print('Model loaded.', model.info(detailed=False, verbose=False))
+    if '.engine' in AI_model_path:
+        print('Engine loaded')
 
     print('Aimbot is started. Enjoy!\n[Right mouse button] - Aiming at the target\n[F2] - EXIT')
     
@@ -93,6 +93,14 @@ def init():
     
     queue_worker = work_queue()
     queue_worker.name = 'work_queue_thread'
+
+    clss = []
+    if show_window: # debug all classes
+        clss = range(9)
+    if hideout_targets and show_window == False:
+        clss = [0,1,5,6,7]
+    if hideout_targets == False and show_window == False:
+        clss = [0,1,7]
 
     while True:
         frame = get_new_frame()
@@ -111,7 +119,7 @@ def init():
             half=True,
             max_det=AI_max_det,
             vid_stride=False,
-            classes=range(9),
+            classes=clss,
             verbose=False,
             show_boxes=False,
             show_labels=False,

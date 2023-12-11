@@ -4,7 +4,7 @@ detection_window_height = 216
 
 # Dxcam Capture method
 Dxcam_capture = True
-dxcam_capture_fps = 60
+dxcam_capture_fps = 30
 dxcam_monitor_id = 0
 dxcam_gpu_id = 0
 dxcam_max_buffer_len = 64
@@ -12,14 +12,14 @@ dxcam_max_buffer_len = 64
 # Obs capture method
 Obs_capture = False
 Obs_camera_id = 1
-Obs_capture_fps = 60
+Obs_capture_fps = 30
 
 # Windows capture method
 native_Windows_capture = False
 
 # Aim settings
 body_y_offset = 0.35
-hideout_targets = True
+hideout_targets = False
 disable_headshot = False
 
 # Mouse settings
