@@ -1,10 +1,9 @@
-import time
-from screen import check_target_in_scope, screen_x_center, screen_y_center
-from options import mouse_auto_shoot, mouse_native, mouse_wild_mouse, mouse_break_force
+from logic.screen import check_target_in_scope, screen_x_center, screen_y_center
 import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
+from logic.config_watcher import mouse_break_force, mouse_wild_mouse, mouse_native, mouse_auto_shoot
 
 basedir = path.dirname(path.abspath(__file__))
 dlldir = path.join(basedir, 'ghub_mouse.dll')
@@ -81,9 +80,9 @@ def mouse_close():
 
 async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, target_w=None, target_h=None, distance=None):
     bScope = False
-    force = calculate_mouse_braking_force(distance=distance)
 
     if mouse_break_force >= 1:
+        force = calculate_mouse_braking_force(distance=distance)
         st_x = x
         st_y = y
         if distance >= 81:

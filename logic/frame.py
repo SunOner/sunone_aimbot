@@ -1,10 +1,8 @@
 import threading
 import cv2
 import dxcam
-import time
-from screeninfo import get_monitors
-from screen import *
-from options import *
+from logic.screen import *
+from logic.config_watcher import Dxcam_capture, native_Windows_capture, Obs_capture, dxcam_monitor_id, dxcam_gpu_id, dxcam_max_buffer_len, dxcam_capture_fps, Obs_camera_id, Obs_capture_fps, show_boxes, show_labels, show_conf
 
 dx = None
 obs_camera = None

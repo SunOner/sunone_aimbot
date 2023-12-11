@@ -1,6 +1,6 @@
 import math
-from options import *
-from main import screen_x_center, screen_y_center
+from logic.config_watcher import mouse_smoothing, body_y_offset
+from run import screen_x_center, screen_y_center
 
 class Targets:
     def __init__(self, x, y, w, h, cls):

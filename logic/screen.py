@@ -1,8 +1,8 @@
 import cv2
-from options import *
 import win32gui, win32ui, win32con
 import numpy as np
 from screeninfo import get_monitors
+from logic.config_watcher import detection_window_width, detection_window_height
 
 screen_x_center, screen_y_center = detection_window_width / 2, detection_window_height / 2
 

@@ -7,11 +7,11 @@ import win32con, win32api
 import threading
 import queue
 import time
-from options import *
-from targets import *
-from screen import *
-from frame import get_new_frame, speed, draw_helpers
-from mouse import win32_raw_mouse_move
+from logic.targets import *
+from logic.screen import *
+from logic.frame import get_new_frame, speed, draw_helpers
+from logic.mouse import win32_raw_mouse_move
+from logic.config_watcher import *
 
 class work_queue(threading.Thread):
     def __init__(self):
@@ -73,7 +73,7 @@ def init():
         prev_frame_time = 0
         new_frame_time = 0
     try:
-        model = YOLO(AI_model_path, task='detect')
+        model = YOLO('models/{}'.format(AI_model_path), task='detect')
     except FileNotFoundError:
         print('Model file not found')
         quit(0)
@@ -108,7 +108,7 @@ def init():
         result = model.predict(
             source=frame,
             stream=True,
-            cfg='game.yaml',
+            cfg='logic/game.yaml',
             imgsz=AI_image_size,
             stream_buffer=False,
             agnostic_nms=False,

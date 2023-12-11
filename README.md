@@ -13,7 +13,7 @@ Before you get started, make sure you have the following prerequisites installed
 - [RU questions](https://github.com/SunOner/yolov8_aimbot/blob/main/questions_ru.md)
 
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
-- To launch the aimbot after all installations, type `python main.py` in cmd.
+- To launch the aimbot after all installations, type `python run.py` or `py run.py` in cmd.
 
 ## Tested Environment
 The YOLOv8 Aimbot has been tested on the following environment:
@@ -113,7 +113,7 @@ The repository provides multiple AI models for different purposes:
 - `F2`: Exit.
 
 ## Export .pt model to .engine
-- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320` or python export_and_train.py.
+- Run `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320`.
 <br></br>
 `model="model_path/*.pt"`; Path to model.
 <br></br>
