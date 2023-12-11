@@ -95,7 +95,7 @@ def init():
     queue_worker.name = 'work_queue_thread'
 
     clss = []
-    if show_window: # debug all classes
+    if show_window:
         clss = range(9)
     if hideout_targets and show_window == False:
         clss = [0,1,5,6,7]
