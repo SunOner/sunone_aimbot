@@ -47,7 +47,7 @@ The YOLOv8 Aimbot has been tested on the following environment:
 | GTX 750-ti     |
 
 ## Options
-The behavior of the aim bot can be configured via the `options.py` file. Here are the available options:
+The behavior of the aim bot can be configured via the `config.ini` file. Here are the available options:
 
 Object Search window resolution:
 - detection_window_width `int`: Horizontal resolution of the object search window.
