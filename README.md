@@ -7,10 +7,10 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 ## Requirements
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot:
 
-- [EN Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_en.md)
-- [RU Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/install_guide_ru.md)
-- [EN questions](https://github.com/SunOner/yolov8_aimbot/blob/main/questions_en.md)
-- [RU questions](https://github.com/SunOner/yolov8_aimbot/blob/main/questions_ru.md)
+- [EN Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/install_guide_en.md)
+- [RU Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/install_guide_ru.md)
+- [EN questions](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/questions_en.md)
+- [RU questions](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/questions_ru.md)
 
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 - To launch the aimbot after all installations, type `python run.py` or `py run.py` in cmd.
