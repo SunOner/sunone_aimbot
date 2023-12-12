@@ -1,13 +1,15 @@
-import asyncio
-import queue
-import threading
-
+from multiprocessing import Lock, Process
+from threading import Thread
 from logic.screen import check_target_in_scope, screen_x_center, screen_y_center
 import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
-from logic.config_watcher import mouse_break_force, mouse_wild_mouse, mouse_native, mouse_auto_shoot, mouse_move_by_arduino, mouse_shoot_by_arduino
+from logic.config_watcher import mouse_break_force, mouse_wild_mouse, mouse_native, mouse_auto_shoot, mouse_move_by_arduino, mouse_shoot_by_arduino, mouse_smoothing
+from logic.pyduino_mk import constants
+from logic.pyduino_mk import Arduino
+
+arduino = Arduino()
 
 if mouse_native == False:
     basedir = path.dirname(path.abspath(__file__))
@@ -76,33 +78,6 @@ if mouse_native == False:
     def mouse_close():
         if gmok:
             return gm.mouse_close()
-        
-if mouse_move_by_arduino or mouse_shoot_by_arduino:
-    from logic.ArduinoMouse import ArduinoMouse
-    arduino = ArduinoMouse()
-
-    class fire_queue(threading.Thread):
-        def __init__(self):
-            super(fire_queue, self).__init__()
-            self.queue = queue.Queue()
-            self.daemon = True
-            self.queue.maxsize = 10
-            self.start()
-
-        def run(self):
-            while True:
-                item = self.queue.get()
-                if item == 'shoot':
-                    for i in range(10):
-                        asyncio.run(arduino.click())
-                if 'move' in item:
-                    x = int(item.split(' ')[1])
-                    y = int(item.split(' ')[2])
-                    asyncio.run(arduino.move(x / 2, y / 2))
-                self.queue.task_done()
-
-    fire_worker = fire_queue()
-    fire_worker.name = 'fire_worker'
 
 x0, y0, t0 = None, None, None
 
@@ -112,6 +87,10 @@ sqrt5 = np.sqrt(5)
 async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, target_w=None, target_h=None, distance=None):
     bScope = False
     
+    if mouse_smoothing >= 0.001 and x is not None and y is not None or mouse_smoothing <= -0.001 and x is not None and y is not None:
+        x = x / mouse_smoothing
+        y = y / mouse_smoothing
+
     if mouse_break_force >= 1:
         force = calculate_mouse_braking_force(distance=distance)
         st_x = x
@@ -135,18 +114,15 @@ async def win32_raw_mouse_move(x=None, y=None, target_x=None, target_y=None, tar
 
     if mouse_native == False and x is not None and y is not None and mouse_move_by_arduino == False: # ghub move
         mouse_xy(int(x), int(y))
-    
-    if mouse_native == False and mouse_move_by_arduino and x is not None and y is not None: # arduino move
-        fire_worker.queue.put('move {} {}'.format(int(x), int(y)))
 
     if target_x is not None and target_y is not None and mouse_auto_shoot == True:
         bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
 
-    if mouse_auto_shoot and x is not None and y is not None:
+    if mouse_auto_shoot and x is not None and y is not None and mouse_shoot_by_arduino == False: # TODO
         if bScope:
             await win32_raw_mouse_click(x=int(x), y=int(y))
-        # else:
-            # mouse_up()
+        else:
+            mouse_up()
 
 async def win32_raw_mouse_click(x, y):
     if mouse_native and mouse_shoot_by_arduino == False:
@@ -154,8 +130,6 @@ async def win32_raw_mouse_click(x, y):
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
     if mouse_native == False and mouse_shoot_by_arduino == False:
         mouse_down(1)
-    if mouse_shoot_by_arduino and mouse_native == False:
-        fire_worker.queue.put('shoot')
 
 def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, move_mouse=lambda x,y: None):
     current_x,current_y = start_x,start_y

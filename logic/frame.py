@@ -3,13 +3,14 @@ import cv2
 import dxcam
 from logic.screen import *
 from logic.config_watcher import Dxcam_capture, native_Windows_capture, Obs_capture, dxcam_monitor_id, dxcam_gpu_id, dxcam_max_buffer_len, dxcam_capture_fps, Obs_camera_id, Obs_capture_fps, show_boxes, show_labels, show_conf
+import time
 
 dx = None
 obs_camera = None
 
 def thread_hook(args):
     if 'DXCamera' in str(args.thread) and 'cannot join current thread' in str(args.exc_value):
-        print('It looks like the game is currently in fullscreen mode, please switch the game to windowed mode or windowless mode.')
+        raise 'It looks like the game is currently in fullscreen mode, please switch the game to windowed mode or windowless mode.'
 
 def get_new_frame():
     global dx
@@ -21,7 +22,8 @@ def get_new_frame():
         if native_Windows_capture or Obs_capture:
             print('Use only one capture method!')
             exit(0)
-        dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
+        if dx is None:
+            dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
         if dx.is_capturing == False:
             dx.start(Calculate_screen_offset(), target_fps=dxcam_capture_fps)
     if Dxcam_capture and dx is not None:
