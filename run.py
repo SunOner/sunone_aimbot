@@ -121,7 +121,7 @@ def init():
             vid_stride=False,
             classes=clss,
             verbose=False,
-            show_boxes=False,
+            boxes=False,
             show_labels=False,
             show_conf=False)
         
