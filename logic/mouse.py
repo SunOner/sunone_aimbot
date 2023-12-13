@@ -1,5 +1,3 @@
-from multiprocessing import Lock, Process
-from threading import Thread
 from logic.screen import check_target_in_scope, screen_x_center, screen_y_center
 import numpy as np
 import win32con, win32api
@@ -9,7 +7,7 @@ from logic.config_watcher import mouse_break_force, mouse_wild_mouse, mouse_nati
 from logic.pyduino_mk import constants
 from logic.pyduino_mk import Arduino
 
-if mouse_move_by_Arduino or mouse_shoot_by_Arduino:
+if mouse_move_by_arduino or mouse_shoot_by_arduino:
     arduino = Arduino()
 
 if mouse_native == False:
