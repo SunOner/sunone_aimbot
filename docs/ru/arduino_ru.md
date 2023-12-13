@@ -1,1 +1,1 @@
-Смотрите как загрузить код в ррдуино [тут](https://github.com/nanpuhaha/pyduino-mk/tree/master)
+Смотрите как загрузить код в ордуино [тут](https://github.com/nanpuhaha/pyduino-mk/tree/master)
