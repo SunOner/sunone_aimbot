@@ -9,7 +9,8 @@ from logic.config_watcher import mouse_break_force, mouse_wild_mouse, mouse_nati
 from logic.pyduino_mk import constants
 from logic.pyduino_mk import Arduino
 
-arduino = Arduino()
+if mouse_move_by_Arduino or mouse_shoot_by_Arduino:
+    arduino = Arduino()
 
 if mouse_native == False:
     basedir = path.dirname(path.abspath(__file__))
