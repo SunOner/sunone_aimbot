@@ -7,3 +7,4 @@ screeninfo
 asyncio
 onnxruntime
 onnxruntime-gpu
+pyserial
