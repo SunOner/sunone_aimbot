@@ -154,8 +154,9 @@ def init():
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
 
             if len(frame.boxes):
-                if app_pause != 1:
+                if app_pause == 0:
                     append_queue(frame.boxes, queue_worker)
+                else: pass
 
                 if show_window and show_boxes:
                     annotated_frame = draw_helpers(annotated_frame=annotated_frame, boxes=frame.boxes)
