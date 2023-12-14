@@ -7,7 +7,7 @@
 [![img](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
   <p>
     <a href="https://github.com/SunOner/yolov8_aimbot/releases" target="_blank">
-      <img width="65%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
+      <img width="75%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
   </p>
 </div>
 
