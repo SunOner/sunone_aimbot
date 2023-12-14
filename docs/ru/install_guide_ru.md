@@ -32,6 +32,6 @@
 <br></br>
 11. Откройте командную строку и введите `cd C:/путь_где_вы_распаковали/yolov8_aimbot-main/`, затем введите `pip install -r requirements.txt`
 <br></br>
-12. Попробуйте запустить aimbot. Введите `python main.py`. Если aimbot работает, экспортируйте модель .pt в .engine.
+12. Попробуйте запустить aimbot. Введите `python run.py`. Если aimbot работает, экспортируйте модель .pt в .engine.
 <br></br>
 13. Введите `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 workspace=8 imgsz=320`

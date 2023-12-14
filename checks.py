@@ -1,4 +1,4 @@
-from options import *
+from logic.config_watcher import *
 
 try:
     from screeninfo import get_monitors
@@ -54,7 +54,7 @@ def run_checks():
     if '.engine' in AI_model_path:
         print('TensorRT version: {0}'.format(tensorrt.__version__))
     if '.pt' in AI_model_path:
-        print(ultralytics.YOLO(AI_model_path, task='detect').info())
+        print(ultralytics.YOLO('models/{}'.format(AI_model_path), task='detect').info())
 
     print('numpy version: {0}'.format(numpy.version.version))
 
@@ -88,10 +88,13 @@ def run_checks():
     print('body_y_offset', body_y_offset)
     print('hideout_targets', hideout_targets, '\n')
 
+    print('mouse_break_force', mouse_break_force)
     print('mouse_smoothing', mouse_smoothing)
     print('mouse_auto_shoot', mouse_auto_shoot)
     print('mouse_auto_aim', mouse_auto_aim)
-    print('mouse_native', mouse_native, '\n')
+    print('mouse_native', mouse_native)
+    print('mouse_move_by_arduino', mouse_move_by_arduino)
+    print('mouse_shoot_by_arduino', mouse_shoot_by_arduino, '\n')
 
     print('AI_model_path', AI_model_path)
     print('AI_image_size', AI_image_size)
@@ -117,7 +120,7 @@ def run_checks():
     print(detection_test)
 
 def detections_check():
-    model = YOLO(AI_model_path, task='detect')
+    model = YOLO('models/{}'.format(AI_model_path), task='detect')
     cap = cv2.VideoCapture('media/tests/test_det.mp4')
     clss = []
     while cap.isOpened():
