@@ -4,7 +4,7 @@
 [![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/yolov8_aimbot)
 [![img](https://badgen.net/github/license/SunOner/yolov8_aimbot)](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)
 [![img](https://badgen.net/discord/online-members/sMZVvVV)](https://discord.gg/sMZVvVV)
-[![img](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://discord.gg/sMZVvVV)
+[![img](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
   <p>
     <a href="https://github.com/SunOner/yolov8_aimbot/releases" target="_blank">
       <img width="65%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
