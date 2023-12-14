@@ -6,10 +6,10 @@ import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
 from logic.config_watcher import mouse_break_force, mouse_wild_mouse, mouse_native, mouse_auto_shoot, mouse_move_by_arduino, mouse_shoot_by_arduino, mouse_smoothing
-from logic.pyduino_mk import constants
-from logic.pyduino_mk import Arduino
 
 if mouse_move_by_arduino or mouse_shoot_by_arduino:
+    from logic.pyduino_mk import Arduino
+    from logic.pyduino_mk import constants
     arduino = Arduino()
 
 if mouse_native == False:
