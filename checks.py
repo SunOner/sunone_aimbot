@@ -92,7 +92,9 @@ def run_checks():
     print('mouse_smoothing', mouse_smoothing)
     print('mouse_auto_shoot', mouse_auto_shoot)
     print('mouse_auto_aim', mouse_auto_aim)
-    print('mouse_native', mouse_native, '\n')
+    print('mouse_native', mouse_native)
+    print('mouse_move_by_arduino', mouse_move_by_arduino)
+    print('mouse_shoot_by_arduino', mouse_shoot_by_arduino, '\n')
 
     print('AI_model_path', AI_model_path)
     print('AI_image_size', AI_image_size)

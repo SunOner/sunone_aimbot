@@ -8,34 +8,49 @@ import threading
 import queue
 import time
 from logic.targets import *
+
 from logic.screen import *
 from logic.frame import get_new_frame, speed, draw_helpers
 from logic.mouse import win32_raw_mouse_move
 from logic.config_watcher import *
+if mouse_move_by_arduino or mouse_shoot_by_arduino:
+    from logic.mouse import arduino
+
 
 class work_queue(threading.Thread):
     def __init__(self):
         super(work_queue, self).__init__()
         self.queue = queue.Queue()
         self.daemon = True
-        self.queue.maxsize = AI_max_det
+        self.queue.maxsize = 100
         self.start()
 
     def run(self):
         while True:
-            item = self.queue.get()
             # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-            if win32api.GetAsyncKeyState(win32con.VK_RBUTTON) and mouse_auto_aim == False:
-                asyncio.run(win32_raw_mouse_move(x=item[0], y=item[1], target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
-            if mouse_auto_shoot == True and mouse_auto_aim == False:
-                asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
+            shooting_key = win32api.GetAsyncKeyState(win32con.VK_RBUTTON)
 
+            item = self.queue.get()
+
+            x, y, target_x, target_y, target_w, target_h, distance = item
+
+            # By key pressed
+            if shooting_key == -32768 and mouse_auto_aim == False:
+                asyncio.run(win32_raw_mouse_move(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
+                if mouse_shoot_by_arduino:
+                    arduino.press()
+            else:
+                if mouse_shoot_by_arduino and shooting_key == 0:
+                    arduino.release()
+            # Auto shoot
+            if mouse_auto_shoot == True and mouse_auto_aim == False:
+                asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
+
+            # Auto AIM
             if mouse_auto_aim:
                 try:
-                    asyncio.run(win32_raw_mouse_move(x=item[0], y=item[1], target_x=item[2], target_y=item[3], target_w=item[4], target_h=item[5], distance=item[6]))
+                    asyncio.run(win32_raw_mouse_move(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
                 except: pass
-                
-            self.queue.task_done()
 
 def append_queue(boxes, queue_worker):
     shooting_queue = []
@@ -85,7 +100,7 @@ def init():
     if '.engine' in AI_model_path:
         print('Engine loaded')
 
-    print('Aimbot is started. Enjoy!\n[Right mouse button] - Aiming at the target\n[F2] - EXIT')
+    print('Aimbot is started. Enjoy!\n[Right mouse button] - Aiming at the target\n[F2] - EXIT\n[F3] - PAUSE AIM')
     
     if show_window:
         print('An open debug window can affect performance.')
@@ -105,6 +120,8 @@ def init():
     while True:
         frame = get_new_frame()
 
+        app_pause = win32api.GetKeyState(win32con.VK_F3)
+        
         result = model.predict(
             source=frame,
             stream=True,
@@ -137,7 +154,8 @@ def init():
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
 
             if len(frame.boxes):
-                append_queue(frame.boxes, queue_worker)
+                if app_pause != 1:
+                    append_queue(frame.boxes, queue_worker)
 
                 if show_window and show_boxes:
                     annotated_frame = draw_helpers(annotated_frame=annotated_frame, boxes=frame.boxes)
@@ -151,10 +169,10 @@ def init():
             else:
                 cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
-        if win32api.GetAsyncKeyState(win32con.VK_F2):
+        if win32api.GetAsyncKeyState(win32con.VK_F2) & 0xFF:
             if show_window:
                 cv2.destroyWindow(debug_window_name)
-            quit(0)
+            break
 
         if show_window:
             try:

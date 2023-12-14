@@ -32,6 +32,12 @@ Before you get started, make sure you have the following prerequisites installed
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 - To launch the aimbot after all installations, type ``python run.py`` or `py run.py` in cmd.
 
+## Hot keys
+- `Right mouse button` : Aiming at the target.
+- `F2` : Exit.
+- `F3` : Pause AIM.
+> You can change the buttons in run.py
+
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
 <table>
@@ -110,11 +116,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - *.engine: Final exported model, which is faster than the previous two.
 <br></br>
 - My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start. The error may also occur due to the fact that I exported the model in a different version of TensorRT, it's better to just export the model yourself.
-
-## Hot keys
-- [`Right mouse button`](https://github.com/SunOner/yolov8_aimbot/blob/main/run.py#L28): Aiming at the target.
-- [`F2`](https://github.com/SunOner/yolov8_aimbot/blob/main/run.py#L154): Exit.
-> You can change the buttons in run.py
 
 ## Export .pt model to .engine
 - Run in console:
