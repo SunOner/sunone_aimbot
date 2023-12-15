@@ -3,12 +3,12 @@ from ultralytics import YOLO
 import torch
 import cv2
 import time
-import win32con, win32api
+import win32api
 import threading
 import queue
 import time
 from logic.targets import *
-
+from logic.keyboard import *
 from logic.screen import *
 from logic.frame import get_new_frame, speed, draw_helpers
 from logic.mouse import win32_raw_mouse_move
@@ -27,8 +27,7 @@ class work_queue(threading.Thread):
 
     def run(self):
         while True:
-            # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-            shooting_key = win32api.GetAsyncKeyState(win32con.VK_RBUTTON)
+            shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
 
             item = self.queue.get()
 
@@ -100,7 +99,7 @@ def init():
     if '.engine' in AI_model_path:
         print('Engine loaded')
 
-    print('Aimbot is started. Enjoy!\n[Right mouse button] - Aiming at the target\n[F2] - EXIT\n[F3] - PAUSE AIM')
+    print('Aimbot is started. Enjoy!\n[' + hotkey_targeting + '] - Aiming at the target\n[' + hotkey_exit + '] - EXIT\n[' + hotkey_pause + '] - PAUSE AIM')
     
     if show_window:
         print('An open debug window can affect performance.')
@@ -120,7 +119,7 @@ def init():
     while True:
         frame = get_new_frame()
 
-        app_pause = win32api.GetKeyState(win32con.VK_F3)
+        app_pause = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_pause))
         
         result = model.predict(
             source=frame,
@@ -170,7 +169,7 @@ def init():
             else:
                 cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
-        if win32api.GetAsyncKeyState(win32con.VK_F2) & 0xFF:
+        if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_exit)) & 0xFF:
             if show_window:
                 cv2.destroyWindow(debug_window_name)
             break
