@@ -7,7 +7,7 @@
 [![img](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
   <p>
     <a href="https://github.com/SunOner/yolov8_aimbot/releases" target="_blank">
-      <img width="65%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
+      <img width="75%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
   </p>
 </div>
 
@@ -31,12 +31,6 @@ Before you get started, make sure you have the following prerequisites installed
 <br></br>
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 - To launch the aimbot after all installations, type ``python run.py`` or `py run.py` in cmd.
-
-## Hot keys
-- `Right mouse button` : Aiming at the target.
-- `F2` : Exit.
-- `F3` : Pause AIM.
-> You can change the buttons in run.py
 
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
@@ -82,6 +76,11 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
 - disable_headshot `bool`: Disable head targerting.
+
+### Hot keys
+- Right mouse button `str`: Aiming at the target.
+- F2 `str`: Exit.
+- F3 `str`: Pause AIM.
 
 ### Mouse settings:
 - mouse_break_force `int`: Eliminates unnecessary mouse acceleration.

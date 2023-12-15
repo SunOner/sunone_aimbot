@@ -3,9 +3,9 @@ import configparser
 config = configparser.ConfigParser()
 config.read('./config.ini')
 
-config_detection_window = config['Detection window']
-detection_window_width = int(config_detection_window['detection_window_width'])
-detection_window_height = int(config_detection_window['detection_window_height'])
+config_Detection_window = config['Detection window']
+detection_window_width = int(config_Detection_window['detection_window_width'])
+detection_window_height = int(config_Detection_window['detection_window_height'])
 
 config_Dxcam_Capture = config['Dxcam Capture']
 Dxcam_capture = config_Dxcam_Capture.getboolean('Dxcam_capture')
@@ -26,6 +26,11 @@ config_Aim_settings = config['Aim settings']
 body_y_offset = float(config_Aim_settings['body_y_offset'])
 hideout_targets = config_Aim_settings.getboolean('hideout_targets')
 disable_headshot = config_Aim_settings.getboolean('disable_headshot')
+
+config_Hotkeys_settings = config['Hotkeys settings']
+hotkey_targeting = str(config_Hotkeys_settings['hotkey_targeting'])
+hotkey_exit = str(config_Hotkeys_settings['hotkey_exit'])
+hotkey_pause = str(config_Hotkeys_settings['hotkey_pause'])
 
 config_Mouse_settings = config['Mouse settings']
 mouse_break_force = int(config_Mouse_settings['mouse_break_force'])
