@@ -119,7 +119,7 @@ def init():
     while True:
         frame = get_new_frame()
 
-        app_pause = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_pause))
+        app_pause = win32api.GetKeyState(Keyboard.KeyCodes.get(hotkey_pause))
         
         result = model.predict(
             source=frame,
