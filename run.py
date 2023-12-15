@@ -99,7 +99,7 @@ def init():
     if '.engine' in AI_model_path:
         print('Engine loaded')
 
-    print('Aimbot is started. Enjoy!\n[' + hotkey_targeting + '] - Aiming at the target\n[' + hotkey_exit + '] - EXIT\n[' + hotkey_pause + '] - PAUSE AIM')
+    print('\033[32mAimbot is started. Enjoy!\033[0m\n[\033[33m' + hotkey_targeting + '\033[0m] - Aiming at the target\n[\033[33m' + hotkey_exit + '\033[0m] - EXIT\n[\033[33m' + hotkey_pause + '\033[0m] - PAUSE AIM')
     
     if show_window:
         print('An open debug window can affect performance.')
