@@ -1,21 +1,23 @@
+from logic.config_watcher import *
 import asyncio
 from ultralytics import YOLO
 import torch
 import cv2
 import time
-import win32api
+import win32con, win32api
 import threading
 import queue
 import time
+
 from logic.targets import *
 from logic.keyboard import *
 from logic.screen import *
 from logic.frame import get_new_frame, speed, draw_helpers
-from logic.mouse import win32_raw_mouse_move
-from logic.config_watcher import *
-if mouse_move_by_arduino or mouse_shoot_by_arduino:
-    from logic.mouse import arduino
-
+from logic.mouse import precalculate
+if mouse_native == False:
+    from logic.mouse import ghub_mouse_up, ghub_mouse_down
+if mouse_shoot_by_arduino or mouse_move_by_arduino:
+    from logic.mouse import Arduino
 
 class work_queue(threading.Thread):
     def __init__(self):
@@ -27,28 +29,26 @@ class work_queue(threading.Thread):
 
     def run(self):
         while True:
+            # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
             shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
-
             item = self.queue.get()
 
             x, y, target_x, target_y, target_w, target_h, distance = item
 
             # By key pressed
             if shooting_key == -32768 and mouse_auto_aim == False:
-                asyncio.run(win32_raw_mouse_move(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
-                if mouse_shoot_by_arduino:
-                    arduino.press()
-            else:
-                if mouse_shoot_by_arduino and shooting_key == 0:
-                    arduino.release()
-            # Auto shoot
-            if mouse_auto_shoot == True and mouse_auto_aim == False:
-                asyncio.run(win32_raw_mouse_move(x=None, y=None, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
+                if mouse_move_by_arduino:
+                    Arduino.move(x,y)
+                else:
+                    asyncio.run(precalculate(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
 
             # Auto AIM
             if mouse_auto_aim:
                 try:
-                    asyncio.run(win32_raw_mouse_move(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
+                    if mouse_move_by_arduino:
+                        Arduino.move(x,y)
+                    else:
+                        asyncio.run(precalculate(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
                 except: pass
 
 def append_queue(boxes, queue_worker):
@@ -173,6 +173,24 @@ def init():
             if show_window:
                 cv2.destroyWindow(debug_window_name)
             break
+
+        # TODO
+        if mouse_auto_shoot:
+            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting)) == -32768: # press
+                if mouse_native and mouse_shoot_by_arduino == False: # native
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+                if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
+                    ghub_mouse_down()
+                if mouse_shoot_by_arduino: # arduino
+                    Arduino.press()
+
+            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting)) == 0: # release
+                if mouse_native and mouse_shoot_by_arduino == False: # native
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+                if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
+                    ghub_mouse_up()
+                if mouse_shoot_by_arduino: # arduino
+                    Arduino.release()
 
         if show_window:
             try:
