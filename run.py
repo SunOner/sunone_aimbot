@@ -175,7 +175,7 @@ def init():
             break
 
         # TODO
-        if mouse_auto_shoot:
+        if mouse_auto_shoot and app_pause == 0:
             if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting)) == -32768: # press
                 if mouse_native and mouse_shoot_by_arduino == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
