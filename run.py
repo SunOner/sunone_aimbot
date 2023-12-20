@@ -13,7 +13,8 @@ from logic.targets import *
 from logic.keyboard import *
 from logic.screen import *
 from logic.frame import get_new_frame, speed, draw_helpers
-from logic.mouse import precalculate
+from logic.mouse import MouseThread
+
 if mouse_native == False:
     from logic.mouse import ghub_mouse_up, ghub_mouse_down
 if mouse_shoot_by_arduino or mouse_move_by_arduino:
@@ -24,62 +25,65 @@ class work_queue(threading.Thread):
         super(work_queue, self).__init__()
         self.queue = queue.Queue()
         self.daemon = True
-        self.queue.maxsize = 100
+        self.queue.maxsize = 10
+        self.shooting_queue = []
+        self.x = 0
+        self.y = 0
+        self.target_x = 0
+        self.target_y = 0
+        self.target_w = 0
+        self.target_h = 0
+        self.distance = 0
         self.start()
 
     def run(self):
         while True:
-            # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-            shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
             item = self.queue.get()
-
-            x, y, target_x, target_y, target_w, target_h, distance = item
-
-            # By key pressed
-            if shooting_key == -32768 and mouse_auto_aim == False:
-                if mouse_move_by_arduino:
-                    Arduino.move(x,y)
-                else:
-                    asyncio.run(precalculate(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
-
-            # Auto AIM
-            if mouse_auto_aim:
-                try:
-                    if mouse_move_by_arduino:
-                        Arduino.move(x,y)
+            if item == None:
+                self.shooting_queue = []
+            if item != None:
+                shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
+                if disable_headshot == False:
+                    head_target = False
+                    for box in item:
+                        self.shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
+                    for x in self.shooting_queue:
+                        if len(self.shooting_queue) >= 3:
+                            head_target = False
+                            break
+                        if x.cls == 7:
+                            head_target = True
+                        else:
+                            head_target = False
+                    if head_target:
+                        self.shooting_queue.sort(key=lambda x: x.cls == 7, reverse=True)
                     else:
-                        asyncio.run(precalculate(x=x, y=y, target_x=target_x, target_y=target_y, target_w=target_w, target_h=target_h, distance=distance))
-                except: pass
+                        self.shooting_queue.sort(key=lambda x: x.distance, reverse=False)
+                else:
+                    for box in item:
+                        if int(box.cls.item()) == 0 or int(box.cls.item()) == 1 or int(box.cls.item()) == 5 or int(box.cls.item()) == 6:
+                            self.shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
+                    self.shooting_queue.sort(key=lambda x: x.distance, reverse=False)
+                try:
+                    self.x = self.shooting_queue[0].mouse_x
+                    self.y = self.shooting_queue[0].mouse_y
+                    self.target_x = self.shooting_queue[0].x
+                    self.target_y = self.shooting_queue[0].y
+                    self.target_w = self.shooting_queue[0].w
+                    self.target_h = self.shooting_queue[0].h
+                    self.distance = self.shooting_queue[0].distance
+                    self.shooting_queue = []
+                except:
+                    pass
 
-def append_queue(boxes, queue_worker):
-    shooting_queue = []
-
-    if disable_headshot == False:
-        head_target = False
-        for box in boxes:
-            shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
-        for x in shooting_queue:
-            if len(shooting_queue) >= 3:
-                head_target = False
-                break
-            if x.cls == 7:
-                head_target = True
-            else:
-                head_target = False
-        if head_target:
-            shooting_queue.sort(key=lambda x: x.cls == 7, reverse=True)
-        else:
-            shooting_queue.sort(key=lambda x: x.distance, reverse=False)
-    else:
-        for box in boxes:
-            if int(box.cls.item()) == 0 or int(box.cls.item()) == 1 or int(box.cls.item()) == 5 or int(box.cls.item()) == 6:
-                shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
-        shooting_queue.sort(key=lambda x: x.distance, reverse=False)
-
-    try:
-        queue_worker.queue.put((shooting_queue[0].mouse_x, shooting_queue[0].mouse_y, shooting_queue[0].x, shooting_queue[0].y, shooting_queue[0].w, shooting_queue[0].h, shooting_queue[0].distance))
-    except:
-        pass
+                # By key pressed
+                if shooting_key == -32768 and mouse_auto_aim == False:
+                    mus_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
+                # Auto AIM
+                if mouse_auto_aim:
+                    try:
+                        mus_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
+                    except: pass
 
 @torch.no_grad()
 def init():
@@ -104,9 +108,6 @@ def init():
     if show_window:
         print('An open debug window can affect performance.')
         cv2.namedWindow(debug_window_name)
-    
-    queue_worker = work_queue()
-    queue_worker.name = 'work_queue_thread'
 
     clss = []
     if show_window:
@@ -132,7 +133,7 @@ def init():
             conf=AI_conf,
             iou=AI_iou,
             device=AI_device,
-            half=True,
+            half=False,
             max_det=AI_max_det,
             vid_stride=False,
             classes=clss,
@@ -154,11 +155,14 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    append_queue(frame.boxes, queue_worker)
+                    queue_worker.queue.put(frame.boxes)
                 else: pass
 
                 if show_window and show_boxes:
                     annotated_frame = draw_helpers(annotated_frame=annotated_frame, boxes=frame.boxes)
+            else:
+                if app_pause == 0:
+                    queue_worker.queue.put(None)
 
         if show_window and show_fps:
             new_frame_time = time.time()
@@ -200,6 +204,12 @@ def init():
             cv2.imshow(debug_window_name, resised)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+
+queue_worker = work_queue()
+queue_worker.name = 'work_queue'
+
+mus_worker = MouseThread()
+mus_worker.name = 'MouseThread'
 
 if __name__ == "__main__":
     init()

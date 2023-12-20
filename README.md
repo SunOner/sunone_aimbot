@@ -83,7 +83,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - F3 `str`: Pause AIM.
 
 ### Mouse settings:
-- mouse_break_force `int`: Eliminates unnecessary mouse acceleration.
 - mouse_smoothing `float`: Smoothing when moving the mouse.
 - mouse_auto_shoot `bool`: Automatic shooting. (Not working in some games).
 - mouse_auto_aim `bool`: Automatic targeting.

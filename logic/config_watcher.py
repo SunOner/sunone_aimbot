@@ -33,7 +33,6 @@ hotkey_exit = str(config_Hotkeys_settings['hotkey_exit'])
 hotkey_pause = str(config_Hotkeys_settings['hotkey_pause'])
 
 config_Mouse_settings = config['Mouse settings']
-mouse_break_force = int(config_Mouse_settings['mouse_break_force'])
 mouse_smoothing = float(config_Mouse_settings['mouse_smoothing'])
 mouse_auto_shoot = config_Mouse_settings.getboolean('mouse_auto_shoot')
 mouse_auto_aim = config_Mouse_settings.getboolean('mouse_auto_aim')

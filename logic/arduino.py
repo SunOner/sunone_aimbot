@@ -36,14 +36,13 @@ class ArduinoMouse:
             time.sleep(4)
             exit()
 
-        serial_reader = threading.Thread(target = self.__read_buffer)
-        serial_reader.daemon = True
-        serial_reader.start()
+        # serial_reader = threading.Thread(target = self.__read_buffer)
+        # serial_reader.daemon = True
+        # serial_reader.start()
 
-    def __read_buffer(self):
-        while True:
-            line = self.serial_port.readline()
-            # print(line)
+    # def __read_buffer(self):
+    #     while True:
+    #         line = self.serial_port.readline()
     
     def click(self):
         self.serial_port.write(b'c')
@@ -64,7 +63,7 @@ class ArduinoMouse:
             data = str('m{},{}'.format((int(x)), (int(y))))
             data = str.encode(data)
             self.serial_port.write(data)
-            self.serial_port.write(b'\n')
+        self.serial_port.write(b'\n')
         
     def close(self):
         self.serial_port.close()

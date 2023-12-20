@@ -1,10 +1,14 @@
-from logic.screen import check_target_in_scope, screen_x_center, screen_y_center
+import math
+import queue
+import threading
+import time
+from logic.screen import screen_x_center, screen_y_center
 import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
-from logic.config_watcher import mouse_break_force, mouse_wild_mouse, mouse_native, mouse_auto_shoot, mouse_move_by_arduino, mouse_shoot_by_arduino, mouse_smoothing
-
+from logic.config_watcher import mouse_wild_mouse, mouse_native, mouse_auto_shoot, mouse_move_by_arduino, mouse_shoot_by_arduino, mouse_smoothing
+from logic.screen import check_target_in_scope
 if mouse_move_by_arduino or mouse_shoot_by_arduino:
     from logic.arduino import ArduinoMouse
     Arduino = ArduinoMouse()
@@ -77,40 +81,9 @@ if mouse_native == False:
         if gmok:
             return gm.mouse_close()
 
-x0, y0, t0 = None, None, None
-
-sqrt3 = np.sqrt(3)
-sqrt5 = np.sqrt(5)
-
-async def precalculate(x=None, y=None, target_x=None, target_y=None, target_w=None, target_h=None, distance=None):
-    if mouse_smoothing >= 0 and x is not None and y is not None or mouse_smoothing <= -0 and x is not None and y is not None:
-        x = x / mouse_smoothing
-        y = y / mouse_smoothing
-
-    if mouse_break_force >= 1:
-        force = calculate_mouse_braking_force(distance=distance)
-        st_x = x
-        st_y = y
-        if  x is not None and y is not None:
-            if distance >= 81:
-                x = (x / force) / 4
-                y = (y / force) / 4
-            if distance <= 80 and distance >= 20:
-                x = x / force
-                y = y / force
-            if distance <= 19:
-                x = st_x / 2
-                y = st_y / 2
-
-    if mouse_wild_mouse:
-        x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
-
-    if mouse_native == True and x is not None and y is not None and mouse_move_by_arduino == False: # Native move
-        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
-
-    if mouse_native == False and x is not None and y is not None and mouse_move_by_arduino == False: # ghub move
-        ghub_mouse_xy(int(x), int(y))
-
+if mouse_wild_mouse:
+    sqrt3 = np.sqrt(3)
+    sqrt5 = np.sqrt(5)
 def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, move_mouse=lambda x,y: None):
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
@@ -144,7 +117,35 @@ def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, m
     except:
         return 0, 0
 
-def calculate_mouse_braking_force(distance):
-    if distance <= 0:
-        pass
-    return mouse_break_force / distance
+class MouseThread(threading.Thread):
+    def __init__(self):
+        super(MouseThread, self).__init__()
+        self.queue = queue.Queue()
+        self.daemon = True
+        self.queue.maxsize = 2
+        self.start()
+    
+    def run(self):
+        while True:
+            (x, y, target_x, target_y, target_w, target_h, distance) = self.queue.get()
+
+            slow_down_factor = min(distance, 4)
+
+            x = x / slow_down_factor
+            y = y / slow_down_factor
+                
+            if mouse_smoothing != 0 and x is not None and y is not None or mouse_smoothing != 0 and x is not None and y is not None:
+                x = x / mouse_smoothing
+                y = y / mouse_smoothing
+
+            if mouse_wild_mouse:
+                x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
+
+            if mouse_native == True and x is not None and y is not None and mouse_move_by_arduino == False: # Native move
+                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
+
+            if mouse_native == False and x is not None and y is not None and mouse_move_by_arduino == False: # ghub move
+                ghub_mouse_xy(int(x), int(y))
+
+            if mouse_move_by_arduino and x is not None and y is not None:
+                Arduino.move(int(x), int(y))
