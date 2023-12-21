@@ -88,7 +88,6 @@ def run_checks():
     print('body_y_offset', body_y_offset)
     print('hideout_targets', hideout_targets, '\n')
 
-    print('mouse_break_force', mouse_break_force)
     print('mouse_smoothing', mouse_smoothing)
     print('mouse_auto_shoot', mouse_auto_shoot)
     print('mouse_auto_aim', mouse_auto_aim)
