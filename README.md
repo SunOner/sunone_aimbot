@@ -2,9 +2,9 @@
   
 ### YOLOv8 Aimbot
 [![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/yolov8_aimbot)
-[![img](https://badgen.net/github/license/SunOner/yolov8_aimbot)](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)
-[![img](https://badgen.net/discord/online-members/sMZVvVV)](https://discord.gg/sMZVvVV)
-[![img](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
+[![License MIT](https://badgen.net/github/license/SunOner/yolov8_aimbot)](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)
+[![Discord server](https://badgen.net/discord/online-members/sMZVvVV)](https://discord.gg/sMZVvVV)
+[![Github stars](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
   <p>
     <a href="https://github.com/SunOner/yolov8_aimbot/releases" target="_blank">
       <img width="75%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
@@ -77,7 +77,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
 - disable_headshot `bool`: Disable head targerting.
 
-### Hot keys
+### Hot keys:
 - Right mouse button `str`: Aiming at the target.
 - F2 `str`: Exit.
 - F3 `str`: Pause AIM.
@@ -116,7 +116,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start. The error may also occur due to the fact that I exported the model in a different version of TensorRT, it's better to just export the model yourself.
 
 ## Export .pt model to .engine
-- Run in console:
+Run in console:
 ```cmd
 yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320
 ```
@@ -139,7 +139,7 @@ yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true devi
 - If you have started the application and nothing happens, it may be working, close it with the F2 key and change the show_window setting to Yes in the file [config.ini](https://github.com/SunOner/yolov8_aimbot/blob/main/config.ini) to make sure that the application is working.
 
 ## Support the project
-- I will post new models [here](https://boosty.to/sunone).
+I will post new models [here](https://boosty.to/sunone).
 
 ## License
 This project is licensed under the MIT License. See **[LICENSE](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)** for details
