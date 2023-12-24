@@ -22,12 +22,12 @@ Before you get started, make sure you have the following prerequisites installed
 - Information in English:
   - [Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/install_guide_en.md)
   - [Questions and answers](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/questions_en.md)
-  - [Arduino setup](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/arduino_en.md)
+  - [Arduino setup](https://github.com/SunOner/HID_Arduino)
 <br></br>
 - Информация на Русском языке:
   - [Инструкция по установке](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/install_guide_ru.md)
   - [Вопросы и ответы](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/questions_ru.md)
-  - [Установка ардуино](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/arduino_ru.md)
+  - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
 <br></br>
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
 - To launch the aimbot after all installations, type ``python run.py`` or `py run.py` in cmd.
