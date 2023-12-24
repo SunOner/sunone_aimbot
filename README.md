@@ -35,12 +35,12 @@ Before you get started, make sure you have the following prerequisites installed
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
 <table>
-  <thead><tr><th>Operating Systems:</th><td>Windows 10</td><td>Windows 11</td></tr></thead>
+  <thead><tr><th>Operating Systems:</th><td>Windows 10</td></thead>
   <thead><tr><th>NVIDIA CUDA Version:</th><td>12.1</td></tr></thead>
   <thead><tr><th>NVIDIA cuDNN Version:</th><td>8.9.4.25</td></thead>
   <thead><tr><th>TensorRT Version:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python Version:</th><td>3.11.6</td></tr></thead>
-  <thead><tr><th>PyTorch Version:</th><td>2.1.1+cu121</td><td>2.1.0.dev20230519+cu121</td></tr></thead>
+  <thead><tr><th>PyTorch Version:</th><td>2.1.1+cu121</td></tr></thead>
   <thead><tr><th>YOLO Version:</th><td>YOLOv8.0.226</td></tr></thead>
   <thead><tr><th>OpenCV Version:</th><td>4.8.1</td></tr></thead>
   <thead><tr><th>NumPy Version:</th><td>1.26.0</td></tr></thead>
