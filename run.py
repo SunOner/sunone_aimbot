@@ -1,5 +1,4 @@
 from logic.config_watcher import *
-import asyncio
 from ultralytics import YOLO
 import torch
 import cv2
@@ -7,7 +6,6 @@ import time
 import win32con, win32api
 import threading
 import queue
-import time
 
 from logic.targets import *
 from logic.keyboard import *
@@ -25,7 +23,7 @@ class work_queue(threading.Thread):
         super(work_queue, self).__init__()
         self.queue = queue.Queue()
         self.daemon = True
-        self.queue.maxsize = 10
+        self.name = 'work_queue'
         self.shooting_queue = []
         self.x = 0
         self.y = 0
@@ -78,15 +76,17 @@ class work_queue(threading.Thread):
 
                 # By key pressed
                 if shooting_key == -32768 and mouse_auto_aim == False:
-                    mus_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
+                    mouse_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
                 # Auto AIM
                 if mouse_auto_aim:
                     try:
-                        mus_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
+                        mouse_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
                     except: pass
 
 @torch.no_grad()
 def init():
+    frame_num = 0
+
     if show_window and show_fps:
         prev_frame_time = 0
         new_frame_time = 0
@@ -118,12 +118,12 @@ def init():
         clss = [0,1,7]
 
     while True:
-        frame = get_new_frame()
-
         app_pause = win32api.GetKeyState(Keyboard.KeyCodes.get(hotkey_pause))
         
+        image = get_new_frame()
+        
         result = model.predict(
-            source=frame,
+            source=image,
             stream=True,
             cfg='logic/game.yaml',
             imgsz=AI_image_size,
@@ -143,11 +143,11 @@ def init():
             show_conf=False)
         
         if show_window:
-            height = int(frame.shape[0] * debug_window_scale_percent / 100)
-            width = int(frame.shape[1] * debug_window_scale_percent / 100)
+            height = int(detection_window_height * debug_window_scale_percent / 100)
+            width = int(detection_window_width * debug_window_scale_percent / 100)
             dim = (width, height)
             
-            annotated_frame = frame
+            annotated_frame = image
 
         for frame in result:
             if show_window and show_speed == True:
@@ -155,7 +155,10 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
+                    # frame_num = frame_num + 1
+                    # if frame_num >= 1:
                     queue_worker.queue.put(frame.boxes)
+                        # frame_num = 0
                 else: pass
 
                 if show_window and show_boxes:
@@ -168,6 +171,7 @@ def init():
             new_frame_time = time.time()
             fps = 1/(new_frame_time-prev_frame_time)
             prev_frame_time = new_frame_time
+            
             if show_speed:
                 cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
             else:
@@ -205,11 +209,8 @@ def init():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-queue_worker = work_queue()
-queue_worker.name = 'work_queue'
-
-mus_worker = MouseThread()
-mus_worker.name = 'MouseThread'
 
 if __name__ == "__main__":
+    queue_worker = work_queue()
+    mouse_worker = MouseThread()
     init()
