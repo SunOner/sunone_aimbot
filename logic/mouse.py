@@ -2,13 +2,12 @@ import math
 import queue
 import threading
 import time
-from logic.screen import screen_x_center, screen_y_center
+from logic.screen import screen_x_center, screen_y_center, check_target_in_scope
 import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
 from logic.config_watcher import mouse_wild_mouse, mouse_native, mouse_auto_shoot, mouse_move_by_arduino, mouse_shoot_by_arduino, mouse_smoothing
-from logic.screen import check_target_in_scope
 if mouse_move_by_arduino or mouse_shoot_by_arduino:
     from logic.arduino import ArduinoMouse
     Arduino = ArduinoMouse()
@@ -122,18 +121,16 @@ class MouseThread(threading.Thread):
         super(MouseThread, self).__init__()
         self.queue = queue.Queue()
         self.daemon = True
-        self.queue.maxsize = 2
         self.start()
-    
+
     def run(self):
         while True:
             (x, y, target_x, target_y, target_w, target_h, distance) = self.queue.get()
-
             slow_down_factor = min(distance, 4)
 
             x = x / slow_down_factor
             y = y / slow_down_factor
-                
+            
             if mouse_smoothing != 0 and x is not None and y is not None or mouse_smoothing != 0 and x is not None and y is not None:
                 x = x / mouse_smoothing
                 y = y / mouse_smoothing
