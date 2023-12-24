@@ -40,16 +40,14 @@ def windows_grab_screen(region):
 
     return cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
 
-def check_target_in_scope(target_x, target_y, target_w, target_h, multiplier = 1):
-    upto = 1
-    if multiplier >= 2 or multiplier <= -2:
-        upto = int(multiplier)
+def check_target_in_scope(target_x, target_y, target_w, target_h):
     x = detection_window_width / 2
     y = detection_window_height / 2
-    x1 = (target_x - target_w) * upto
-    x2 = (target_x + target_w) * upto
-    y1 = (target_y - target_h) * upto
-    y2 = (target_y + target_h) * upto
+    x1 = (target_x - target_w)
+    x2 = (target_x + target_w)
+    y1 = (target_y - target_h)
+    y2 = (target_y + target_h)
+
     if (x > x1 and x < x2 and y > y1 and y < y2) :
         return True
     else :

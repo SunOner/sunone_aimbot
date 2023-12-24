@@ -9,6 +9,7 @@ from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, si
 from os import path
 from logic.keyboard import *
 from logic.config_watcher import *
+
 if mouse_move_by_arduino or mouse_shoot_by_arduino:
     from logic.arduino import ArduinoMouse
     Arduino = ArduinoMouse()
@@ -128,22 +129,27 @@ class MouseThread(threading.Thread):
     def run(self):
         while True:
             data = self.queue.get()
+            bScope = False
             if data == None:
                 self.frame_ready_event.set()
             else:
                 shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
                 (x, y, target_x, target_y, target_w, target_h, distance) = data
+                bScope = False
+
+                if mouse_auto_shoot or mouse_triggerbot:
+                    bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
 
                 slow_down_factor = min(distance, 4)
-
                 x = x / slow_down_factor
                 y = y / slow_down_factor
                 
                 if mouse_smoothing != 0 and x is not None and y is not None or mouse_smoothing != 0 and x is not None and y is not None:
                     x = x / mouse_smoothing
                     y = y / mouse_smoothing
-
-                if shooting_key == -32768 and mouse_auto_aim == False:
+                
+                # Move section
+                if shooting_key == -32768 and mouse_auto_aim == False and mouse_triggerbot == False:
                     if mouse_wild_mouse:
                         x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
 
@@ -155,5 +161,41 @@ class MouseThread(threading.Thread):
 
                     if mouse_move_by_arduino and x is not None and y is not None:
                         Arduino.move(int(x), int(y))
+
+                # Shoot section
                 
+                # By GetAsyncKeyState
+                if mouse_auto_shoot == True and mouse_triggerbot == False:
+                    if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting)) == -32768 and bScope:
+                        if mouse_native and mouse_shoot_by_arduino == False: # native
+                            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+                        if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
+                            ghub_mouse_down()
+                        if mouse_shoot_by_arduino: # arduino
+                            Arduino.press()
+
+                    if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting)) == 0 or bScope == False:
+                        if mouse_native and mouse_shoot_by_arduino == False: # native
+                            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+                        if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
+                            ghub_mouse_up()
+                        if mouse_shoot_by_arduino: # arduino
+                            Arduino.release()
+                    
+                # By triggerbot
+                if mouse_auto_shoot and mouse_triggerbot and bScope:
+                    if mouse_native and mouse_shoot_by_arduino == False: # native
+                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+                    if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
+                        ghub_mouse_down()
+                    if mouse_shoot_by_arduino: # arduino
+                        Arduino.press()
+
+                if mouse_auto_shoot and mouse_triggerbot and bScope == False:
+                    if mouse_native and mouse_shoot_by_arduino == False: # native
+                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+                    if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
+                        ghub_mouse_up()
+                    if mouse_shoot_by_arduino: # arduino
+                        Arduino.release()
                 self.frame_ready_event.set()

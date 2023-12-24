@@ -177,24 +177,6 @@ def init():
                 cv2.destroyWindow(debug_window_name)
             break
 
-        # TODO
-        if mouse_auto_shoot and app_pause == 0:
-            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting)) == -32768: # press
-                if mouse_native and mouse_shoot_by_arduino == False: # native
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
-                    ghub_mouse_down()
-                if mouse_shoot_by_arduino: # arduino
-                    Arduino.press()
-
-            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting)) == 0: # release
-                if mouse_native and mouse_shoot_by_arduino == False: # native
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                if mouse_native == False and mouse_shoot_by_arduino == False: #ghub
-                    ghub_mouse_up()
-                if mouse_shoot_by_arduino: # arduino
-                    Arduino.release()
-
         if show_window:
             try:
                 cv2.resizeWindow(debug_window_name, dim)
@@ -203,7 +185,6 @@ def init():
             cv2.imshow(debug_window_name, resised)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-
 
 if __name__ == "__main__":
     frame_ready = threading.Event()

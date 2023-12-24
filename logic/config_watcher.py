@@ -38,6 +38,7 @@ mouse_auto_shoot = config_Mouse_settings.getboolean('mouse_auto_shoot')
 mouse_auto_aim = config_Mouse_settings.getboolean('mouse_auto_aim')
 mouse_native = config_Mouse_settings.getboolean('mouse_native')
 mouse_wild_mouse = config_Mouse_settings.getboolean('mouse_wild_mouse')
+mouse_triggerbot = config_Mouse_settings.getboolean('mouse_triggerbot')
 mouse_move_by_arduino = config_Mouse_settings.getboolean('mouse_move_by_arduino')
 mouse_shoot_by_arduino = config_Mouse_settings.getboolean('mouse_shoot_by_arduino')
 
