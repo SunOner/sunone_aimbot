@@ -73,8 +73,6 @@ def run_checks():
 
     print('Dxcam_capture', Dxcam_capture)
     print('dxcam_capture_fps', dxcam_capture_fps)
-    if dxcam_capture_fps >= 31:
-        print('Warning!\nA large number of frames per second can lead to incorrect mouse operation. If you want to use more frames per second, additionally use the mouse_smoothing option to smooth out mouse movement, this can be useful for smooth mouse movements.')
     print('dxcam_monitor_id', dxcam_monitor_id)
     print('dxcam_gpu_id', dxcam_gpu_id)
     print('dxcam_max_buffer_len', dxcam_max_buffer_len, '\n')
@@ -117,7 +115,13 @@ def run_checks():
 
     print('Environment variables:\n')
     for key, value in os.environ.items():
-        print(f'{key}: {value}')
+        if key == 'PATH':
+            print('--------------------------- PATH ---------------------------')
+            for i in value.split(';'):
+                print(i)
+            print('--------------------------- PATH ---------------------------')
+        else:
+            print(f'{key}: {value}')
     
     detection_test = detections_check()
     print(detection_test)
@@ -130,14 +134,15 @@ def detections_check():
         success, frame = cap.read()
 
         if success:
-            result = model(frame, stream=False, show=False, imgsz=320, device=AI_device, verbose=False, half=True)
+            result = model(frame, stream=False, show=False, imgsz=AI_image_size, device=AI_device, verbose=False)
             for frame in result:
                 clss.append(frame.boxes.cls)
             annotated_frame = result[0].plot()
 
-            cv2.imshow("Detections test", annotated_frame)
-
-            if cv2.waitKey(1) & 0xFF == ord("q"):
+            cv2.putText(annotated_frame, 'TEST 1234567890', (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+            
+            cv2.imshow("ETECTION TEST", annotated_frame)
+            if cv2.waitKey(30) & 0xFF == ord("q"):
                 break
         else:
             break
@@ -146,9 +151,9 @@ def detections_check():
     cv2.destroyAllWindows()
 
     if len(clss) <= 0:
-        return 'Detection test failed'
+        return '\nDetection test: Failed'
     else:
-        return 'Detection test passed'
+        return '\nDetection test: Passed. Number of detections: {}'.format(len(clss))
 
 if __name__ == "__main__":
     run_checks()
