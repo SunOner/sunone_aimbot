@@ -39,8 +39,8 @@ class work_queue(threading.Thread):
             item = self.queue.get()
             if item == None:
                 self.shooting_queue = []
+                mouse_worker.queue.put(None)
             if item != None:
-                shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
                 if disable_headshot == False:
                     head_target = False
                     for box in item:
@@ -74,19 +74,10 @@ class work_queue(threading.Thread):
                 except:
                     pass
 
-                # By key pressed
-                if shooting_key == -32768 and mouse_auto_aim == False:
-                    mouse_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
-                # Auto AIM
-                if mouse_auto_aim:
-                    try:
-                        mouse_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
-                    except: pass
+                mouse_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
 
 @torch.no_grad()
 def init():
-    frame_num = 0
-
     if show_window and show_fps:
         prev_frame_time = 0
         new_frame_time = 0
@@ -117,11 +108,18 @@ def init():
     if hideout_targets == False and show_window == False:
         clss = [0,1,7]
 
+    first_frame_init = True
     while True:
         app_pause = win32api.GetKeyState(Keyboard.KeyCodes.get(hotkey_pause))
-        
-        image = get_new_frame()
-        
+
+        if frame_ready.is_set() and first_frame_init == False:
+            image = get_new_frame()
+            frame_ready.clear()
+
+        if first_frame_init:
+            first_frame_init = False
+            image = get_new_frame()
+
         result = model.predict(
             source=image,
             stream=True,
@@ -155,10 +153,7 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    # frame_num = frame_num + 1
-                    # if frame_num >= 1:
                     queue_worker.queue.put(frame.boxes)
-                        # frame_num = 0
                 else: pass
 
                 if show_window and show_boxes:
@@ -211,6 +206,7 @@ def init():
 
 
 if __name__ == "__main__":
+    frame_ready = threading.Event()
+    mouse_worker = MouseThread(frame_ready)
     queue_worker = work_queue()
-    mouse_worker = MouseThread()
     init()

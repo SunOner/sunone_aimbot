@@ -7,7 +7,8 @@ import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
-from logic.config_watcher import mouse_wild_mouse, mouse_native, mouse_auto_shoot, mouse_move_by_arduino, mouse_shoot_by_arduino, mouse_smoothing
+from logic.keyboard import *
+from logic.config_watcher import *
 if mouse_move_by_arduino or mouse_shoot_by_arduino:
     from logic.arduino import ArduinoMouse
     Arduino = ArduinoMouse()
@@ -117,32 +118,42 @@ def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, m
         return 0, 0
 
 class MouseThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, frame_ready_event):
         super(MouseThread, self).__init__()
         self.queue = queue.Queue()
         self.daemon = True
+        self.frame_ready_event = frame_ready_event
         self.start()
 
     def run(self):
         while True:
-            (x, y, target_x, target_y, target_w, target_h, distance) = self.queue.get()
-            slow_down_factor = min(distance, 4)
+            data = self.queue.get()
+            if data == None:
+                self.frame_ready_event.set()
+            else:
+                shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
+                (x, y, target_x, target_y, target_w, target_h, distance) = data
 
-            x = x / slow_down_factor
-            y = y / slow_down_factor
-            
-            if mouse_smoothing != 0 and x is not None and y is not None or mouse_smoothing != 0 and x is not None and y is not None:
-                x = x / mouse_smoothing
-                y = y / mouse_smoothing
+                slow_down_factor = min(distance, 4)
 
-            if mouse_wild_mouse:
-                x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
+                x = x / slow_down_factor
+                y = y / slow_down_factor
+                
+                if mouse_smoothing != 0 and x is not None and y is not None or mouse_smoothing != 0 and x is not None and y is not None:
+                    x = x / mouse_smoothing
+                    y = y / mouse_smoothing
 
-            if mouse_native == True and x is not None and y is not None and mouse_move_by_arduino == False: # Native move
-                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
+                if shooting_key == -32768 and mouse_auto_aim == False:
+                    if mouse_wild_mouse:
+                        x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
 
-            if mouse_native == False and x is not None and y is not None and mouse_move_by_arduino == False: # ghub move
-                ghub_mouse_xy(int(x), int(y))
+                    if mouse_native == True and x is not None and y is not None and mouse_move_by_arduino == False: # Native move
+                        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
 
-            if mouse_move_by_arduino and x is not None and y is not None:
-                Arduino.move(int(x), int(y))
+                    if mouse_native == False and x is not None and y is not None and mouse_move_by_arduino == False: # ghub move
+                        ghub_mouse_xy(int(x), int(y))
+
+                    if mouse_move_by_arduino and x is not None and y is not None:
+                        Arduino.move(int(x), int(y))
+                
+                self.frame_ready_event.set()
