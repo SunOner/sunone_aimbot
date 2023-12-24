@@ -149,7 +149,7 @@ class MouseThread(threading.Thread):
                     y = y / mouse_smoothing
                 
                 # Move section
-                if shooting_key == -32768 and mouse_auto_aim == False and mouse_triggerbot == False:
+                if shooting_key == -32768 and mouse_auto_aim == False and mouse_triggerbot == False or mouse_auto_aim:
                     if mouse_wild_mouse:
                         x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
 
