@@ -123,6 +123,7 @@ class MouseThread(threading.Thread):
         super(MouseThread, self).__init__()
         self.queue = queue.Queue()
         self.daemon = True
+        self.maxsize = 1
         self.frame_ready_event = frame_ready_event
         self.start()
 
@@ -135,14 +136,14 @@ class MouseThread(threading.Thread):
             else:
                 shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
                 (x, y, target_x, target_y, target_w, target_h, distance) = data
-                bScope = False
 
                 if mouse_auto_shoot or mouse_triggerbot:
                     bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
 
-                slow_down_factor = min(distance, 4)
-                x = x / slow_down_factor
-                y = y / slow_down_factor
+                if mouse_slow_down_factor != 0:
+                    slow_down_factor = min(distance, mouse_slow_down_factor)
+                    x = x / slow_down_factor
+                    y = y / slow_down_factor
                 
                 if mouse_smoothing != 0 and x is not None and y is not None or mouse_smoothing != 0 and x is not None and y is not None:
                     x = x / mouse_smoothing
@@ -198,4 +199,5 @@ class MouseThread(threading.Thread):
                         ghub_mouse_up()
                     if mouse_shoot_by_arduino: # arduino
                         Arduino.release()
+                        
                 self.frame_ready_event.set()

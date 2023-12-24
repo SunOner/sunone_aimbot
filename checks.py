@@ -87,6 +87,7 @@ def run_checks():
     print('hideout_targets', hideout_targets, '\n')
 
     print('mouse_smoothing', mouse_smoothing)
+    print('mouse_slow_down_factor', mouse_slow_down_factor)
     print('mouse_auto_shoot', mouse_auto_shoot)
     print('mouse_auto_aim', mouse_auto_aim)
     print('mouse_native', mouse_native)

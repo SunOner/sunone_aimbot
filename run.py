@@ -23,6 +23,7 @@ class work_queue(threading.Thread):
         super(work_queue, self).__init__()
         self.queue = queue.Queue()
         self.daemon = True
+        self.maxsize = 1
         self.name = 'work_queue'
         self.shooting_queue = []
         self.x = 0

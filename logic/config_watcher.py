@@ -34,6 +34,7 @@ hotkey_pause = str(config_Hotkeys_settings['hotkey_pause'])
 
 config_Mouse_settings = config['Mouse settings']
 mouse_smoothing = float(config_Mouse_settings['mouse_smoothing'])
+mouse_slow_down_factor = float(config_Mouse_settings['mouse_slow_down_factor'])
 mouse_auto_shoot = config_Mouse_settings.getboolean('mouse_auto_shoot')
 mouse_auto_aim = config_Mouse_settings.getboolean('mouse_auto_aim')
 mouse_native = config_Mouse_settings.getboolean('mouse_native')
