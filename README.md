@@ -35,7 +35,7 @@ Before you get started, make sure you have the following prerequisites installed
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
 <table>
-  <thead><tr><th>Operating Systems:</th><td>Windows 10</td></thead>
+  <thead><tr><th>Operating Systems:</th><td>Windows 10-11</td></thead>
   <thead><tr><th>NVIDIA CUDA Version:</th><td>12.1</td></tr></thead>
   <thead><tr><th>NVIDIA cuDNN Version:</th><td>8.9.4.25</td></thead>
   <thead><tr><th>TensorRT Version:</th><td>8.6.1</td></tr></thead>
