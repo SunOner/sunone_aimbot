@@ -85,7 +85,8 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 ### Mouse settings:
 - mouse_smoothing `float`: Smoothing when moving the mouse.
 - mouse_slow_down_factor  `float`: Slowing down the mouse when approaching the target.
-- mouse_auto_shoot `bool`: Automatic shooting. (Not working in some games).
+- mouse_lock_target `bool`: Lock targeting.
+- mouse_auto_shoot `bool`: Automatic shooting. (For some games need arduino).
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_native `bool`: Use windows native mouse input.
 - mouse_wild_mouse `bool`: Simulate human like mouse input.

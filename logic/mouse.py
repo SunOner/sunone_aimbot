@@ -134,7 +134,11 @@ class MouseThread(threading.Thread):
             if data == None:
                 self.frame_ready_event.set()
             else:
-                shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
+                if mouse_lock_target:
+                    shooting_key = win32api.GetKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
+                else:
+                    shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(hotkey_targeting))
+
                 (x, y, target_x, target_y, target_w, target_h, distance) = data
 
                 if mouse_auto_shoot or mouse_triggerbot:
@@ -150,7 +154,7 @@ class MouseThread(threading.Thread):
                     y = y / mouse_smoothing
                 
                 # Move section
-                if shooting_key == -32768 and mouse_auto_aim == False and mouse_triggerbot == False or mouse_auto_aim:
+                if shooting_key == -32768 or shooting_key == 1 and mouse_auto_aim == False and mouse_triggerbot == False or mouse_auto_aim:
                     if mouse_wild_mouse:
                         x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
 
