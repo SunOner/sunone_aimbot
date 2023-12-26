@@ -4,6 +4,7 @@ import dxcam
 from logic.screen import *
 from logic.config_watcher import *
 import time
+from run import cfg
 
 dx = None
 obs_camera = None
@@ -18,30 +19,30 @@ def get_new_frame():
 
     threading.excepthook = thread_hook
 
-    if Dxcam_capture and dx is None:
-        if native_Windows_capture or Obs_capture:
+    if cfg.Dxcam_capture and dx is None:
+        if cfg.native_Windows_capture or cfg.Obs_capture:
             print('Use only one capture method!')
             exit(0)
         if dx is None:
-            dx = dxcam.create(device_idx=dxcam_monitor_id, output_idx=dxcam_gpu_id, output_color="BGR", max_buffer_len=dxcam_max_buffer_len)
+            dx = dxcam.create(device_idx=cfg.dxcam_monitor_id, output_idx=cfg.dxcam_gpu_id, output_color="BGR", max_buffer_len=cfg.dxcam_max_buffer_len)
         if dx.is_capturing == False:
-            dx.start(Calculate_screen_offset(), target_fps=dxcam_capture_fps)
-    if Dxcam_capture and dx is not None:
+            dx.start(Calculate_screen_offset(), target_fps=cfg.dxcam_capture_fps)
+    if cfg.Dxcam_capture and dx is not None:
         img = dx.get_latest_frame()
 
-    if Obs_capture and obs_camera is None:
-        if Dxcam_capture or native_Windows_capture:
+    if cfg.Obs_capture and obs_camera is None:
+        if cfg.Dxcam_capture or cfg.native_Windows_capture:
             print('Use only one capture method!')
             exit(0)
-        obs_camera = cv2.VideoCapture(Obs_camera_id)
+        obs_camera = cv2.VideoCapture(cfg.Obs_camera_id)
         obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, detection_window_width)
         obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, detection_window_height)
-        obs_camera.set(cv2.CAP_PROP_FPS, Obs_capture_fps)
-    if Obs_capture and obs_camera is not None:
+        obs_camera.set(cv2.CAP_PROP_FPS, cfg.Obs_capture_fps)
+    if cfg.Obs_capture and obs_camera is not None:
         ret_val, img = obs_camera.read()
         
-    if native_Windows_capture:
-        if Obs_capture or Dxcam_capture:
+    if cfg.native_Windows_capture:
+        if cfg.Obs_capture or cfg.Dxcam_capture:
             print('Use only one capture method!')
             exit(0)
         img = windows_grab_screen(Calculate_screen_offset())
@@ -60,9 +61,9 @@ def draw_helpers(annotated_frame, boxes):
     for item in boxes:
         if item is not None:
             for xyxy in item.xyxy:
-                if show_boxes:
+                if cfg.show_boxes:
                     cv2.rectangle(annotated_frame, (int(xyxy[0].item()), int(xyxy[1].item())), (int(xyxy[2].item()), int(xyxy[3].item())), (0, 200, 0), 2)
-                    if show_labels:
+                    if cfg.show_labels:
                         str_cls = ''
                         for cls in item.cls:
                             match cls:
@@ -86,9 +87,9 @@ def draw_helpers(annotated_frame, boxes):
                                     str_cls = 'smoke'
                                 case 9:
                                     str_cls = 'fire'
-                            if show_conf == False:
+                            if cfg.show_conf == False:
                                 cv2.putText(annotated_frame, str_cls, (int(xyxy[0].item()), int(xyxy[1].item() - 5)), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 200, 0), 1, cv2.LINE_AA)
-                    if show_conf:
+                    if cfg.show_conf:
                         for conf in item.conf:
                             cv2.putText(annotated_frame, str('{} {:.2f}'.format(str_cls,conf.item())), (int(xyxy[0].item()), int(xyxy[1].item() - 5)), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 200, 0), 1, cv2.LINE_AA)
     return annotated_frame

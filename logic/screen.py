@@ -2,16 +2,16 @@ import cv2
 import win32gui, win32ui, win32con
 import numpy as np
 from screeninfo import get_monitors
-from logic.config_watcher import detection_window_width, detection_window_height
+from run import cfg
 
-screen_x_center, screen_y_center = detection_window_width / 2, detection_window_height / 2
+screen_x_center, screen_y_center = cfg.detection_window_width / 2, cfg.detection_window_height / 2
 
 def Calculate_screen_offset():
     left, top = get_primary_display_resolution()
-    left = left / 2 - detection_window_width / 2
-    top = top / 2 - detection_window_height / 2
-    width = left + detection_window_width
-    height = top + detection_window_height
+    left = left / 2 - cfg.detection_window_width / 2
+    top = top / 2 - cfg.detection_window_height / 2
+    width = left + cfg.detection_window_width
+    height = top + cfg.detection_window_height
     return (int(left), int(top), int(width), int(height))
 
 def windows_grab_screen(region):
@@ -41,8 +41,8 @@ def windows_grab_screen(region):
     return cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
 
 def check_target_in_scope(target_x, target_y, target_w, target_h):
-    x = detection_window_width / 2
-    y = detection_window_height / 2
+    x = cfg.detection_window_width / 2
+    y = cfg.detection_window_height / 2
     x1 = (target_x - target_w)
     x2 = (target_x + target_w)
     y1 = (target_y - target_h)

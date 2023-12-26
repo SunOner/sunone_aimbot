@@ -1,63 +1,71 @@
 import configparser
 
-config = configparser.ConfigParser()
-config.read('./config.ini')
+class Config():
+    def __init__(self):
+        self.config = configparser.ConfigParser()
+        self.Read(verbose=False)
+    
+    def Read(self, verbose=False):
+        self.config.read('./config.ini')
+        self.config_Detection_window = self.config['Detection window']
+        self.detection_window_width = int(self.config_Detection_window['detection_window_width'])
+        self.detection_window_height = int(self.config_Detection_window['detection_window_height'])
+        
+        self.config_Dxcam_Capture = self.config['Dxcam Capture']
+        self.Dxcam_capture = self.config_Dxcam_Capture.getboolean('Dxcam_capture')
+        self.dxcam_capture_fps = int(self.config_Dxcam_Capture['dxcam_capture_fps'])
+        self.dxcam_monitor_id = int(self.config_Dxcam_Capture['dxcam_monitor_id'])
+        self.dxcam_gpu_id = int(self.config_Dxcam_Capture['dxcam_gpu_id'])
+        self.dxcam_max_buffer_len =int(self.config_Dxcam_Capture['dxcam_max_buffer_len'])
 
-config_Detection_window = config['Detection window']
-detection_window_width = int(config_Detection_window['detection_window_width'])
-detection_window_height = int(config_Detection_window['detection_window_height'])
+        self.config_Obs_capture = self.config['Obs capture']
+        self.Obs_capture = self.config_Obs_capture.getboolean('Obs_capture')
+        self.Obs_camera_id = int(self.config_Obs_capture['Obs_camera_id'])
+        self.Obs_capture_fps = int(self.config_Obs_capture['Obs_capture_fps'])
+        
+        self.config_Windows_capture = self.config['Windows capture']
+        self.native_Windows_capture = self.config_Windows_capture.getboolean('native_Windows_capture')
+        
+        self.config_Aim_settings = self.config['Aim settings']
+        self.body_y_offset = float(self.config_Aim_settings['body_y_offset'])
+        self.hideout_targets = self.config_Aim_settings.getboolean('hideout_targets')
+        self.disable_headshot = self.config_Aim_settings.getboolean('disable_headshot')
+        
+        self.config_Hotkeys_settings = self.config['Hotkeys settings']
+        self.hotkey_targeting = str(self.config_Hotkeys_settings['hotkey_targeting'])
+        self.hotkey_exit = str(self.config_Hotkeys_settings['hotkey_exit'])
+        self.hotkey_pause = str(self.config_Hotkeys_settings['hotkey_pause'])
+        self.hotkey_reload_config = str(self.config_Hotkeys_settings['hotkey_reload_config'])
+        
+        self.config_Mouse_settings = self.config['Mouse settings']
+        self.mouse_smoothing = float(self.config_Mouse_settings['mouse_smoothing'])
+        self.mouse_slow_down_factor = float(self.config_Mouse_settings['mouse_slow_down_factor'])
+        self.mouse_lock_target = self.config_Mouse_settings.getboolean('mouse_lock_target')
+        self.mouse_auto_shoot = self.config_Mouse_settings.getboolean('mouse_auto_shoot')
+        self.mouse_auto_aim = self.config_Mouse_settings.getboolean('mouse_auto_aim')
+        self.mouse_native = self.config_Mouse_settings.getboolean('mouse_native')
+        self.mouse_wild_mouse = self.config_Mouse_settings.getboolean('mouse_wild_mouse')
+        self.mouse_triggerbot = self.config_Mouse_settings.getboolean('mouse_triggerbot')
+        self.mouse_move_by_arduino = self.config_Mouse_settings.getboolean('mouse_move_by_arduino')
+        self.mouse_shoot_by_arduino = self.config_Mouse_settings.getboolean('mouse_shoot_by_arduino')
+        
+        self.config_AI_options = self.config['AI options']
+        self.AI_model_path = str(self.config_AI_options['AI_model_path'])
+        self.AI_image_size = int(self.config_AI_options['AI_image_size'])
+        self.AI_conf = float(self.config_AI_options['AI_conf'])
+        self.AI_iou = float(self.config_AI_options['AI_iou'])
+        self.AI_device = str(self.config_AI_options['AI_device'])
+        self.AI_max_det = int(self.config_AI_options['AI_max_det'])
+        
+        self.config_Debug_window = self.config['Debug window']
+        self.show_window = self.config_Debug_window.getboolean('show_window')
+        self.show_speed = self.config_Debug_window.getboolean('show_speed')
+        self.show_fps = self.config_Debug_window.getboolean('show_fps')
+        self.show_boxes = self.config_Debug_window.getboolean('show_boxes')
+        self.show_labels = self.config_Debug_window.getboolean('show_labels')
+        self.show_conf = self.config_Debug_window.getboolean('show_conf')
+        self.debug_window_scale_percent = int(self.config_Debug_window['debug_window_scale_percent'])
+        self.debug_window_name = str(self.config_Debug_window['debug_window_name'])
 
-config_Dxcam_Capture = config['Dxcam Capture']
-Dxcam_capture = config_Dxcam_Capture.getboolean('Dxcam_capture')
-dxcam_capture_fps = int(config_Dxcam_Capture['dxcam_capture_fps'])
-dxcam_monitor_id = int(config_Dxcam_Capture['dxcam_monitor_id'])
-dxcam_gpu_id = int(config_Dxcam_Capture['dxcam_gpu_id'])
-dxcam_max_buffer_len =int( config_Dxcam_Capture['dxcam_max_buffer_len'])
-
-config_Obs_capture = config['Obs capture']
-Obs_capture = config_Obs_capture.getboolean('Obs_capture')
-Obs_camera_id = int(config_Obs_capture['Obs_camera_id'])
-Obs_capture_fps = int(config_Obs_capture['Obs_capture_fps'])
-
-config_Windows_capture = config['Windows capture']
-native_Windows_capture = config_Windows_capture.getboolean('native_Windows_capture')
-
-config_Aim_settings = config['Aim settings']
-body_y_offset = float(config_Aim_settings['body_y_offset'])
-hideout_targets = config_Aim_settings.getboolean('hideout_targets')
-disable_headshot = config_Aim_settings.getboolean('disable_headshot')
-
-config_Hotkeys_settings = config['Hotkeys settings']
-hotkey_targeting = str(config_Hotkeys_settings['hotkey_targeting'])
-hotkey_exit = str(config_Hotkeys_settings['hotkey_exit'])
-hotkey_pause = str(config_Hotkeys_settings['hotkey_pause'])
-
-config_Mouse_settings = config['Mouse settings']
-mouse_smoothing = float(config_Mouse_settings['mouse_smoothing'])
-mouse_slow_down_factor = float(config_Mouse_settings['mouse_slow_down_factor'])
-mouse_lock_target = config_Mouse_settings.getboolean('mouse_lock_target')
-mouse_auto_shoot = config_Mouse_settings.getboolean('mouse_auto_shoot')
-mouse_auto_aim = config_Mouse_settings.getboolean('mouse_auto_aim')
-mouse_native = config_Mouse_settings.getboolean('mouse_native')
-mouse_wild_mouse = config_Mouse_settings.getboolean('mouse_wild_mouse')
-mouse_triggerbot = config_Mouse_settings.getboolean('mouse_triggerbot')
-mouse_move_by_arduino = config_Mouse_settings.getboolean('mouse_move_by_arduino')
-mouse_shoot_by_arduino = config_Mouse_settings.getboolean('mouse_shoot_by_arduino')
-
-config_AI_options = config['AI options']
-AI_model_path = str(config_AI_options['AI_model_path'])
-AI_image_size = int(config_AI_options['AI_image_size'])
-AI_conf = float(config_AI_options['AI_conf'])
-AI_iou = float(config_AI_options['AI_iou'])
-AI_device = str(config_AI_options['AI_device'])
-AI_max_det = int(config_AI_options['AI_max_det'])
-
-config_Debug_window = config['Debug window']
-show_window = config_Debug_window.getboolean('show_window')
-show_speed = config_Debug_window.getboolean('show_speed')
-show_fps = config_Debug_window.getboolean('show_fps')
-show_boxes = config_Debug_window.getboolean('show_boxes')
-show_labels = config_Debug_window.getboolean('show_labels')
-show_conf = config_Debug_window.getboolean('show_conf')
-debug_window_scale_percent = int(config_Debug_window['debug_window_scale_percent'])
-debug_window_name = str(config_Debug_window['debug_window_name'])
+        if verbose:
+            print('Config reloaded')

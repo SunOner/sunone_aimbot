@@ -30,7 +30,7 @@ Before you get started, make sure you have the following prerequisites installed
   - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
 <br></br>
 - I advise you to check the environment by running `checks.py`, it will let you know what and where to fix or re-install.
-- To launch the aimbot after all installations, type ``python run.py`` or `py run.py` in cmd.
+- To launch the aimbot after all installations, type `python run.py` or `py run.py` in cmd.
 
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
@@ -81,6 +81,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - Right mouse button `str`: Aiming at the target.
 - F2 `str`: Exit.
 - F3 `str`: Pause AIM.
+- F4 `str`: Reload config.
 
 ### Mouse settings:
 - mouse_smoothing `float`: Smoothing when moving the mouse.
@@ -112,7 +113,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
 ## AI Models
-### The repository provides multiple AI models for different purposes:
 - *.pt: Default AI model.
 - *.onnx: The model is optimized to run on processors.
 - *.engine: Final exported model, which is faster than the previous two.
@@ -122,9 +122,9 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 ## Export .pt model to .engine
 Run in console:
 ```cmd
-yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 imgsz=320
+yolo export model="models/sunxds_0.2.9.6.pt" format=engine half=true device=0 imgsz=320
 ```
-  - `model="model_path/*.pt"`: Path to model.
+  - `model="model_path/model_name.pt"`: Path to model.
   - `format=engine`: TensorRT model format.
   - `half=true`: Use Half-precision floating-point format.
   - `device=0`: GPU id.

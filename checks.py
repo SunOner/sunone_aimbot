@@ -1,5 +1,5 @@
-from logic.config_watcher import *
-
+from logic.config_watcher import Config
+cfg = Config()
 try:
     from screeninfo import get_monitors
 except:
@@ -13,7 +13,7 @@ except:
     print('install ultralytics: pip install ultralytics')
     exit(0)
 
-if '.engine' in AI_model_path:
+if '.engine' in cfg.AI_model_path:
     import tensorrt
 
 try:
@@ -22,7 +22,7 @@ except:
     print('install numpy: pip install numpy')
     exit(0)
 
-if Dxcam_capture == True:
+if cfg.Dxcam_capture == True:
     try:
         import dxcam
     except:
@@ -51,14 +51,14 @@ def run_checks():
 
     print('OpenCV version: {0}'.format(__version__))
 
-    if '.engine' in AI_model_path:
+    if '.engine' in cfg.AI_model_path:
         print('TensorRT version: {0}'.format(tensorrt.__version__))
-    if '.pt' in AI_model_path:
-        print(ultralytics.YOLO('models/{}'.format(AI_model_path), task='detect').info())
+    if '.pt' in cfg.AI_model_path:
+        print(ultralytics.YOLO('models/{}'.format(cfg.AI_model_path), task='detect').info())
 
     print('numpy version: {0}'.format(numpy.version.version))
 
-    if Dxcam_capture:
+    if cfg.Dxcam_capture:
         print('DXcam devices info:\n{0}'.format(dxcam.output_info()))
     # TODO: ADD OBS_CAPTURE CHECKS
     try:
@@ -68,51 +68,51 @@ def run_checks():
 
     print('\n********** Options **********\n')
 
-    print('screen_width', detection_window_width)
-    print('screen_height', detection_window_height, '\n')
+    print('screen_width', cfg.detection_window_width)
+    print('screen_height', cfg.detection_window_height, '\n')
 
-    print('Dxcam_capture', Dxcam_capture)
-    print('dxcam_capture_fps', dxcam_capture_fps)
-    print('dxcam_monitor_id', dxcam_monitor_id)
-    print('dxcam_gpu_id', dxcam_gpu_id)
-    print('dxcam_max_buffer_len', dxcam_max_buffer_len, '\n')
+    print('Dxcam_capture', cfg.Dxcam_capture)
+    print('dxcam_capture_fps', cfg.dxcam_capture_fps)
+    print('dxcam_monitor_id', cfg.dxcam_monitor_id)
+    print('dxcam_gpu_id', cfg.dxcam_gpu_id)
+    print('dxcam_max_buffer_len', cfg.dxcam_max_buffer_len, '\n')
 
-    print('Obs_capture', Obs_capture)
-    print('Obs_camera_id', Obs_camera_id)
-    print('Obs_capture_fps', Obs_capture_fps, '\n')
+    print('Obs_capture',cfg. Obs_capture)
+    print('Obs_camera_id', cfg.Obs_camera_id)
+    print('Obs_capture_fps', cfg.Obs_capture_fps, '\n')
 
-    print('native_Windows_capture', native_Windows_capture, '\n')
+    print('native_Windows_capture', cfg.native_Windows_capture, '\n')
 
-    print('body_y_offset', body_y_offset)
-    print('hideout_targets', hideout_targets, '\n')
+    print('body_y_offset', cfg.body_y_offset)
+    print('hideout_targets', cfg.hideout_targets, '\n')
 
-    print('mouse_smoothing', mouse_smoothing)
-    print('mouse_slow_down_factor', mouse_slow_down_factor)
-    print('mouse_auto_shoot', mouse_auto_shoot)
-    print('mouse_auto_aim', mouse_auto_aim)
-    print('mouse_native', mouse_native)
-    print('mouse_move_by_arduino', mouse_move_by_arduino)
-    print('mouse_shoot_by_arduino', mouse_shoot_by_arduino, '\n')
+    print('mouse_smoothing', cfg.mouse_smoothing)
+    print('mouse_slow_down_factor', cfg.mouse_slow_down_factor)
+    print('mouse_auto_shoot', cfg.mouse_auto_shoot)
+    print('mouse_auto_aim', cfg.mouse_auto_aim)
+    print('mouse_native', cfg.mouse_native)
+    print('mouse_move_by_arduino', cfg.mouse_move_by_arduino)
+    print('mouse_shoot_by_arduino', cfg.mouse_shoot_by_arduino, '\n')
 
-    print('hotkey_targeting', hotkey_targeting)
-    print('hotkey_exit', hotkey_exit)
-    print('hotkey_pause', hotkey_pause, '\n')
+    print('hotkey_targeting', cfg.hotkey_targeting)
+    print('hotkey_exit', cfg.hotkey_exit)
+    print('hotkey_pause', cfg.hotkey_pause, '\n')
 
-    print('AI_model_path', AI_model_path)
-    print('AI_image_size', AI_image_size)
-    print('AI_conf', AI_conf)
-    print('AI_iou', AI_iou)
-    print('AI_device', AI_device)
-    print('AI_max_det', AI_max_det, '\n')
+    print('AI_model_path', cfg.AI_model_path)
+    print('AI_image_size', cfg.AI_image_size)
+    print('AI_conf', cfg.AI_conf)
+    print('AI_iou', cfg.AI_iou)
+    print('AI_device', cfg.AI_device)
+    print('AI_max_det', cfg.AI_max_det, '\n')
 
-    print('show_window', show_window)
-    print('show_speed', show_speed)
-    print('show_fps', show_fps)
-    print('show_boxes', show_boxes)
-    print('show_labels', show_labels)
-    print('show_conf', show_conf)
-    print('debug_window_scale_percent', debug_window_scale_percent)
-    print('debug_window_name', debug_window_name, '\n')
+    print('show_window', cfg.show_window)
+    print('show_speed', cfg.show_speed)
+    print('show_fps', cfg.show_fps)
+    print('show_boxes', cfg.show_boxes)
+    print('show_labels', cfg.show_labels)
+    print('show_conf', cfg.show_conf)
+    print('debug_window_scale_percent', cfg.debug_window_scale_percent)
+    print('debug_window_name', cfg.debug_window_name, '\n')
 
     print('Environment variables:\n')
     for key, value in os.environ.items():
@@ -128,14 +128,14 @@ def run_checks():
     print(detection_test)
 
 def detections_check():
-    model = YOLO('models/{}'.format(AI_model_path), task='detect')
+    model = YOLO('models/{}'.format(cfg.AI_model_path), task='detect')
     cap = cv2.VideoCapture('media/tests/test_det.mp4')
     clss = []
     while cap.isOpened():
         success, frame = cap.read()
 
         if success:
-            result = model(frame, stream=False, show=False, imgsz=AI_image_size, device=AI_device, verbose=False)
+            result = model(frame, stream=False, show=False, imgsz=cfg.AI_image_size, device=cfg.AI_device, verbose=False)
             for frame in result:
                 clss.append(frame.boxes.cls)
             annotated_frame = result[0].plot()
