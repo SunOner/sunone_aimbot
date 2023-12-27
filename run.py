@@ -1,3 +1,4 @@
+import math
 from logic.config_watcher import Config
 cfg = Config()
 
@@ -5,78 +6,73 @@ from ultralytics import YOLO
 import torch
 import cv2
 import time
-import win32con, win32api
+import win32api
 import threading
 import queue
 
-from logic.targets import *
 from logic.keyboard import *
-from logic.screen import *
-from logic.frame import Capture, speed, draw_helpers
+from logic.capture import *
 from logic.mouse import MouseThread
 if cfg.mouse_native == False:
     from logic.mouse import ghub_mouse_up, ghub_mouse_down
 if cfg.mouse_shoot_by_arduino or cfg.mouse_move_by_arduino:
     from logic.mouse import Arduino
 
-class work_queue(threading.Thread):
+class Targets:
+    def __init__(self, x, y, w, h, cls):
+        self.mouse_x = x - frames.screen_x_center
+        self.mouse_y = (y - frames.screen_y_center) if cls == 7 else (y - frames.screen_y_center - cfg.body_y_offset * h)
+        self.distance = math.sqrt((x - frames.screen_x_center)**2 + (y - frames.screen_y_center)**2)
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.cls = cls
+        
+class WorkQueue(threading.Thread):
     def __init__(self):
-        super(work_queue, self).__init__()
-        self.queue = queue.Queue()
+        super().__init__()
+        self.queue = queue.Queue(maxsize=1)
+        self.name = 'WorkQueue'
         self.daemon = True
-        self.maxsize = 1
-        self.name = 'work_queue'
         self.shooting_queue = []
-        self.x = 0
-        self.y = 0
-        self.target_x = 0
-        self.target_y = 0
-        self.target_w = 0
-        self.target_h = 0
-        self.distance = 0
         self.start()
 
     def run(self):
         while True:
             item = self.queue.get()
-            if item == None:
-                self.shooting_queue = []
+            if item is None:
+                self.shooting_queue.clear()
                 mouse_worker.queue.put(None)
-            if item != None:
-                if cfg.disable_headshot == False:
-                    head_target = False
-                    for box in item:
-                        self.shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
-                    for x in self.shooting_queue:
-                        if len(self.shooting_queue) >= 3:
-                            head_target = False
-                            break
-                        if x.cls == 7:
-                            head_target = True
-                        else:
-                            head_target = False
-                    if head_target:
-                        self.shooting_queue.sort(key=lambda x: x.cls == 7, reverse=True)
-                    else:
-                        self.shooting_queue.sort(key=lambda x: x.distance, reverse=False)
-                else:
-                    for box in item:
-                        if int(box.cls.item()) == 0 or int(box.cls.item()) == 1 or int(box.cls.item()) == 5 or int(box.cls.item()) == 6:
-                            self.shooting_queue.append(Targets(x=box.xywh[0][0].item(), y=box.xywh[0][1].item(), w=box.xywh[0][2].item(), h=box.xywh[0][3].item(), cls=int(box.cls.item())))
-                    self.shooting_queue.sort(key=lambda x: x.distance, reverse=False)
+            else:
+                self.process_items(item)
                 try:
-                    self.x = self.shooting_queue[0].mouse_x
-                    self.y = self.shooting_queue[0].mouse_y
-                    self.target_x = self.shooting_queue[0].x
-                    self.target_y = self.shooting_queue[0].y
-                    self.target_w = self.shooting_queue[0].w
-                    self.target_h = self.shooting_queue[0].h
-                    self.distance = self.shooting_queue[0].distance
-                    self.shooting_queue = []
-                except:
+                    target = self.shooting_queue[0]
+                    mouse_worker.queue.put((
+                        target.mouse_x,
+                        target.mouse_y,
+                        target.x,
+                        target.y,
+                        target.w,
+                        target.h,
+                        target.distance
+                    ))
+                except IndexError:
                     pass
 
-                mouse_worker.queue.put((self.x, self.y, self.target_x, self.target_y, self.target_w, self.target_h, self.distance))
+    def process_items(self, item):
+        self.shooting_queue.clear()
+        for box in item:
+            cls = int(box.cls.item())
+            if not cfg.disable_headshot:
+                self.shooting_queue.append(Targets(*box.xywh[0], cls))
+            elif cls in (0, 1, 5, 6):
+                self.shooting_queue.append(Targets(*box.xywh[0], cls))
+
+        if not cfg.disable_headshot:
+            self.shooting_queue.sort(key=lambda x: (x.cls != 7, x.distance))
+        else:
+            self.shooting_queue.sort(key=lambda x: x.distance, reverse=False)
 
 @torch.no_grad()
 def init():
@@ -189,6 +185,7 @@ def init():
         if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_exit)) & 0xFF:
             if cfg.show_window:
                 cv2.destroyWindow(cfg.debug_window_name)
+            frames.Quit()
             break
 
         if cfg.show_window:
@@ -204,6 +201,6 @@ if __name__ == "__main__":
     frame_ready = threading.Event()
     frames = Capture()
     mouse_worker = MouseThread(frame_ready)
-    queue_worker = work_queue()
+    queue_worker = WorkQueue()
 
     init()

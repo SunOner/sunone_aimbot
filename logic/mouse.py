@@ -2,7 +2,6 @@ import math
 import queue
 import threading
 import time
-from logic.screen import screen_x_center, screen_y_center, check_target_in_scope
 import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
@@ -144,7 +143,7 @@ class MouseThread(threading.Thread):
                 (x, y, target_x, target_y, target_w, target_h, distance) = data
 
                 if cfg.mouse_auto_shoot or cfg.mouse_triggerbot:
-                    bScope = check_target_in_scope(target_x, target_y, target_w, target_h)
+                    bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h)
 
                 if cfg.mouse_slow_down_factor != 0:
                     slow_down_factor = min(distance, cfg.mouse_slow_down_factor)
@@ -157,8 +156,8 @@ class MouseThread(threading.Thread):
 
                 # Move section
                 if shooting_key == -32768 or shooting_key == 1 and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
-                    if cfg.mouse_wild_mouse:
-                        x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
+                    # if cfg.mouse_wild_mouse:
+                    #     x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
 
                     if cfg.mouse_native == True and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # Native move
                         win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)

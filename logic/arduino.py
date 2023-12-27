@@ -24,7 +24,7 @@ class ArduinoMouse:
         self.serial_port.timeout = 0
         self.serial_port.write_timeout = 0
         self.serial_port.port = self.__detect_port()
-        self.mouse_is_pressed = False
+        # self.mouse_is_pressed = False
 
         try:
             self.serial_port.open()
