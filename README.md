@@ -86,7 +86,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_auto_shoot `bool`: Automatic shooting. (For some games need arduino).
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_native `bool`: Use windows native mouse input.
-- mouse_wild_mouse `bool`: Simulate human like mouse input.
 - mouse_move_by_arduino `bool`: Sends a command to the arduino to move the mouse.
 - mouse_shoot_by_arduino `bool`: Sends a command to the arduino to fire with the mouse
 
