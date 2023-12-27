@@ -68,9 +68,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - Obs_camera_id `int`: Virtual Camera ID.
 - Obs_capture_fps `int`: Specific fps value for screen capture.
 
-### Windows capture method:
-- native_Windows_capture `bool`: Use the windows native capture method. It is not recommended. It is not compatible with most models, does not use GPU, is not stable and is slow.
-
 ### Aim settings:
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
@@ -108,6 +105,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - show_boxes `bool`: Displays detectable objects.
 - show_labels `bool`: Displays the name of the detected object.
 - show_conf `bool`: Displays object confidence threshold for detection.
+- show_target_line `bool`: Shows the mouse finishing line.
 - debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 

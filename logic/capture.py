@@ -37,32 +37,6 @@ class Capture():
         
         if cfg.native_Windows_capture:
             return self.windows_native_grab_screen(self.Calculate_screen_offset())
-        
-    def windows_native_grab_screen(self, region):
-        hwin = win32gui.GetDesktopWindow()
-
-        left,top,x2,y2 = region
-        width = x2 - left
-        height = y2 - top
-        
-        hwindc = win32gui.GetWindowDC(hwin)
-        srcdc = win32ui.CreateDCFromHandle(hwindc)
-        memdc = srcdc.CreateCompatibleDC()
-        bmp = win32ui.CreateBitmap()
-        bmp.CreateCompatibleBitmap(srcdc, width, height)
-        memdc.SelectObject(bmp)
-        memdc.BitBlt((0, 0), (width, height), srcdc, (left, top), win32con.SRCCOPY)
-        
-        signedIntsArray = bmp.GetBitmapBits(True)
-        img = np.fromstring(signedIntsArray, dtype='uint8')
-        img.shape = (height, width, 4)
-
-        srcdc.DeleteDC()
-        memdc.DeleteDC()
-        win32gui.ReleaseDC(hwin, hwindc)
-        win32gui.DeleteObject(bmp.GetHandle())
-
-        return img
     
     def reload_capture(self):
         if cfg.Bettercam_capture and self.prev_detection_window_height != cfg.detection_window_height or cfg.Bettercam_capture and self.prev_detection_window_width != cfg.detection_window_width or cfg.Bettercam_capture and self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps:
@@ -92,23 +66,13 @@ class Capture():
         for m in _:
             if m.is_primary:
                 return m.width, m.height
-        
-    def check_target_in_scope(self, target_x, target_y, target_w, target_h):
-        x = cfg.detection_window_width / 2
-        y = cfg.detection_window_height / 2
-        x1 = (target_x - target_w)
-        x2 = (target_x + target_w)
-        y1 = (target_y - target_h)
-        y2 = (target_y + target_h)
-
-        if (x > x1 and x < x2 and y > y1 and y < y2) :
-            return True
-        else :
-            return False
     
     def Quit(self):
         if cfg.Bettercam_capture:
             self.bc.stop()
+
+def draw_target_line(annotated_frame, screen_x_center, screen_y_center, target_x, target_y):
+    cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(target_x), int(target_y)), (0, 255, 255), 1)
 
 def speed(annotated_frame, speed_preprocess, speed_inference, speed_postprocess):
     cv2.putText(annotated_frame, 'preprocess: {:.2f}'.format(speed_preprocess), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)

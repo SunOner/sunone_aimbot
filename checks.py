@@ -80,8 +80,6 @@ def run_checks():
     print('Obs_camera_id', cfg.Obs_camera_id)
     print('Obs_capture_fps', cfg.Obs_capture_fps, '\n')
 
-    print('native_Windows_capture', cfg.native_Windows_capture, '\n')
-
     print('body_y_offset', cfg.body_y_offset)
     print('hideout_targets', cfg.hideout_targets, '\n')
 
@@ -110,6 +108,7 @@ def run_checks():
     print('show_boxes', cfg.show_boxes)
     print('show_labels', cfg.show_labels)
     print('show_conf', cfg.show_conf)
+    print('show_target_line', cfg.show_target_line)
     print('debug_window_scale_percent', cfg.debug_window_scale_percent)
     print('debug_window_name', cfg.debug_window_name, '\n')
 

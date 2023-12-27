@@ -22,9 +22,6 @@ class Config():
         self.Obs_camera_id = int(self.config_Obs_capture['Obs_camera_id'])
         self.Obs_capture_fps = int(self.config_Obs_capture['Obs_capture_fps'])
         
-        self.config_Windows_capture = self.config['Windows capture']
-        self.native_Windows_capture = self.config_Windows_capture.getboolean('native_Windows_capture')
-        
         self.config_Aim_settings = self.config['Aim settings']
         self.body_y_offset = float(self.config_Aim_settings['body_y_offset'])
         self.hideout_targets = self.config_Aim_settings.getboolean('hideout_targets')
@@ -43,7 +40,6 @@ class Config():
         self.mouse_auto_shoot = self.config_Mouse_settings.getboolean('mouse_auto_shoot')
         self.mouse_auto_aim = self.config_Mouse_settings.getboolean('mouse_auto_aim')
         self.mouse_native = self.config_Mouse_settings.getboolean('mouse_native')
-        self.mouse_wild_mouse = self.config_Mouse_settings.getboolean('mouse_wild_mouse')
         self.mouse_triggerbot = self.config_Mouse_settings.getboolean('mouse_triggerbot')
         self.mouse_move_by_arduino = self.config_Mouse_settings.getboolean('mouse_move_by_arduino')
         self.mouse_shoot_by_arduino = self.config_Mouse_settings.getboolean('mouse_shoot_by_arduino')
@@ -63,6 +59,7 @@ class Config():
         self.show_boxes = self.config_Debug_window.getboolean('show_boxes')
         self.show_labels = self.config_Debug_window.getboolean('show_labels')
         self.show_conf = self.config_Debug_window.getboolean('show_conf')
+        self.show_target_line = self.config_Debug_window.getboolean('show_target_line')
         self.debug_window_scale_percent = int(self.config_Debug_window['debug_window_scale_percent'])
         self.debug_window_name = str(self.config_Debug_window['debug_window_name'])
 

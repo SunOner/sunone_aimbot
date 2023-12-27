@@ -28,51 +28,6 @@ class Targets:
         self.w = w
         self.h = h
         self.cls = cls
-        
-class WorkQueue(threading.Thread):
-    def __init__(self):
-        super().__init__()
-        self.queue = queue.Queue(maxsize=1)
-        self.name = 'WorkQueue'
-        self.daemon = True
-        self.shooting_queue = []
-        self.start()
-
-    def run(self):
-        while True:
-            item = self.queue.get()
-            if item is None:
-                self.shooting_queue.clear()
-                mouse_worker.queue.put(None)
-            else:
-                self.process_items(item)
-                try:
-                    target = self.shooting_queue[0]
-                    mouse_worker.queue.put((
-                        target.mouse_x,
-                        target.mouse_y,
-                        target.x,
-                        target.y,
-                        target.w,
-                        target.h,
-                        target.distance
-                    ))
-                except IndexError:
-                    pass
-
-    def process_items(self, item):
-        self.shooting_queue.clear()
-        for box in item:
-            cls = int(box.cls.item())
-            if not cfg.disable_headshot:
-                self.shooting_queue.append(Targets(*box.xywh[0], cls))
-            elif cls in (0, 1, 5, 6):
-                self.shooting_queue.append(Targets(*box.xywh[0], cls))
-
-        if not cfg.disable_headshot:
-            self.shooting_queue.sort(key=lambda x: (x.cls != 7, x.distance))
-        else:
-            self.shooting_queue.sort(key=lambda x: x.distance, reverse=False)
 
 @torch.no_grad()
 def init():
@@ -108,7 +63,7 @@ def init():
 
     first_frame_init = True
     cfg_reload_prev_state = 0
-
+    shooting_queue = []
     while True:
         app_pause = win32api.GetKeyState(Keyboard.KeyCodes.get(cfg.hotkey_pause))
 
@@ -163,14 +118,39 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    queue_worker.queue.put(frame.boxes)
+                    for box in frame.boxes:
+                        cls = int(box.cls.item())
+                        if not cfg.disable_headshot:
+                            shooting_queue.append(Targets(*box.xywh[0], cls))
+                        elif cls in (0, 1, 5, 6):
+                            shooting_queue.append(Targets(*box.xywh[0], cls))
+
+                    if not cfg.disable_headshot:
+                        shooting_queue.sort(key=lambda x: (x.cls != 7, x.distance))
+                    else:
+                        shooting_queue.sort(key=lambda x: x.distance, reverse=False)
+                    try:
+                        target = shooting_queue[0]
+                        mouse_worker.queue.put((
+                            target.mouse_x,
+                            target.mouse_y,
+                            target.x,
+                            target.y,
+                            target.w,
+                            target.h,
+                            target.distance))
+                        if cfg.show_window and cfg.show_target_line:
+                            draw_target_line(annotated_frame=annotated_frame, screen_x_center=cfg.detection_window_width / 2, screen_y_center=cfg.detection_window_height / 2, target_x=target.mouse_x + frames.screen_x_center, target_y=target.mouse_y + frames.screen_y_center + cfg.body_y_offset / target.h)
+                    except IndexError:
+                        mouse_worker.queue.put(None)
+                        shooting_queue.clear()
+                    shooting_queue.clear()
                 else: pass
 
                 if cfg.show_window and cfg.show_boxes:
-                    annotated_frame = draw_helpers(annotated_frame=annotated_frame, boxes=frame.boxes)
+                    draw_helpers(annotated_frame=annotated_frame, boxes=frame.boxes)
             else:
-                if app_pause == 0:
-                    queue_worker.queue.put(None)
+                mouse_worker.queue.put(None)
 
         if cfg.show_window and cfg.show_fps:
             new_frame_time = time.time()
@@ -201,6 +181,4 @@ if __name__ == "__main__":
     frame_ready = threading.Event()
     frames = Capture()
     mouse_worker = MouseThread(frame_ready)
-    queue_worker = WorkQueue()
-
     init()

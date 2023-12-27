@@ -1,4 +1,3 @@
-import math
 import queue
 import threading
 import time
@@ -82,126 +81,107 @@ if cfg.mouse_native == False:
         if gmok:
             return gm.mouse_close()
 
-if cfg.mouse_wild_mouse:
-    sqrt3 = np.sqrt(3)
-    sqrt5 = np.sqrt(5)
-
-def wind_mouse(start_x, start_y, dest_x, dest_y, G_0=9, W_0=3, M_0=15, D_0=12, move_mouse=lambda x,y: None):
-    current_x,current_y = start_x,start_y
-    v_x = v_y = W_x = W_y = 0
-    try:
-        while (dist:=np.hypot(dest_x - start_x, dest_y - start_y)) >= 1:
-            W_mag = min(W_0, dist)
-            if dist >= D_0:
-                W_x = W_x/sqrt3 + (2*np.random.random()-1)*W_mag/sqrt5
-                W_y = W_y/sqrt3 + (2*np.random.random()-1)*W_mag/sqrt5
-            else:
-                W_x /= sqrt3
-                W_y /= sqrt3
-                if M_0 < 3:
-                    M_0 = np.random.random()*3 + 3
-                else:
-                    M_0 /= sqrt5
-            v_x += W_x + G_0*(dest_x-start_x)/dist
-            v_y += W_y + G_0*(dest_y-start_y)/dist
-            v_mag = np.hypot(v_x, v_y)
-            if v_mag > M_0:
-                v_clip = M_0/2 + np.random.random()*M_0/2
-                v_x = (v_x/v_mag) * v_clip
-                v_y = (v_y/v_mag) * v_clip
-            start_x += v_x
-            start_y += v_y
-            move_x = int(np.round(start_x))
-            move_y = int(np.round(start_y))
-            if current_x != move_x or current_y != move_y:
-                move_mouse(current_x:=move_x,current_y:=move_y)
-        return current_x,current_y
-    except:
-        return 0, 0
-
 class MouseThread(threading.Thread):
     def __init__(self, frame_ready_event):
         super(MouseThread, self).__init__()
-        self.queue = queue.Queue()
+        self.queue = queue.Queue(maxsize=1)
         self.daemon = True
-        self.maxsize = 1
         self.frame_ready_event = frame_ready_event
         self.start()
 
     def run(self):
         while True:
             data = self.queue.get()
-            bScope = False
-            if data == None:
+            if data is None:
                 self.frame_ready_event.set()
-            else:
-                if cfg.mouse_lock_target:
-                    shooting_key = win32api.GetKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
-                else:
-                    shooting_key = win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
+                continue
 
-                (x, y, target_x, target_y, target_w, target_h, distance) = data
+            self.process_data(data)
+            self.frame_ready_event.set()
 
-                if cfg.mouse_auto_shoot or cfg.mouse_triggerbot:
-                    bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h)
+    def process_data(self, data):
+        shooting_key = self.get_shooting_key_state()
+        x, y, target_x, target_y, target_w, target_h, distance = data
+        bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h) if cfg.mouse_auto_shoot or cfg.mouse_triggerbot else False
+        x, y = self.adjust_mouse_movement(x, y, distance)
+        self.move_mouse(x, y, shooting_key)
+        self.shoot(bScope)
 
-                if cfg.mouse_slow_down_factor != 0:
-                    slow_down_factor = min(distance, cfg.mouse_slow_down_factor)
-                    x = x / slow_down_factor
-                    y = y / slow_down_factor
-                
-                if cfg.mouse_smoothing != 0 and x is not None and y is not None or cfg.mouse_smoothing != 0 and x is not None and y is not None:
-                    x = x / cfg.mouse_smoothing
-                    y = y / cfg.mouse_smoothing
+    def get_shooting_key_state(self):
+        if cfg.mouse_lock_target:
+            return win32api.GetKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
+        return win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
 
-                # Move section
-                if shooting_key == -32768 or shooting_key == 1 and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
-                    # if cfg.mouse_wild_mouse:
-                    #     x, y = wind_mouse(screen_x_center, screen_y_center, x,y)
+    def adjust_mouse_movement(self, x, y, distance):
+        if cfg.mouse_slow_down_factor != 0:
+            slow_down_factor = min(distance, cfg.mouse_slow_down_factor)
+            x /= slow_down_factor
+            y /= slow_down_factor
 
-                    if cfg.mouse_native == True and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # Native move
-                        win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
+        if cfg.mouse_smoothing != 0 and x is not None and y is not None:
+            x /= cfg.mouse_smoothing
+            y /= cfg.mouse_smoothing
 
-                    if cfg.mouse_native == False and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # ghub move
-                        ghub_mouse_xy(int(x), int(y))
+        return x, y
+    
+    def check_target_in_scope(self, target_x, target_y, target_w, target_h):
+        x = cfg.detection_window_width / 2
+        y = cfg.detection_window_height / 2
+        x1 = (target_x - target_w)
+        x2 = (target_x + target_w)
+        y1 = (target_y - target_h)
+        y2 = (target_y + target_h)
 
-                    if cfg.mouse_move_by_arduino and x is not None and y is not None:
-                        Arduino.move(int(x), int(y))
+        if (x > x1 and x < x2 and y > y1 and y < y2) :
+            return True
+        else :
+            return False
 
-                # Shoot section
-                
-                # By GetAsyncKeyState
-                if cfg.mouse_auto_shoot == True and cfg.mouse_triggerbot == False:
-                    if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting)) == -32768 and bScope:
-                        if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
-                            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                        if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
-                            ghub_mouse_down()
-                        if cfg.mouse_shoot_by_arduino: # arduino
-                            Arduino.press()
+    def move_mouse(self, x, y, shooting_key):
+        if x is None or y is None:
+            return
+        if shooting_key == -32768 or shooting_key == 1 and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
+            if cfg.mouse_native == True and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # Native move
+                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
 
-                    if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting)) == 0 or bScope == False:
-                        if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
-                            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                        if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
-                            ghub_mouse_up()
-                        if cfg.mouse_shoot_by_arduino: # arduino
-                            Arduino.release()
-                    
-                # By triggerbot
-                if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope:
-                    if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
-                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                    if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
-                        ghub_mouse_down()
-                    if cfg.mouse_shoot_by_arduino: # arduino
-                        Arduino.press()
+            if cfg.mouse_native == False and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # ghub move
+                ghub_mouse_xy(int(x), int(y))
 
-                if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope == False:
-                    if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
-                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                    if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
-                        ghub_mouse_up()
-                    if cfg.mouse_shoot_by_arduino: # arduino
-                        Arduino.release()
-                self.frame_ready_event.set()
+            if cfg.mouse_move_by_arduino and x is not None and y is not None:
+                Arduino.move(int(x), int(y))
+    
+    def shoot(self, bScope):
+        # By GetAsyncKeyState
+        if cfg.mouse_auto_shoot == True and cfg.mouse_triggerbot == False:
+            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting)) == -32768 and bScope:
+                if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+                if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+                    ghub_mouse_down()
+                if cfg.mouse_shoot_by_arduino: # arduino
+                    Arduino.press()
+
+            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting)) == 0 or bScope == False:
+                if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+                if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+                    ghub_mouse_up()
+                if cfg.mouse_shoot_by_arduino: # arduino
+                    Arduino.release()
+            
+        # By triggerbot
+        if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope:
+            if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+            if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+                ghub_mouse_down()
+            if cfg.mouse_shoot_by_arduino: # arduino
+                Arduino.press()
+
+        if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope == False:
+            if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+            if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+                ghub_mouse_up()
+            if cfg.mouse_shoot_by_arduino: # arduino
+                Arduino.release()
