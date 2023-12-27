@@ -12,7 +12,7 @@ import queue
 from logic.targets import *
 from logic.keyboard import *
 from logic.screen import *
-from logic.frame import get_new_frame, speed, draw_helpers
+from logic.frame import Capture, speed, draw_helpers
 from logic.mouse import MouseThread
 if cfg.mouse_native == False:
     from logic.mouse import ghub_mouse_up, ghub_mouse_down
@@ -120,15 +120,16 @@ def init():
         if app_reload_cfg != cfg_reload_prev_state:
             if app_reload_cfg == 1 or app_reload_cfg == 0:
                 cfg.Read(verbose=True)
+                frames.reload_capture()
         cfg_reload_prev_state = app_reload_cfg
 
         if frame_ready.is_set() and first_frame_init == False:
-            image = get_new_frame()
+            image = frames.get_new_frame()
             frame_ready.clear()
 
         if first_frame_init:
             first_frame_init = False
-            image = get_new_frame()
+            image = frames.get_new_frame()
 
         result = model.predict(
             source=image,
@@ -201,7 +202,7 @@ def init():
 
 if __name__ == "__main__":
     frame_ready = threading.Event()
-
+    frames = Capture()
     mouse_worker = MouseThread(frame_ready)
     queue_worker = work_queue()
 

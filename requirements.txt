@@ -1,5 +1,5 @@
 cuda_python
-dxcam[cv2]
+bettercam
 numpy
 pywin32
 ultralytics

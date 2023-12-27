@@ -154,7 +154,7 @@ class MouseThread(threading.Thread):
                 if cfg.mouse_smoothing != 0 and x is not None and y is not None or cfg.mouse_smoothing != 0 and x is not None and y is not None:
                     x = x / cfg.mouse_smoothing
                     y = y / cfg.mouse_smoothing
-                
+
                 # Move section
                 if shooting_key == -32768 or shooting_key == 1 and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
                     if cfg.mouse_wild_mouse:
@@ -205,5 +205,4 @@ class MouseThread(threading.Thread):
                         ghub_mouse_up()
                     if cfg.mouse_shoot_by_arduino: # arduino
                         Arduino.release()
-                        
                 self.frame_ready_event.set()

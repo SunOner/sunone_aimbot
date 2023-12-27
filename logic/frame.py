@@ -1,53 +1,46 @@
-import threading
 import cv2
-import dxcam
+import bettercam
 from logic.screen import *
 from logic.config_watcher import *
-import time
 from run import cfg
+import time
 
-dx = None
-obs_camera = None
+class Capture():
+    def __init__(self):
+        self.prev_detection_window_width = cfg.detection_window_width
+        self.prev_detection_window_height = cfg.detection_window_height
 
-def thread_hook(args):
-    if 'DXCamera' in str(args.thread) and 'cannot join current thread' in str(args.exc_value):
-        raise 'It looks like the game is currently in fullscreen mode, please switch the game to windowed mode or windowless mode.'
-
-def get_new_frame():
-    global dx
-    global obs_camera
-
-    threading.excepthook = thread_hook
-
-    if cfg.Dxcam_capture and dx is None:
-        if cfg.native_Windows_capture or cfg.Obs_capture:
-            print('Use only one capture method!')
-            exit(0)
-        if dx is None:
-            dx = dxcam.create(device_idx=cfg.dxcam_monitor_id, output_idx=cfg.dxcam_gpu_id, output_color="BGR", max_buffer_len=cfg.dxcam_max_buffer_len)
-        if dx.is_capturing == False:
-            dx.start(Calculate_screen_offset(), target_fps=cfg.dxcam_capture_fps)
-    if cfg.Dxcam_capture and dx is not None:
-        img = dx.get_latest_frame()
-
-    if cfg.Obs_capture and obs_camera is None:
-        if cfg.Dxcam_capture or cfg.native_Windows_capture:
-            print('Use only one capture method!')
-            exit(0)
-        obs_camera = cv2.VideoCapture(cfg.Obs_camera_id)
-        obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, detection_window_width)
-        obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, detection_window_height)
-        obs_camera.set(cv2.CAP_PROP_FPS, cfg.Obs_capture_fps)
-    if cfg.Obs_capture and obs_camera is not None:
-        ret_val, img = obs_camera.read()
+        if cfg.Bettercam_capture:
+            self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id, output_idx=cfg.bettercam_gpu_id, output_color="BGR", max_buffer_len=64)
+            if self.bc.is_capturing == False:
+                self.bc.start(Calculate_screen_offset(), target_fps=cfg.bettercam_capture_fps)
         
-    if cfg.native_Windows_capture:
-        if cfg.Obs_capture or cfg.Dxcam_capture:
-            print('Use only one capture method!')
-            exit(0)
-        img = windows_grab_screen(Calculate_screen_offset())
-
-    return img
+        if cfg.Obs_capture:
+            self.obs_camera = cv2.VideoCapture(cfg.Obs_camera_id)
+            self.obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.detection_window_width)
+            self.obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.detection_window_height)
+            self.obs_camera.set(cv2.CAP_PROP_FPS, cfg.Obs_capture_fps)
+            
+    def get_new_frame(self):
+        if cfg.Bettercam_capture:
+            return self.bc.get_latest_frame()
+        
+        if cfg.Obs_capture:
+            self.ret_val, self.img = self.obs_camera.read()
+            return self.img
+        
+        if cfg.native_Windows_capture:
+            return windows_grab_screen(Calculate_screen_offset())
+        
+    def reload_capture(self):
+        if cfg.Bettercam_capture and self.prev_detection_window_height != cfg.detection_window_height or cfg.Bettercam_capture and self.prev_detection_window_width != cfg.detection_window_width:
+            self.bc.stop()
+            del self.bc
+            self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id, output_idx=cfg.bettercam_gpu_id, output_color="BGR", max_buffer_len=64)
+            self.bc.start(Calculate_screen_offset(), target_fps=cfg.bettercam_capture_fps)
+            print('Capture reloaded')
+            self.prev_detection_window_width = cfg.detection_window_width
+            self.prev_detection_window_height = cfg.detection_window_height
 
 def speed(annotated_frame, speed_preprocess, speed_inference, speed_postprocess):
     cv2.putText(annotated_frame, 'preprocess: {:.2f}'.format(speed_preprocess), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)

@@ -11,12 +11,11 @@ class Config():
         self.detection_window_width = int(self.config_Detection_window['detection_window_width'])
         self.detection_window_height = int(self.config_Detection_window['detection_window_height'])
         
-        self.config_Dxcam_Capture = self.config['Dxcam Capture']
-        self.Dxcam_capture = self.config_Dxcam_Capture.getboolean('Dxcam_capture')
-        self.dxcam_capture_fps = int(self.config_Dxcam_Capture['dxcam_capture_fps'])
-        self.dxcam_monitor_id = int(self.config_Dxcam_Capture['dxcam_monitor_id'])
-        self.dxcam_gpu_id = int(self.config_Dxcam_Capture['dxcam_gpu_id'])
-        self.dxcam_max_buffer_len =int(self.config_Dxcam_Capture['dxcam_max_buffer_len'])
+        self.config_Bettercam_Capture = self.config['Bettercam Capture']
+        self.Bettercam_capture = self.config_Bettercam_Capture.getboolean('Bettercam_capture')
+        self.bettercam_capture_fps = int(self.config_Bettercam_Capture['bettercam_capture_fps'])
+        self.bettercam_monitor_id = int(self.config_Bettercam_Capture['bettercam_monitor_id'])
+        self.bettercam_gpu_id = int(self.config_Bettercam_Capture['bettercam_gpu_id'])
 
         self.config_Obs_capture = self.config['Obs capture']
         self.Obs_capture = self.config_Obs_capture.getboolean('Obs_capture')

@@ -22,11 +22,11 @@ except:
     print('install numpy: pip install numpy')
     exit(0)
 
-if cfg.Dxcam_capture == True:
+if cfg.Bettercam_capture == True:
     try:
-        import dxcam
+        import bettercam
     except:
-        print('Install dxcam: pip install dxcam[cv2]')
+        print('Install bettercam: pip install bettercam')
         exit(0)
 
 import importlib.metadata
@@ -36,7 +36,7 @@ try:
     import cv2
     from cv2 import __version__
 except:
-    print('install cv2: pip install opencv-python \nor\npip install dxcam[cv2]')
+    print('install cv2: pip install opencv-python')
     exit(0)
 
 def run_checks():
@@ -58,8 +58,8 @@ def run_checks():
 
     print('numpy version: {0}'.format(numpy.version.version))
 
-    if cfg.Dxcam_capture:
-        print('DXcam devices info:\n{0}'.format(dxcam.output_info()))
+    if cfg.Bettercam_capture:
+        print('Bettercam devices info:\n{0}'.format(bettercam.output_info()))
     # TODO: ADD OBS_CAPTURE CHECKS
     try:
         print('asyncio version: {0}'.format(importlib.metadata.version('asyncio')))
@@ -71,11 +71,10 @@ def run_checks():
     print('screen_width', cfg.detection_window_width)
     print('screen_height', cfg.detection_window_height, '\n')
 
-    print('Dxcam_capture', cfg.Dxcam_capture)
-    print('dxcam_capture_fps', cfg.dxcam_capture_fps)
-    print('dxcam_monitor_id', cfg.dxcam_monitor_id)
-    print('dxcam_gpu_id', cfg.dxcam_gpu_id)
-    print('dxcam_max_buffer_len', cfg.dxcam_max_buffer_len, '\n')
+    print('Bettercam_capture', cfg.Bettercam_capture)
+    print('bettercam_capture_fps', cfg.bettercam_capture_fps)
+    print('bettercam_monitor_id', cfg.bettercam_monitor_id)
+    print('bettercam_gpu_id', cfg.bettercam_gpu_id, '\n')
 
     print('Obs_capture',cfg. Obs_capture)
     print('Obs_camera_id', cfg.Obs_camera_id)

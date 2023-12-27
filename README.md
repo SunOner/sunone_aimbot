@@ -57,12 +57,11 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - detection_window_width `int`: Horizontal resolution of the object search window.
 - detection_window_height `int`: Vertical resolution of the object search window.
 
-### Dxcam capture method:
-- Dxcam_capture `bool`: Use [dxcam](https://github.com/ra1nty/DXcam) to capture images from the screen.
-- dxcam_capture_fps `int`: Specific fps value for screen capture.
-- dxcam_monitor_id `int`: Id of the monitor from which the images will be captured.
-- dxcam_gpu_id `int`: Id of the GPU to be used for image capture
-- dxcam_max_buffer_len `int`: [Video Buffer](https://github.com/ra1nty/DXcam#video-buffer)
+### Bettercam capture method:
+- Bettercam_capture `bool`: Use [dxcam](https://github.com/RootKit-Org/BetterCam) to capture images from the screen.
+- bettercam_capture_fps `int`: Specific fps value for screen capture.
+- bettercam_monitor_id `int`: Id of the monitor from which the images will be captured.
+- bettercam_gpu_id `int`: Id of the GPU to be used for image capture
 
 ### Obs capture method:
 - Obs_capture `bool`: Use [Obs](https://github.com/obsproject/obs-studio) to capture images from the screen.
