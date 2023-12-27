@@ -58,7 +58,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - detection_window_height `int`: Vertical resolution of the object search window.
 
 ### Bettercam capture method:
-- Bettercam_capture `bool`: Use [dxcam](https://github.com/RootKit-Org/BetterCam) to capture images from the screen.
+- Bettercam_capture `bool`: Use [Bettercam](https://github.com/RootKit-Org/BetterCam) to capture images from the screen.
 - bettercam_capture_fps `int`: Specific fps value for screen capture.
 - bettercam_monitor_id `int`: Id of the monitor from which the images will be captured.
 - bettercam_gpu_id `int`: Id of the GPU to be used for image capture
