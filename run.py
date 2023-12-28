@@ -52,13 +52,14 @@ def init():
     if cfg.show_window:
         print('An open debug window can affect performance.')
         cv2.namedWindow(cfg.debug_window_name)
+        if cfg.debug_window_always_on_top:
+            debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
+            win32gui.SetWindowPos(debug_window_hwnd,win32con.HWND_TOPMOST,100,100,200,200,0)
 
     clss = []
-    if cfg.show_window:
-        clss = range(9)
-    if cfg.hideout_targets and cfg.show_window == False:
+    if cfg.hideout_targets:
         clss = [0,1,5,6,7]
-    if cfg.hideout_targets == False and cfg.show_window == False:
+    if cfg.hideout_targets == False:
         clss = [0,1,7]
 
     first_frame_init = True

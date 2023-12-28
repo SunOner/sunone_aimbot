@@ -60,6 +60,7 @@ class Config():
         self.show_labels = self.config_Debug_window.getboolean('show_labels')
         self.show_conf = self.config_Debug_window.getboolean('show_conf')
         self.show_target_line = self.config_Debug_window.getboolean('show_target_line')
+        self.debug_window_always_on_top = self.config_Debug_window.getboolean('debug_window_always_on_top')
         self.debug_window_scale_percent = int(self.config_Debug_window['debug_window_scale_percent'])
         self.debug_window_name = str(self.config_Debug_window['debug_window_name'])
 

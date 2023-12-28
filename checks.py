@@ -109,6 +109,7 @@ def run_checks():
     print('show_labels', cfg.show_labels)
     print('show_conf', cfg.show_conf)
     print('show_target_line', cfg.show_target_line)
+    print('debug_window_always_on_top', cfg.debug_window_always_on_top)
     print('debug_window_scale_percent', cfg.debug_window_scale_percent)
     print('debug_window_name', cfg.debug_window_name, '\n')
 

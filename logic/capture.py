@@ -72,7 +72,7 @@ class Capture():
             self.bc.stop()
 
 def draw_target_line(annotated_frame, screen_x_center, screen_y_center, target_x, target_y):
-    cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(target_x), int(target_y)), (0, 255, 255), 1)
+    cv2.line(annotated_frame, (int(screen_x_center), int(screen_y_center)), (int(target_x), int(target_y)), (0, 255, 255), 2)
 
 def speed(annotated_frame, speed_preprocess, speed_inference, speed_postprocess):
     cv2.putText(annotated_frame, 'preprocess: {:.2f}'.format(speed_preprocess), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
