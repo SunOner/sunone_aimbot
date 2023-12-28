@@ -166,15 +166,14 @@ def Update_yolov8_aimbot():
         target.write(source.read())
 
     cleanup_script = f"""
-    import os
-    import time
-    import subprocess
-
-    time.sleep(1)
-    os.remove(r'install.py')
-    os.rename('install_copy.py', 'install.py')
-    subprocess.Popen(['python', r'install.py'])
-    os.system('RMDIR temp /S')
+import os
+import time
+import subprocess
+time.sleep(1)
+os.remove(r'install.py')
+os.rename('install_copy.py', 'install.py')
+subprocess.Popen(['python', r'install.py'])
+os.system('RMDIR temp /S')
     """
     with open('cleanup.py', 'w') as file:
         file.write(cleanup_script)
@@ -229,8 +228,8 @@ def main():
             print("Incorrect input, try again.")
 
 if __name__ == "__main__":
-    if not os.path.exists('./temp'):
-        os.makedirs('./temp')
+    if os.path.exists(r'./cleanup.py'):
+        os.remove(r'./cleanup.py')
     upgrade_pip()
     upgrade_ultralytics()
     main()
