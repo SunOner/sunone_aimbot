@@ -138,8 +138,8 @@ class MouseThread(threading.Thread):
             return False
 
     def move_mouse(self, x, y, shooting_key):
-        if x is None and y is None:
-            return
+        if x == None or y == None:
+            pass
         if shooting_key == -32768 or shooting_key == 1 and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
             if cfg.mouse_native == True and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # Native move
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
