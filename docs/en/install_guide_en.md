@@ -34,4 +34,4 @@
 <br></br>
 12. Try run aimbot. `python run.py`. If aimbot works, export .pt model to .engine.
 <br></br>
-13. Type `yolo export model="models/sunxds_0.2.1_nano_320.pt" format=engine half=true device=0 workspace=8 imgsz=320`
+13. Type `yolo export model="models/sunxds_0.2.9.6.pt" format=engine half=true device=0 imgsz=320`
