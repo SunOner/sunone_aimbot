@@ -23,7 +23,7 @@
 12. Errors are reported and fixed [here](https://github.com/SunOner/yolov8_aimbot/issues?q=is%3Aissue)
 13. I have a suggestion for improvement!
     - [Create a topic here](https://github.com/SunOner/yolov8_aimbot/discussions)
-14. The aimbot takes a long time to aim. It's kind of jerky.
+14. The aimbot takes a long time to aim. It's kind of jerky. / WARNING NMS time limit exceeded
 	- Do not overload the graphics card!
 	- Do not set high game settings.
 	- Lock the frame rate (for example, if you have a 144Hz monitor, lock FPS to 144 in the game).
