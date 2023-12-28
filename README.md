@@ -41,7 +41,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>TensorRT Version:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python Version:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>PyTorch Version:</th><td>2.1.1+cu121</td></tr></thead>
-  <thead><tr><th>YOLO Version:</th><td>YOLOv8.0.230</td></tr></thead>
+  <thead><tr><th>Ultralytics Version:</th><td>YOLOv8.0.230</td></tr></thead>
   <thead><tr><th>OpenCV Version:</th><td>4.8.1</td></tr></thead>
   <thead><tr><th>NumPy Version:</th><td>1.26.0</td></tr></thead>
 </table>
@@ -105,6 +105,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - show_labels `bool`: Displays the name of the detected object.
 - show_conf `bool`: Displays object confidence threshold for detection.
 - show_target_line `bool`: Shows the mouse finishing line.
+- debug_window_always_on_top `bool`: The debug window will always be on top of other windows.
 - debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
 - debug_window_name `str`: Specifies the title of the OpenCV2 window.
 
