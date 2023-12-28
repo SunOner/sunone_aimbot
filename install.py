@@ -165,20 +165,20 @@ def Update_yolov8_aimbot():
     with open('./temp/install.py', 'r') as source, open(copy_file, 'w') as target:
         target.write(source.read())
 
-    cleanup_script = f"""
+    cleanup_script = r"""
 import os
 import time
 import subprocess
 time.sleep(1)
-os.remove(r'install.py')
-os.rename('install_copy.py', 'install.py')
-subprocess.Popen(['python', r'install.py'])
-os.system('RMDIR temp /S')
+cwd = os.getcwd()
+os.rename('{0}\install_copy.py'.format(cwd).replace('\\\\', '\\'), '{0}\install.py'.format(cwd).replace('\\\\', '\\'))
+subprocess.Popen(['python', '{0}\install.py'.format(cwd).replace('\\\\', '\\')])
+os.system('RMDIR {0}\temp /S'.format(cwd).replace('\\\\', '\\'))
     """
-    with open('cleanup.py', 'w') as file:
+    with open('./cleanup.py', 'w') as file:
         file.write(cleanup_script)
 
-    subprocess.Popen(['python', 'cleanup.py'])
+    subprocess.Popen(['python', './cleanup.py'])
     sys.exit()
 
 def download_file(url, filename):
