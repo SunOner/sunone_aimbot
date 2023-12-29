@@ -46,7 +46,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>NumPy Version:</th><td>1.26.0</td></tr></thead>
 </table>
 <details><summary><b>Tested GPUs:</b></summary><table style="table-layout: fixed; width: 100%">
-   <thead><tr><td>RTX 4080</td><td>RTX 4070</td><td>RTX 4060</td><td>RTX 3090</td><td>RTX 3080-ti</td><td>RTX 3070</td><td>RTX 3050</td>
+   <thead><tr><td>RTX 4080</td><td>RTX 4070</td><td>RTX 4060</td><td>RTX 3090</td><td>RTX 3080-ti</td><td>RTX 3070</td><td>RTX 3060</td><td>RTX 3050</td>
    <td>RTX 2080</td><td>RTX 2060-super</td><td>GTX 1660-super</td><td>GTX 1660</td><td>GTX 1650</td><td>GTX 1080</td><td>GTX 1060</td><td>GTX 1050-ti</td><td>GTX 1050</td><td>GTX 750-ti</td><td>GTX 750</td></tr></thead>
 </table></details>
 
