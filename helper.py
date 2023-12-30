@@ -44,7 +44,7 @@ except:
         if not os.path.isfile('Git-2.43.0-64-bit.exe'):
             download_file('https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe', 'Git-2.43.0-64-bit.exe')
         subprocess.call('{}/Git-2.43.0-64-bit.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
-        os.system('py helper.py')
+        os.system('py helper.py') # restart required for imports
         quit()
 try:
     import cuda
@@ -236,10 +236,9 @@ def find_tensorrt_path():
         return None
 
 def Install_TensorRT():
-    # TODO (more ckecks begin install)
     cuda = find_cuda_path()
     if cuda is not None:
-        if not os.path.isfile('TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip'):
+        if not os.path.isfile('TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip') and os.path.isdir('TensorRT-8.6.1.6') == False:
             print('TensorRT in not downloaded\nDownloading TensorRT 8.6.1.6...')
             download_file('https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/secure/8.6.1/zip/TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip', 'TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip')
         
@@ -270,11 +269,17 @@ def Install_TensorRT():
                     shutil.copy2('{0}\TensorRT-8.6.1.6\lib\\{1}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__))), lib), cuda_path)
     else:
         print('First install cuda 12.1.')
-
+        
+def install_cuda():
+    os.system('cls')
+    print('Cuda 12.1 is being downloaded, and installation will begin after downloading.')
+    download_file('https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_531.14_windows.exe', './cuda_12.1.0_531.14_windows.exe')
+    subprocess.call('{}/cuda_12.1.0_531.14_windows.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
+    
 def print_menu():
     os.system('cls')
-    # TODO: last error
     print('Run this script as an administrator to work correctly.')
+    # TODO: print last error
     print('Installed version is: {0}, latest: {1}\n'.format(get_aimbot_current_version(), get_aimbot_version()))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
@@ -292,8 +297,7 @@ def main():
                 Update_yolov8_aimbot()
             
             elif choice == "2":
-                print("The file will appear in the current folder\nDownloading Cuda 12.1...")
-                download_file('https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_531.14_windows.exe', './cuda_12.1.0_531.14_windows.exe')
+                install_cuda()
             
             elif choice == "3":
                 Install_TensorRT()
