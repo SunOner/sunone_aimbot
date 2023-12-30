@@ -150,7 +150,8 @@ def Update_yolov8_aimbot():
     try:
         Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp', progress=CloneProgress())
     except:
-        print('Folder temp is existing, deleting...')
+        print('Folder temp is existing:')
+        os.system('RMDIR temp /S')
         print("Cloning repo. Please wait...")
         Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp', progress=CloneProgress())
 
@@ -166,23 +167,7 @@ def Update_yolov8_aimbot():
         print(temp_file)
         shutil.move(temp_file, temp_file.replace('temp/', ''))
 
-    cleanup_script = r"""
-import os
-import sys
-import time
-import subprocess
-time.sleep(1)
-cwd = os.getcwd()
-sys.exit()
-    """[1:]
-    with open('./cleanup.py', 'w') as file:
-        file.write(cleanup_script)
-
-    subprocess.Popen(['python', './cleanup.py'])
-    time.sleep(0.6)
-    os.remove(r'./cleanup.py')
-    subprocess.Popen(['python', './install.py'])
-    sys.exit()
+    os.system('py install.py')
 
 def download_file(url, filename):
     response = requests.get(url, stream=True)
