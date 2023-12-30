@@ -1,13 +1,18 @@
 import re
-import os
+import os, ctypes
 import os.path
 import sys, subprocess
 import time 
-import requests
 import shutil
 import zipfile
 import winreg
 
+try:
+    import requests
+except:
+    os.system('pip install requests')
+    os.system('py helper.py')
+    quit()
 try:
     from tqdm import tqdm
 except:
@@ -338,6 +343,15 @@ def main():
         quit()
 
 if __name__ == "__main__":
-    upgrade_pip()
-    upgrade_ultralytics()
-    main()
+    try:
+        is_admin = os.getuid() == 0
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+        print('Please run the script as an administrator.\nExit...')
+        time.sleep(3)
+        exit()
+        
+    if is_admin:
+        upgrade_pip()
+        upgrade_ultralytics()
+        main()
