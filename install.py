@@ -11,7 +11,7 @@ except:
     os.system('pip install tqdm')
     from tqdm import tqdm
 try:
-    from git import Repo
+    from git import Repo, RemoteProgress
 except:
     print('gitpython not found, installation is in progress')
     os.system('pip install gitpython')
@@ -67,6 +67,11 @@ try:
 except:
     print('torch not found, installation is in progress')
     os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
+
+class CloneProgress(RemoteProgress):
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        if message:
+            print(message)
 
 def upgrade_ultralytics():
     print('Checks new ultralytics version...')
@@ -143,15 +148,14 @@ def Update_yolov8_aimbot():
 
     print("Cloning repo. Please wait...")
     try:
-        Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp')
+        Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp', progress=CloneProgress())
     except:
         print('Folder temp is existing, deleting...')
-        delete_files_in_folder('./temp')
-        os.system('RMDIR temp /S')
         print("Cloning repo. Please wait...")
-        Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp')
+        Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp', progress=CloneProgress())
 
     os.makedirs('./media/tests')
+
     temp_aimbot_files = [
         './temp/checks.py', './temp/config.ini', './temp/install.py', './temp/run.py', './temp/version', 
         './temp/logic/arduino.py', './temp/logic/capture.py', './temp/logic/config_watcher.py', './temp/logic/game.yaml', './temp/logic/ghub_mouse.dll', './temp/logic/keyboard.py', './temp/logic/mouse.py', 
@@ -169,7 +173,6 @@ import time
 import subprocess
 time.sleep(1)
 cwd = os.getcwd()
-os.system('RMDIR {0}\temp /S'.format(cwd).replace('\\\\', '\\'))
 sys.exit()
     """[1:]
     with open('./cleanup.py', 'w') as file:
@@ -178,6 +181,7 @@ sys.exit()
     subprocess.Popen(['python', './cleanup.py'])
     time.sleep(0.6)
     os.remove(r'./cleanup.py')
+    subprocess.Popen(['python', './install.py'])
     sys.exit()
 
 def download_file(url, filename):
