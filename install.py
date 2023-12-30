@@ -39,10 +39,12 @@ except:
     try:
         from git import Repo, RemoteProgress
     except:
-        print('Please, install git\nDownloading git.\nAfter download install git from base derictory. and relaunch script.')
-        download_file('https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe', 'Git-2.43.0-64-bit.exe')
-        
-        time.sleep(3)
+        os.system('cls')
+        print('Please, install git\nDownloading git.\nAfter installation, the script will restart automatically.')
+        if not os.path.isfile('Git-2.43.0-64-bit.exe'):
+            download_file('https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe', 'Git-2.43.0-64-bit.exe')
+        subprocess.call('{}/Git-2.43.0-64-bit.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
+        os.system('py install.py')
         quit()
 try:
     import cuda
@@ -272,14 +274,14 @@ def Install_TensorRT():
         print('First install cuda 12.1.')
 
 def print_menu():
-    # os.system('cls')
+    os.system('cls')
     # TODO: last error
     print('Run this script as an administrator to work correctly.')
     print('Installed version is: {0}, latest: {1}\n'.format(get_aimbot_current_version(), get_aimbot_version()))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
-    print("3: Download and unpack TensorRT")
+    print("3: Install TensorRT")
     print("0: Exit")
 
 def main():
