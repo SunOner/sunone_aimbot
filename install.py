@@ -19,7 +19,7 @@ try:
 except:
     print('gitpython not found, installation is in progress')
     os.system('pip install gitpython')
-    from git import Repo
+    from git import Repo, RemoteProgress
 try:
     import cuda
 except:
@@ -272,7 +272,6 @@ def print_menu():
     print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
     print("3: Download and unpack TensorRT")
-    print("4: tests")
     print("0: Exit")
 
 def main():
@@ -289,11 +288,8 @@ def main():
                 download_file('https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_531.14_windows.exe', './cuda_12.1.0_531.14_windows.exe')
             
             elif choice == "3":
-                print("A feature in development")
-
-            elif choice == "4":
                 Install_TensorRT()
-            
+                
             elif choice == "0":
                 print("Exiting the program...")
                 break
