@@ -20,12 +20,14 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot:
 
 - Information in English:
-  - [Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/install_guide_en.md)
+  - [Auto-Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/helper_en.md)
+  - [Self install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/install_guide_en.md)
   - [Questions and answers](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/questions_en.md)
   - [Arduino setup](https://github.com/SunOner/HID_Arduino)
 <br></br>
 - Информация на Русском языке:
-  - [Инструкция по установке](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/install_guide_ru.md)
+  - [Инструкция по автоматической установке](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/helper_ru.md)
+  - [Инструкция по установке в ручную](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/install_guide_ru.md)
   - [Вопросы и ответы](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/questions_ru.md)
   - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
 <br></br>

@@ -158,8 +158,14 @@ def delete_files_in_folder(folder):
 
 def Update_yolov8_aimbot():
     print('Deleting old files..')
-    delete_files_in_folder('./logic')
-    delete_files_in_folder('./media')
+    try:
+        delete_files_in_folder('./logic')
+    except:
+        pass
+    try:
+        delete_files_in_folder('./media')
+    except:
+        pass
     try:
         os.remove('./checks.py')
     except:
@@ -194,18 +200,38 @@ def Update_yolov8_aimbot():
         os.system('RMDIR temp /S')
         print("Cloning repo. Please wait...")
         Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp', progress=CloneProgress())
-
-    os.makedirs('./media/tests')
+    
+    if os.path.isdir('./logic') == False:
+        os.makedirs('./logic')
+        
+    if os.path.isdir('./media') == False:
+        os.makedirs('./media')
+        
+    if os.path.isdir('./media/tests') == False:
+        os.makedirs('./media/tests')
+        
+    if os.path.isdir('./docs/en') == False:
+        os.makedirs('./docs/en')
+    if os.path.isdir('./docs/ru') == False:
+        os.makedirs('./docs/ru')
 
     temp_aimbot_files = [
         './temp/checks.py', './temp/config.ini', './temp/helper.py', './temp/run.py', './temp/version', 
         './temp/logic/arduino.py', './temp/logic/capture.py', './temp/logic/config_watcher.py', './temp/logic/game.yaml', './temp/logic/ghub_mouse.dll', './temp/logic/keyboard.py', './temp/logic/mouse.py', 
-        './temp/media/aimbot.png', './temp/media/cuda.png', './temp/media/environment_variables.png', './temp/media/environment_variables_path.png', './temp/media/one.gif', './temp/media/python.png', './temp/media/tests/test_det.mp4']
+        './temp/media/aimbot.png', './temp/media/cmd_admin_en.png', './temp/media/cmd_admin_ru.png', './temp/media/cmd_cd_path.png',
+        './temp/media/copy_explorer_path.png', './temp/media/python_add_to_path.png', './temp/media/cuda.png', './temp/media/environment_variables.png',
+        './temp/media/environment_variables_path.png', './temp/media/one.gif', './temp/media/python.png',
+        './temp/media/tests/test_det.mp4'
+        './temp/docs/en/helper_en.md', './temp/docs/en/install_guide_en.md', './temp/docs/en/questions_en.md',
+        './temp/docs/ru/helper_ru.md', './temp/docs/ru/install_guide_ru.md', './temp/docs/ru/questions_ru.md', ]
 
     print('Moving files from ./temp/')
     for temp_file in temp_aimbot_files:
         print(temp_file)
-        shutil.move(temp_file, temp_file.replace('temp/', ''))
+        try:
+            shutil.move(temp_file, temp_file.replace('temp/', ''))
+        except:
+            pass
 
     os.system('py helper.py')
 
