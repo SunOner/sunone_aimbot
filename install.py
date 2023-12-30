@@ -14,12 +14,36 @@ except:
     print('tqdm not found, installation is in progress')
     os.system('pip install tqdm')
     from tqdm import tqdm
+
+def download_file(url, filename):
+    response = requests.get(url, stream=True)
+    total_size_in_bytes = int(response.headers.get('content-length', 0))
+
+    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
+
+    with open(filename, 'wb') as file:
+        for data in response.iter_content(1024):
+            progress_bar.update(len(data))
+            file.write(data)
+    
+    progress_bar.close()
+
+    if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+        print("Error with downloading file.")
+
 try:
     from git import Repo, RemoteProgress
 except:
     print('gitpython not found, installation is in progress')
     os.system('pip install gitpython')
-    from git import Repo, RemoteProgress
+    try:
+        from git import Repo, RemoteProgress
+    except:
+        print('Please, install git\nDownloading git.\nAfter download install git from base derictory. and relaunch script.')
+        download_file('https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe', 'Git-2.43.0-64-bit.exe')
+        
+        time.sleep(3)
+        quit()
 try:
     import cuda
 except:
@@ -182,22 +206,6 @@ def Update_yolov8_aimbot():
         shutil.move(temp_file, temp_file.replace('temp/', ''))
 
     os.system('py install.py')
-
-def download_file(url, filename):
-    response = requests.get(url, stream=True)
-    total_size_in_bytes = int(response.headers.get('content-length', 0))
-
-    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
-
-    with open(filename, 'wb') as file:
-        for data in response.iter_content(1024):
-            progress_bar.update(len(data))
-            file.write(data)
-    
-    progress_bar.close()
-
-    if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-        print("Error with downloading file.")
 
 def find_cuda_path():
     cuda_paths = []
