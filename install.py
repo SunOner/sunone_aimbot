@@ -1,9 +1,13 @@
 import re
 import os
+import os.path
 import sys, subprocess
 import time 
 import requests
 import shutil
+import zipfile
+import winreg
+
 try:
     from tqdm import tqdm
 except:
@@ -67,6 +71,16 @@ try:
 except:
     print('torch not found, installation is in progress')
     os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
+
+def get_system_path():
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 0, winreg.KEY_READ) as key:
+        return winreg.QueryValueEx(key, 'Path')[0]
+
+def set_system_path(new_path):
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 0, winreg.KEY_WRITE) as key:
+        winreg.SetValueEx(key, 'Path', 0, winreg.REG_EXPAND_SZ, new_path)
+    from ctypes import windll
+    windll.user32.SendMessageTimeoutA(0xFFFF, 0x001A, 0, None, 0x02, 1000, None)
 
 class CloneProgress(RemoteProgress):
     def update(self, op_code, cur_count, max_count=None, message=''):
@@ -185,40 +199,111 @@ def download_file(url, filename):
     if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
         print("Error with downloading file.")
 
+def find_cuda_path():
+    cuda_paths = []
+    for key, value in os.environ.items():
+        if key == 'PATH':
+            for path_string in value.split(';'):
+                if r'CUDA' in path_string and r'12.1' in path_string:
+                    cuda_paths.append(path_string)
+
+    if len(cuda_paths):
+        return cuda_paths
+    else:
+        return None
+
+def find_tensorrt_path():
+    path = None
+    for key, value in os.environ.items():
+        if key == 'PATH':
+            for path_string in value.split(';'):
+                if r'TensorRT' in path_string and r'lib' in path_string:
+                    path = path_string
+    
+    if path is not None:
+        return path
+    else:
+        return None
+
+def Install_TensorRT():
+    ## TODO
+    cuda = find_cuda_path()
+    if cuda is not None:
+        if not os.path.isfile('TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip'):
+            print('TensorRT in not downloaded\nDownloading TensorRT 8.6.1.6...')
+            download_file('https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/secure/8.6.1/zip/TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip', 'TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip')
+        
+        if not os.path.isdir('TensorRT-8.6.1.6'):
+            print('Unpacking the TensorRT archive, please wait...')
+            with zipfile.ZipFile(r'./TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip', 'r') as zip_ref:
+                zip_ref.extractall('./')
+        
+        os.system('pip install ./TensorRT-8.6.1.6/python/tensorrt-8.6.1-cp311-none-win_amd64.whl')
+
+        current_path = get_system_path()
+        tensorrt_lib_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'TensorRT-8.6.1.6\\lib')
+
+        if tensorrt_lib_path not in current_path:
+            new_path = current_path + ';' + tensorrt_lib_path
+            set_system_path(new_path)
+            print(f'New path added: {tensorrt_lib_path}')
+        else:
+            print(f'Env path already exists: {tensorrt_lib_path}')
+
+        tensorrt_lib_files = ['nvinfer.dll', 'nvinfer.lib', 'nvinfer_builder_resource.dll', 'nvinfer_dispatch.dll', 'nvinfer_dispatch.lib', 'nvinfer_lean.dll',
+                            'nvinfer_lean.lib', 'nvinfer_plugin.dll', 'nvinfer_plugin.lib', 'nvinfer_vc_plugin.dll', 'nvinfer_vc_plugin.lib',
+                            'nvonnxparser.dll', 'nvonnxparser.lib', 'nvparsers.dll', 'nvparsers.lib']
+        
+        for cuda_path in cuda:
+            if 'bin' in cuda_path:
+                for lib in tensorrt_lib_files:
+                    # print('{0}\TensorRT-8.6.1.6\lib\\{1}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__))), lib), cuda_path)
+                    shutil.copy2('{0}\TensorRT-8.6.1.6\lib\\{1}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__))), lib), cuda_path)
+                
+    else:
+        print('First install cuda 12.1.')
+
 def print_menu():
-    print('This script is under active development and is not stable, run it at your own risk.')
+    # os.system('cls')
+    # TODO: last error
+    print('Run this script as an administrator to work correctly.')
     print('Installed version is: {0}, latest: {1}\n'.format(get_aimbot_current_version(), get_aimbot_version()))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
     print("3: Download and unpack TensorRT")
+    print("4: tests")
     print("0: Exit")
 
 def main():
-    while True:
-        print_menu()
-        choice = input("Select an option: ")
+    try:
+        while True:
+            print_menu()
+            choice = input("Select an option: ")
 
-        if choice == "1":
-            Update_yolov8_aimbot()
-        
-        elif choice == "2":
-            print("The file will appear in the current folder\nDownloading Cuda 12.1...")
-            download_file('https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_531.14_windows.exe', './cuda_12.1.0_531.14_windows.exe')
-        
-        elif choice == "3":
-            print("A feature in development")
-        
-        elif choice == "0":
-            print("Exiting the program...")
-            break
-        
-        else:
-            print("Incorrect input, try again.")
+            if choice == "1":
+                Update_yolov8_aimbot()
+            
+            elif choice == "2":
+                print("The file will appear in the current folder\nDownloading Cuda 12.1...")
+                download_file('https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_531.14_windows.exe', './cuda_12.1.0_531.14_windows.exe')
+            
+            elif choice == "3":
+                print("A feature in development")
+
+            elif choice == "4":
+                Install_TensorRT()
+            
+            elif choice == "0":
+                print("Exiting the program...")
+                break
+            
+            else:
+                print("Incorrect input, try again.")
+    except: # ctrl + z
+        quit()
 
 if __name__ == "__main__":
-    if os.path.exists(r'./cleanup.py'):
-        os.remove(r'./cleanup.py')
     upgrade_pip()
     upgrade_ultralytics()
     main()
