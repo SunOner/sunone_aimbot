@@ -34,3 +34,5 @@
 	- They can be obtained by supporting the project [here](https://boosty.to/sunone).
 16. There are false positives, how to eliminate them?
 	- Increase the value of `AI_conf` in the config.
+17. AttributeError: 'Bettercam' object has no attribute 'is_capturing'
+	- Go to "Settings->System->Display->Graphics->Classic Application-Overview" and add the python executable file (It should be here by default "C:\Users\your_user_name\AppData\Local\Programs\Python\Python311\python.exe"), specify "energy saving" in the parameters. This is due to the fact that on most laptops, the duplicator is powered by an integrated graphics processor.
