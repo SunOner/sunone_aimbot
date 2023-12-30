@@ -11,6 +11,8 @@ try:
     import requests
 except:
     os.system('pip install requests')
+    os.system('pip install -r requirements.txt')
+    os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
     os.system('py helper.py')
     quit()
 try:
