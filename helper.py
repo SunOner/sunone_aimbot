@@ -44,7 +44,7 @@ except:
         if not os.path.isfile('Git-2.43.0-64-bit.exe'):
             download_file('https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe', 'Git-2.43.0-64-bit.exe')
         subprocess.call('{}/Git-2.43.0-64-bit.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
-        os.system('py install.py')
+        os.system('py helper.py')
         quit()
 try:
     import cuda
@@ -171,9 +171,9 @@ def Update_yolov8_aimbot():
         print('File config.ini is not found, continued')
         pass
     try:
-        os.remove('./install.py')
+        os.remove('./helper.py')
     except:
-        print('File install.py is not found, continued')
+        print('File helper.py is not found, continued')
         pass
     try:
         os.remove('./run.py')
@@ -198,7 +198,7 @@ def Update_yolov8_aimbot():
     os.makedirs('./media/tests')
 
     temp_aimbot_files = [
-        './temp/checks.py', './temp/config.ini', './temp/install.py', './temp/run.py', './temp/version', 
+        './temp/checks.py', './temp/config.ini', './temp/helper.py', './temp/run.py', './temp/version', 
         './temp/logic/arduino.py', './temp/logic/capture.py', './temp/logic/config_watcher.py', './temp/logic/game.yaml', './temp/logic/ghub_mouse.dll', './temp/logic/keyboard.py', './temp/logic/mouse.py', 
         './temp/media/aimbot.png', './temp/media/cuda.png', './temp/media/environment_variables.png', './temp/media/environment_variables_path.png', './temp/media/one.gif', './temp/media/python.png', './temp/media/tests/test_det.mp4']
 
@@ -207,7 +207,7 @@ def Update_yolov8_aimbot():
         print(temp_file)
         shutil.move(temp_file, temp_file.replace('temp/', ''))
 
-    os.system('py install.py')
+    os.system('py helper.py')
 
 def find_cuda_path():
     cuda_paths = []
@@ -236,7 +236,7 @@ def find_tensorrt_path():
         return None
 
 def Install_TensorRT():
-    ## TODO
+    # TODO (more ckecks begin install)
     cuda = find_cuda_path()
     if cuda is not None:
         if not os.path.isfile('TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip'):
@@ -267,9 +267,7 @@ def Install_TensorRT():
         for cuda_path in cuda:
             if 'bin' in cuda_path:
                 for lib in tensorrt_lib_files:
-                    # print('{0}\TensorRT-8.6.1.6\lib\\{1}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__))), lib), cuda_path)
                     shutil.copy2('{0}\TensorRT-8.6.1.6\lib\\{1}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__))), lib), cuda_path)
-                
     else:
         print('First install cuda 12.1.')
 
