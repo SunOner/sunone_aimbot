@@ -1,7 +1,7 @@
-# This script is under active development and is not stable, run it at your own risk.
 import re
 import os
-import sys, subprocess 
+import sys, subprocess
+import time 
 import requests
 import shutil
 try:
@@ -69,6 +69,7 @@ except:
     os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
 
 def upgrade_ultralytics():
+    print('Checks new ultralytics version...')
     ultralytics_current_version = ultralytics.__version__
 
     ultralytics_repo_version = requests.get('https://raw.githubusercontent.com/ultralytics/ultralytics/main/ultralytics/__init__.py').content.decode('utf-8')
@@ -77,16 +78,21 @@ def upgrade_ultralytics():
     if ultralytics_current_version != ultralytics_repo_version:
         print('The versions of ultralytics do not match\nAn update is in progress...')
         os.system('pip install ultralytics --upgrade')
+    else:
+        os.system('cls')
 
 def upgrade_pip():
+    print('Checks new pip version...')
     ver = os.popen('pip -V').read().split(' ')[1]
     if ver != '23.3.2':
         print('The pip version does not match the required one.\nAn update is in progress...')
         os.system("python -m pip install --upgrade pip")
+    else:
+        os.system('cls')
 
 def get_aimbot_current_version():
     try:
-        return open('version', 'r').read()
+        return open('./version', 'r').read()
     except:
         print('The version file was not found, we will consider it an old version of the program.')
         return '0.0.0'
@@ -142,43 +148,36 @@ def Update_yolov8_aimbot():
         print('Folder temp is existing, deleting...')
         delete_files_in_folder('./temp')
         os.system('RMDIR temp /S')
+        print("Cloning repo. Please wait...")
         Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp')
 
-    print('Moving files from ./temp/')
-    shutil.move('./temp/logic/arduino.py', './logic/arduino.py')
-    shutil.move('./temp/logic/capture.py', './logic/capture.py')
-    shutil.move('./temp/logic/config_watcher.py', './logic/config_watcher.py')
-    shutil.move('./temp/logic/game.yaml', './logic/game.yaml')
-    shutil.move('./temp/logic/ghub_mouse.dll', './logic/ghub_mouse.dll')
-    shutil.move('./temp/logic/keyboard.py', './logic/keyboard.py')
-    shutil.move('./temp/logic/mouse.py', './logic/mouse.py')
-    
     os.makedirs('./media/tests')
-    shutil.move('./temp/media/tests/test_det.mp4', './media/tests/test_det.mp4')
+    temp_aimbot_files = [
+        './temp/checks.py', './temp/config.ini', './temp/install.py', './temp/run.py', './temp/version', 
+        './temp/logic/arduino.py', './temp/logic/capture.py', './temp/logic/config_watcher.py', './temp/logic/game.yaml', './temp/logic/ghub_mouse.dll', './temp/logic/keyboard.py', './temp/logic/mouse.py', 
+        './temp/media/aimbot.png', './temp/media/cuda.png', './temp/media/environment_variables.png', './temp/media/environment_variables_path.png', './temp/media/one.gif', './temp/media/python.png', './temp/media/tests/test_det.mp4']
 
-    shutil.move('./temp/checks.py', './checks.py')
-    shutil.move('./temp/config.ini', './config.ini')
-    shutil.move('./temp/run.py', './run.py')
-    
-    copy_file = 'install_copy.py'
-
-    with open('./temp/install.py', 'r') as source, open(copy_file, 'w') as target:
-        target.write(source.read())
+    print('Moving files from ./temp/')
+    for temp_file in temp_aimbot_files:
+        print(temp_file)
+        shutil.move(temp_file, temp_file.replace('temp/', ''))
 
     cleanup_script = r"""
 import os
+import sys
 import time
 import subprocess
 time.sleep(1)
 cwd = os.getcwd()
-os.rename('{0}\install_copy.py'.format(cwd).replace('\\\\', '\\'), '{0}\install.py'.format(cwd).replace('\\\\', '\\'))
-subprocess.Popen(['python', '{0}\install.py'.format(cwd).replace('\\\\', '\\')])
 os.system('RMDIR {0}\temp /S'.format(cwd).replace('\\\\', '\\'))
-    """
+sys.exit()
+    """[1:]
     with open('./cleanup.py', 'w') as file:
         file.write(cleanup_script)
 
     subprocess.Popen(['python', './cleanup.py'])
+    time.sleep(0.6)
+    os.remove(r'./cleanup.py')
     sys.exit()
 
 def download_file(url, filename):
@@ -198,9 +197,10 @@ def download_file(url, filename):
         print("Error with downloading file.")
 
 def print_menu():
-    print('Installed version is: {0}, latest: {1}'.format(get_aimbot_current_version(), get_aimbot_version()))
+    print('This script is under active development and is not stable, run it at your own risk.')
+    print('Installed version is: {0}, latest: {1}\n'.format(get_aimbot_current_version(), get_aimbot_version()))
 
-    print("1: Update YOLOv8_aimbot")
+    print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
     print("3: Download and unpack TensorRT")
     print("0: Exit")
