@@ -76,6 +76,7 @@ try:
 except:
     print('ultralytics not found, installation is in progress')
     os.system('pip install ultralytics')
+    import ultralytics
 try:
     import screeninfo
 except:
@@ -163,6 +164,7 @@ def delete_files_in_folder(folder):
 
 def Update_yolov8_aimbot():
     print('Deleting old files..')
+    
     try:
         delete_files_in_folder('./logic')
     except:
@@ -171,6 +173,7 @@ def Update_yolov8_aimbot():
         delete_files_in_folder('./media')
     except:
         pass
+    
     try:
         os.remove('./checks.py')
     except:
@@ -219,6 +222,9 @@ def Update_yolov8_aimbot():
         os.makedirs('./docs/en')
     if os.path.isdir('./docs/ru') == False:
         os.makedirs('./docs/ru')
+    
+    if os.path.isdir('./models') == False:
+        os.makedirs('./models')
 
     temp_aimbot_files = [
         './temp/checks.py', './temp/config.ini', './temp/helper.py', './temp/run.py', './temp/version', 
@@ -228,7 +234,8 @@ def Update_yolov8_aimbot():
         './temp/media/environment_variables_path.png', './temp/media/one.gif', './temp/media/python.png',
         './temp/media/tests/test_det.mp4'
         './temp/docs/en/helper_en.md', './temp/docs/en/install_guide_en.md', './temp/docs/en/questions_en.md',
-        './temp/docs/ru/helper_ru.md', './temp/docs/ru/install_guide_ru.md', './temp/docs/ru/questions_ru.md', ]
+        './temp/docs/ru/helper_ru.md', './temp/docs/ru/install_guide_ru.md', './temp/docs/ru/questions_ru.md',
+        './temp/models/sunxds_0.2.9.6.pt' ]
 
     print('Moving files from ./temp/')
     for temp_file in temp_aimbot_files:
@@ -343,15 +350,6 @@ def main():
         quit()
 
 if __name__ == "__main__":
-    try:
-        is_admin = os.getuid() == 0
-    except AttributeError:
-        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-        print('Please run the script as an administrator.\nExit...')
-        time.sleep(3)
-        exit()
-        
-    if is_admin:
-        upgrade_pip()
-        upgrade_ultralytics()
-        main()
+    upgrade_pip()
+    upgrade_ultralytics()
+    main()
