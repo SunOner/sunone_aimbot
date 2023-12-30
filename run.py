@@ -36,8 +36,8 @@ def init():
         new_frame_time = 0
     try:
         model = YOLO('models/{}'.format(cfg.AI_model_path), task='detect')
-    except FileNotFoundError:
-        print('Model file not found')
+    except Exception as e:
+        print(e)
         quit(0)
 
     if '.pt' in cfg.AI_model_path:
