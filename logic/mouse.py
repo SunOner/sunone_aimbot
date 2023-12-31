@@ -1,8 +1,5 @@
-import math
 import queue
 import threading
-import time
-import numpy as np
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
@@ -83,7 +80,7 @@ if cfg.mouse_native == False:
             return gm.mouse_close()
 
 class MouseThread(threading.Thread):
-    def __init__(self, frame_ready_event):
+    def __init__(self):
         super(MouseThread, self).__init__()
         self.queue = queue.Queue(maxsize=1)
         self.daemon = True
@@ -94,18 +91,15 @@ class MouseThread(threading.Thread):
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
         self.center_y = self.screen_height / 2
-        self.frame_ready_event = frame_ready_event
-        
         self.start()
 
     def run(self):
         while True:
             data = self.queue.get()
             if data is None:
-                self.frame_ready_event.set()
+                pass
             else:
                 self.process_data(data)
-                self.frame_ready_event.set()
 
     def process_data(self, data):
         shooting_key = self.get_shooting_key_state()

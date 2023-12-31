@@ -1,22 +1,15 @@
-import math
 from logic.config_watcher import Config
 cfg = Config()
-
-from ultralytics import YOLO
-import torch
-import cv2
-import time
-import win32api
-import threading
-import queue
-
 from logic.keyboard import *
 from logic.capture import *
 from logic.mouse import MouseThread
-if cfg.mouse_native == False:
-    from logic.mouse import ghub_mouse_up, ghub_mouse_down
-if cfg.mouse_shoot_by_arduino or cfg.mouse_move_by_arduino:
-    from logic.mouse import Arduino
+
+from ultralytics import YOLO
+import math
+import torch
+import cv2
+import time
+import win32api, win32con, win32gui
 
 class Targets:
     def __init__(self, x, y, w, h, cls):
@@ -62,7 +55,6 @@ def init():
     if cfg.hideout_targets == False:
         clss = [0,1,7]
 
-    first_frame_init = True
     cfg_reload_prev_state = 0
     shooting_queue = []
     while True:
@@ -75,15 +67,8 @@ def init():
                 frames.reload_capture()
                 mouse_worker.Update_settings()
         cfg_reload_prev_state = app_reload_cfg
-
-        if frame_ready.is_set() and first_frame_init == False:
-            image = frames.get_new_frame()
-            frame_ready.clear()
-
-        if first_frame_init:
-            first_frame_init = False
-            image = frames.get_new_frame()
-
+        
+        image = frames.get_new_frame()
         result = model.predict(
             source=image,
             stream=True,
@@ -180,7 +165,6 @@ def init():
                 break
 
 if __name__ == "__main__":
-    frame_ready = threading.Event()
     frames = Capture()
-    mouse_worker = MouseThread(frame_ready)
+    mouse_worker = MouseThread()
     init()

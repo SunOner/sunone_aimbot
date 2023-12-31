@@ -1,10 +1,8 @@
 import cv2
 import bettercam
-import numpy as np
 import torch
 from logic.config_watcher import *
 from run import cfg
-import win32gui, win32ui, win32con
 from screeninfo import get_monitors
 
 class Capture():
@@ -109,5 +107,3 @@ def draw_helpers(annotated_frame, boxes):
                 if cfg.show_conf:
                     text = '{} {:.2f}'.format(str_cls, conf.item())
                     cv2.putText(annotated_frame, text, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
-
-    return annotated_frame
