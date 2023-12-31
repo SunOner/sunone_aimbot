@@ -1,3 +1,4 @@
+import math
 import queue
 import threading
 import time
@@ -86,7 +87,15 @@ class MouseThread(threading.Thread):
         super(MouseThread, self).__init__()
         self.queue = queue.Queue(maxsize=1)
         self.daemon = True
+        self.dpi = cfg.mouse_dpi
+        self.mouse_sensitivity = cfg.mouse_sensitivity
+        self.fov = cfg.mouse_fov
+        self.screen_width = cfg.detection_window_width
+        self.screen_height = cfg.detection_window_height
+        self.center_x = self.screen_width / 2
+        self.center_y = self.screen_height / 2
         self.frame_ready_event = frame_ready_event
+        
         self.start()
 
     def run(self):
@@ -94,16 +103,15 @@ class MouseThread(threading.Thread):
             data = self.queue.get()
             if data is None:
                 self.frame_ready_event.set()
-                continue
-
-            self.process_data(data)
-            self.frame_ready_event.set()
+            else:
+                self.process_data(data)
+                self.frame_ready_event.set()
 
     def process_data(self, data):
         shooting_key = self.get_shooting_key_state()
         x, y, target_x, target_y, target_w, target_h, distance = data
         bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h) if cfg.mouse_auto_shoot or cfg.mouse_triggerbot else False
-        x, y = self.adjust_mouse_movement(x, y, distance)
+        x, y = self.adjust_mouse_movement(x, y, distance, target_x, target_y)
         self.move_mouse(x, y, shooting_key)
         self.shoot(bScope)
 
@@ -112,18 +120,28 @@ class MouseThread(threading.Thread):
             return win32api.GetKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
         return win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
 
-    def adjust_mouse_movement(self, x, y, distance):
-        if cfg.mouse_slow_down_factor != 0:
-            slow_down_factor = min(distance, cfg.mouse_slow_down_factor)
-            x /= slow_down_factor
-            y /= slow_down_factor
+    def adjust_mouse_movement(self, x, y, distance, target_x, target_y):
+        offset_x = target_x - self.center_x
+        offset_y = target_y - self.center_y
 
-        if cfg.mouse_smoothing != 0 and x is not None and y is not None:
-            x /= cfg.mouse_smoothing
-            y /= cfg.mouse_smoothing
+        degrees_per_pixel_x = self.fov / self.screen_width
 
-        return x, y
+        mouse_move_x = offset_x * degrees_per_pixel_x
+
+        mouse_dpi_move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+
+        mouse_move_y = offset_y * degrees_per_pixel_x
+        mouse_dpi_move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+        
+        return mouse_dpi_move_x, mouse_dpi_move_y
     
+    def Update_settings(self):
+        self.dpi = cfg.mouse_dpi
+        self.mouse_sensitivity = cfg.mouse_sensitivity
+        self.fov = cfg.mouse_fov
+        self.screen_width = cfg.detection_window_width
+        self.screen_height = cfg.detection_window_height
+        
     def check_target_in_scope(self, target_x, target_y, target_w, target_h):
         x = cfg.detection_window_width / 2
         y = cfg.detection_window_height / 2

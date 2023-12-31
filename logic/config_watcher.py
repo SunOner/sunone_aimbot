@@ -34,8 +34,9 @@ class Config():
         self.hotkey_reload_config = str(self.config_Hotkeys_settings['hotkey_reload_config'])
         
         self.config_Mouse_settings = self.config['Mouse settings']
-        self.mouse_smoothing = float(self.config_Mouse_settings['mouse_smoothing'])
-        self.mouse_slow_down_factor = float(self.config_Mouse_settings['mouse_slow_down_factor'])
+        self.mouse_dpi = float(self.config_Mouse_settings['mouse_dpi'])
+        self.mouse_sensitivity = float(self.config_Mouse_settings['mouse_sensitivity'])
+        self.mouse_fov = float(self.config_Mouse_settings['mouse_fov'])
         self.mouse_lock_target = self.config_Mouse_settings.getboolean('mouse_lock_target')
         self.mouse_auto_shoot = self.config_Mouse_settings.getboolean('mouse_auto_shoot')
         self.mouse_auto_aim = self.config_Mouse_settings.getboolean('mouse_auto_aim')

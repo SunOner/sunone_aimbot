@@ -41,7 +41,7 @@ def init():
         quit(0)
 
     if '.pt' in cfg.AI_model_path:
-        print('PT Model loaded.')
+        print('PT Model loaded.\nYou are using .pt model, exporting the model to the .engine format will give a huge increase in performance!')
     if '.onnx' in cfg.AI_model_path:
         print('Onnx CPU loaded.')
     if '.engine' in cfg.AI_model_path:
@@ -73,6 +73,7 @@ def init():
             if app_reload_cfg == 1 or app_reload_cfg == 0:
                 cfg.Read(verbose=True)
                 frames.reload_capture()
+                mouse_worker.Update_settings()
         cfg_reload_prev_state = app_reload_cfg
 
         if frame_ready.is_set() and first_frame_init == False:
