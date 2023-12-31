@@ -229,7 +229,7 @@ def Update_yolov8_aimbot():
         os.makedirs('./models')
 
     temp_aimbot_files = [
-        './temp/checks.py', './temp/config.ini', './temp/helper.py', './temp/run.py', './temp/version', 
+        './temp/checks.py', './temp/config.ini', './temp/helper.py', './temp/run.py', './temp/requirements.txt', './temp/version', 
         './temp/logic/arduino.py', './temp/logic/capture.py', './temp/logic/config_watcher.py', './temp/logic/game.yaml', './temp/logic/ghub_mouse.dll', './temp/logic/keyboard.py', './temp/logic/mouse.py', 
         './temp/media/aimbot.png', './temp/media/cmd_admin_en.png', './temp/media/cmd_admin_ru.png', './temp/media/cmd_cd_path.png',
         './temp/media/copy_explorer_path.png', './temp/media/python_add_to_path.png', './temp/media/cuda.png', './temp/media/environment_variables.png',
