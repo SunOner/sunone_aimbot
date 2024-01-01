@@ -37,22 +37,6 @@ def download_file(url, filename):
 
     if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
         print("Error with downloading file.")
-
-try:
-    from git import Repo, RemoteProgress
-except:
-    print('gitpython not found, installation is in progress')
-    os.system('pip install gitpython')
-    try:
-        from git import Repo, RemoteProgress
-    except:
-        os.system('cls')
-        print('Please, install git\nDownloading git.\nAfter installation, the script will restart automatically.')
-        if not os.path.isfile('Git-2.43.0-64-bit.exe'):
-            download_file('https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe', 'Git-2.43.0-64-bit.exe')
-        subprocess.call('{}/Git-2.43.0-64-bit.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
-        os.system('py helper.py') # restart required for imports
-        quit()
 try:
     import cuda
 except:
@@ -116,11 +100,6 @@ def set_system_path(new_path):
     from ctypes import windll
     windll.user32.SendMessageTimeoutA(0xFFFF, 0x001A, 0, None, 0x02, 1000, None)
 
-class CloneProgress(RemoteProgress):
-    def update(self, op_code, cur_count, max_count=None, message=''):
-        if message:
-            print(message)
-
 def upgrade_ultralytics():
     print('Checks new ultralytics version...')
     ultralytics_current_version = ultralytics.__version__
@@ -145,14 +124,34 @@ def upgrade_pip():
 
 def get_aimbot_current_version():
     try:
-        return open('./version', 'r').read()
+        app = 0
+        config = 0
+        with open('./version', 'r') as file:
+            lines = file.readlines()
+        for line in lines:
+            key, value = line.strip().split('=')
+            if key == "app":
+                app = value
+            if key == 'config':
+                config = value
+        return app, config
+                
     except:
         print('The version file was not found, we will consider it an old version of the program.')
         return '0.0.0'
 
 def get_aimbot_version():
-    return requests.get('https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/version').content.decode('utf-8')
-
+    app = 0
+    config = 0
+    content = requests.get('https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/version').content.decode('utf-8').split('\n')
+    for line in content:
+            key, value = line.strip().split('=')
+            if key == "app":
+                app = value
+            if key == 'config':
+                config = value
+    return app, config
+        
 def delete_files_in_folder(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
@@ -175,41 +174,37 @@ def Update_yolov8_aimbot():
         delete_files_in_folder('./media')
     except:
         pass
-    
+    base_dir_files = ['./checks.py', './helper.py', './run.py', './version', './requirements.txt']
+    for file in base_dir_files:
+        try:
+            os.remove(file)
+        except:
+            print(file, 'not found, continued')
+    # Config
     try:
-        os.remove('./checks.py')
-    except:
-        print('File checks.py is not found, continued')
-        pass
-    try:
-        os.remove('./config.ini') # TODO: add compare with old config
+        replace_config = False
+        config_online_version = int(get_aimbot_version()[1])
+        config_current_version = int(get_aimbot_current_version()[1])
+        
+        if config_online_version > config_current_version:
+            print('Removing config with old version and installing fresh.')
+            os.remove('./config.ini')
+            replace_config = True
+        if config_online_version == config_current_version:
+            print('Config has a fresh version. We don\'t touch him.')
     except:
         print('File config.ini is not found, continued')
-        pass
-    try:
-        os.remove('./helper.py')
-    except:
-        print('File helper.py is not found, continued')
-        pass
-    try:
-        os.remove('./run.py')
-    except:
-        print('File run.py is not found, continued')
-        pass
-    try:
-        os.remove('./version')
-    except:
-        print('File version is not found, continued')
+        replace_config = True
         pass
 
-    print("Cloning repo. Please wait...")
-    try:
-        Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp', progress=CloneProgress())
-    except:
-        print('Folder temp is existing:')
-        os.system('RMDIR temp /S')
-        print("Cloning repo. Please wait...")
-        Repo.clone_from('https://github.com/SunOner/yolov8_aimbot.git', './temp', progress=CloneProgress())
+    print("Downloading repo. Please wait...")
+    
+    download_file('https://github.com/SunOner/yolov8_aimbot/archive/refs/heads/main.zip', 'main.zip')
+    print('Unpacking...')
+    with zipfile.ZipFile(r'./main.zip', 'r') as zip_ref:
+        zip_ref.extractall('./')
+    print('Deleting downloaded zip...')
+    os.remove(r'./main.zip')
     
     if os.path.isdir('./logic') == False:
         os.makedirs('./logic')
@@ -229,25 +224,34 @@ def Update_yolov8_aimbot():
         os.makedirs('./models')
 
     temp_aimbot_files = [
-        './temp/checks.py', './temp/config.ini', './temp/helper.py', './temp/run.py', './temp/requirements.txt', './temp/version', 
-        './temp/logic/arduino.py', './temp/logic/capture.py', './temp/logic/config_watcher.py', './temp/logic/game.yaml', './temp/logic/ghub_mouse.dll', './temp/logic/keyboard.py', './temp/logic/mouse.py', 
-        './temp/media/aimbot.png', './temp/media/cmd_admin_en.png', './temp/media/cmd_admin_ru.png', './temp/media/cmd_cd_path.png',
-        './temp/media/copy_explorer_path.png', './temp/media/python_add_to_path.png', './temp/media/cuda.png', './temp/media/environment_variables.png',
-        './temp/media/environment_variables_path.png', './temp/media/one.gif', './temp/media/python.png',
-        './temp/media/tests/test_det.mp4'
-        './temp/docs/en/helper_en.md', './temp/docs/en/install_guide_en.md', './temp/docs/en/questions_en.md',
-        './temp/docs/ru/helper_ru.md', './temp/docs/ru/install_guide_ru.md', './temp/docs/ru/questions_ru.md',
-        './temp/models/sunxds_0.2.9.6.pt' ]
+        './checks.py', './config.ini', './helper.py', './run.py', './requirements.txt', './version', 
+        './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/keyboard.py', './logic/mouse.py', 
+        './media/aimbot.png', './media/cmd_admin_en.png', './media/cmd_admin_ru.png', './media/cmd_cd_path.png',
+        './media/copy_explorer_path.png', './media/python_add_to_path.png', './media/cuda.png', './media/environment_variables.png',
+        './media/environment_variables_path.png', './media/one.gif', './media/python.png',
+        './media/tests/test_det.mp4'
+        './docs/en/helper_en.md', './docs/en/install_guide_en.md', './docs/en/questions_en.md',
+        './docs/ru/helper_ru.md', './docs/ru/install_guide_ru.md', './docs/ru/questions_ru.md',
+        './models/sunxds_0.2.9.6.pt' ]
 
     print('Moving files from ./temp/')
     for temp_file in temp_aimbot_files:
         print(temp_file)
         try:
-            shutil.move(temp_file, temp_file.replace('temp/', ''))
+            if temp_file == './yolov8_aimbot-main/config.ini' and replace_config == False:
+                pass
+            else:
+                shutil.move('yolov8_aimbot-main/{0}'.format(temp_file), temp_file)
         except:
             pass
-
+    try:
+        delete_files_in_folder('./yolov8_aimbot-main')
+        os.rmdir('./yolov8_aimbot-main')
+    except Exception as s:
+        print(s)
+        pass
     os.system('py helper.py')
+    quit()
 
 def find_cuda_path():
     cuda_paths = []
@@ -320,7 +324,7 @@ def print_menu():
     os.system('cls')
     print('Run this script as an administrator to work correctly.')
     # TODO: print last error
-    print('Installed version is: {0}, latest: {1}\n'.format(get_aimbot_current_version(), get_aimbot_version()))
+    print('Installed version is: {0}, latest: {1}\n'.format(get_aimbot_current_version()[0], get_aimbot_version()[0]))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
