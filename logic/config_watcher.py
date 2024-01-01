@@ -53,6 +53,10 @@ class Config():
         self.AI_device = str(self.config_AI_options['AI_device'])
         self.AI_max_det = int(self.config_AI_options['AI_max_det'])
         
+        self.config_Overlay_detector = self.config['Overlay detector']
+        self.show_overlay_detector = self.config_Overlay_detector.getboolean('show_overlay_detector')
+        self.show_overlay_boxes = self.config_Overlay_detector.getboolean('show_overlay_boxes')
+        
         self.config_Debug_window = self.config['Debug window']
         self.show_window = self.config_Debug_window.getboolean('show_window')
         self.show_speed = self.config_Debug_window.getboolean('show_speed')

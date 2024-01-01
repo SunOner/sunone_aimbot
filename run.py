@@ -10,6 +10,8 @@ import torch
 import cv2
 import time
 import win32api, win32con, win32gui
+if cfg.show_overlay_detector:
+    import tkinter as tk
 
 class Targets:
     def __init__(self, x, y, w, h, cls):
@@ -24,6 +26,18 @@ class Targets:
 
 @torch.no_grad()
 def init():
+    if cfg.show_overlay_detector:
+        overlay_detector = tk.Tk()
+        overlay_detector.overrideredirect(True)
+        overlay_detector.geometry('{0}x{1}+{2}+{3}'.format(cfg.detection_window_width, cfg.detection_window_height, frames.Calculate_screen_offset()[0], frames.Calculate_screen_offset()[1]))
+        overlay_detector.lift()
+        overlay_detector.wm_attributes("-topmost", True)
+        overlay_detector.wm_attributes("-disabled", True)
+        overlay_detector.wm_attributes("-transparentcolor", "white")
+
+        canvas = tk.Canvas(overlay_detector, bg='white', height=500, width=500)
+        canvas.pack()
+
     if cfg.show_window and cfg.show_fps:
         prev_frame_time = 0
         new_frame_time = 0
@@ -128,6 +142,10 @@ def init():
                             target.distance))
                         if cfg.show_window and cfg.show_target_line:
                             draw_target_line(annotated_frame=annotated_frame, screen_x_center=cfg.detection_window_width / 2, screen_y_center=cfg.detection_window_height / 2, target_x=target.mouse_x + frames.screen_x_center, target_y=target.mouse_y + frames.screen_y_center + cfg.body_y_offset / target.h)
+                        if cfg.show_overlay_detector and cfg.show_overlay_boxes:
+                            x1, y1 = target.x - target.w / 2, target.y - target.h / 2
+                            x2, y2 = target.x + target.w / 2, target.y + target.h / 2
+                            canvas.create_rectangle(x1.item(), y1.item(), x2.item(), y2.item(), width=2, outline='green')
                     except IndexError:
                         mouse_worker.queue.put(None)
                         shooting_queue.clear()
@@ -163,6 +181,10 @@ def init():
             cv2.imshow(cfg.debug_window_name, resised)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+            
+        if cfg.show_overlay_detector:
+            overlay_detector.update()
+            canvas.delete("all")
 
 if __name__ == "__main__":
     frames = Capture()
