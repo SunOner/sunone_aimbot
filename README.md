@@ -100,6 +100,10 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - AI_device `int` or `str`: Device to run on, i.e. cuda AI_device=0/1/2/3 or AI_device='cpu'.
 - AI_max_det `int`: Maximum number of detections per frame.
 
+### Overlay detector:
+- show_overlay_detector `bool`: Show the detector overlay.
+- show_overlay_boxes `bool`: Show goals inside the overlay.
+
 ### Cv2 debug window settings:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
 - show_speed `bool`: Displays speed information inside the OpenCV2 window.
