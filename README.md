@@ -103,6 +103,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 ### Overlay detector:
 - show_overlay_detector `bool`: Show the detector overlay.
 - show_overlay_boxes `bool`: Show goals inside the overlay.
+- show_overlay_line `bool`: Show line to target.
 
 ### Cv2 debug window settings:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.

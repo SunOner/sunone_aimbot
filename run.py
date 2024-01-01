@@ -61,7 +61,7 @@ def init():
         cv2.namedWindow(cfg.debug_window_name)
         if cfg.debug_window_always_on_top:
             debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
-            win32gui.SetWindowPos(debug_window_hwnd,win32con.HWND_TOPMOST,100,100,200,200,0)
+            win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
 
     clss = []
     if cfg.hideout_targets:
@@ -140,12 +140,18 @@ def init():
                             target.w,
                             target.h,
                             target.distance))
+                        
                         if cfg.show_window and cfg.show_target_line:
                             draw_target_line(annotated_frame=annotated_frame, screen_x_center=cfg.detection_window_width / 2, screen_y_center=cfg.detection_window_height / 2, target_x=target.mouse_x + frames.screen_x_center, target_y=target.mouse_y + frames.screen_y_center + cfg.body_y_offset / target.h)
+                            
                         if cfg.show_overlay_detector and cfg.show_overlay_boxes:
                             x1, y1 = target.x - target.w / 2, target.y - target.h / 2
                             x2, y2 = target.x + target.w / 2, target.y + target.h / 2
                             canvas.create_rectangle(x1.item(), y1.item(), x2.item(), y2.item(), width=2, outline='green')
+                            
+                        if cfg.show_overlay_detector and cfg.show_overlay_line:
+                            canvas.create_line(cfg.detection_window_width / 2, cfg.detection_window_height / 2, target.mouse_x.item() + frames.screen_x_center, target.mouse_y.item() + frames.screen_y_center + cfg.body_y_offset / target.h.item(), width=2, fill='red')
+                            
                     except IndexError:
                         mouse_worker.queue.put(None)
                         shooting_queue.clear()

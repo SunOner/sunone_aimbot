@@ -56,6 +56,7 @@ class Config():
         self.config_Overlay_detector = self.config['Overlay detector']
         self.show_overlay_detector = self.config_Overlay_detector.getboolean('show_overlay_detector')
         self.show_overlay_boxes = self.config_Overlay_detector.getboolean('show_overlay_boxes')
+        self.show_overlay_line = self.config_Overlay_detector.getboolean('show_overlay_line')
         
         self.config_Debug_window = self.config['Debug window']
         self.show_window = self.config_Debug_window.getboolean('show_window')
