@@ -35,7 +35,7 @@ def init():
         overlay_detector.wm_attributes("-disabled", True)
         overlay_detector.wm_attributes("-transparentcolor", "white")
 
-        canvas = tk.Canvas(overlay_detector, bg='white', height=500, width=500)
+        canvas = tk.Canvas(overlay_detector, bg='white', height=cfg.detection_window_height, width=cfg.detection_window_width)
         canvas.pack()
 
     if cfg.show_window and cfg.show_fps:
