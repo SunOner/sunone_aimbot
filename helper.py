@@ -192,15 +192,12 @@ def Update_yolov8_aimbot():
         './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/keyboard.py', './logic/mouse.py', 
         './media/aimbot.png', './media/cmd_admin_en.png', './media/cmd_admin_ru.png', './media/cmd_cd_path.png',
         './media/copy_explorer_path.png', './media/python_add_to_path.png', './media/cuda.png', './media/environment_variables.png',
-        './media/environment_variables_path.png', './media/one.gif', './media/python.png',
-        './media/tests/test_det.mp4'
+        './media/environment_variables_path.png', './media/one.gif', './media/python.png', './media/tests/test_det.mp4',
         './docs/en/helper_en.md', './docs/en/install_guide_en.md', './docs/en/questions_en.md',
         './docs/ru/helper_ru.md', './docs/ru/install_guide_ru.md', './docs/ru/questions_ru.md',
         './models/sunxds_0.2.9.6.pt' ]
 
-    print('Moving files from ./temp/')
     for temp_file in temp_aimbot_files:
-        print(temp_file)
         try:
             if temp_file == './yolov8_aimbot-main/config.ini' and replace_config == False:
                 pass
