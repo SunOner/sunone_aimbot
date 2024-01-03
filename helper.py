@@ -7,21 +7,37 @@ import shutil
 import zipfile
 import winreg
 
+
 try:
+    from tqdm import tqdm
     import requests
+    import cuda
+    import bettercam
+    import numpy
+    import win32gui, win32ui, win32con
+    import ultralytics
+    from ultralytics import YOLO
+    import screeninfo
+    import asyncio
+    import onnxruntime
+    import serial
+    import torch
+    import cv2
 except:
-    os.system('pip install requests')
     os.system('pip install -r requirements.txt')
     os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
     os.system('py helper.py')
+    print('restarting...')
     quit()
-try:
-    from tqdm import tqdm
-except:
-    print('tqdm not found, installation is in progress')
-    os.system('pip install tqdm')
-    from tqdm import tqdm
 
+try:
+    from logic.config_watcher import Config
+    cfg = Config()
+except:
+    print('logic/config_watcher.py not found, please reinstall Yolov8_aimbot.')
+    time.sleep(3)
+    quit()
+    
 def download_file(url, filename):
     response = requests.get(url, stream=True)
     total_size_in_bytes = int(response.headers.get('content-length', 0))
@@ -37,58 +53,6 @@ def download_file(url, filename):
 
     if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
         print("Error with downloading file.")
-try:
-    import cuda
-except:
-    print('cuda_python not found, installation is in progress')
-    os.system('pip install cuda_python')
-try:
-    import bettercam
-except:
-    print('bettercam not found, installation is in progress')
-    os.system('pip install bettercam')
-try:
-    import numpy
-except:
-    print('numpy not found, installation is in progress')
-    os.system('pip install numpy')
-try:
-    import win32gui, win32ui, win32con
-except:
-    print('pywin32 not found, installation is in progress')
-    os.system('pip install pywin32')
-try:
-    import ultralytics
-except:
-    print('ultralytics not found, installation is in progress')
-    os.system('pip install ultralytics')
-    import ultralytics
-try:
-    import screeninfo
-except:
-    print('screeninfo not found, installation is in progress')
-    os.system('pip install screeninfo')
-try:
-    import asyncio
-except:
-    print('asyncio not found, installation is in progress')
-    os.system('pip install asyncio')
-try:
-    import onnxruntime
-except:
-    print('onnxruntime not found, installation is in progress')
-    os.system('pip install onnxruntime')
-    os.system('pip install onnxruntime-gpu')
-try:
-    import serial
-except:
-    print('pyserial not found, installation is in progress')
-    os.system('pip install pyserial')
-try:
-    import torch
-except:
-    print('torch not found, installation is in progress')
-    os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
 
 def get_system_path():
     with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 0, winreg.KEY_READ) as key:
@@ -113,7 +77,7 @@ def upgrade_ultralytics():
     else:
         os.system('cls')
 
-def upgrade_pip():
+def upgrade_pip(): # TODO newest version checks
     print('Checks new pip version...')
     ver = os.popen('pip -V').read().split(' ')[1]
     if ver != '23.3.2':
@@ -174,7 +138,7 @@ def Update_yolov8_aimbot():
         delete_files_in_folder('./media')
     except:
         pass
-    base_dir_files = ['./checks.py', './helper.py', './run.py', './version', './requirements.txt']
+    base_dir_files = ['./helper.py', './run.py', './version', './requirements.txt']
     for file in base_dir_files:
         try:
             os.remove(file)
@@ -224,7 +188,7 @@ def Update_yolov8_aimbot():
         os.makedirs('./models')
 
     temp_aimbot_files = [
-        './checks.py', './config.ini', './helper.py', './run.py', './requirements.txt', './version', 
+        './config.ini', './helper.py', './run.py', './requirements.txt', './version', 
         './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/keyboard.py', './logic/mouse.py', 
         './media/aimbot.png', './media/cmd_admin_en.png', './media/cmd_admin_ru.png', './media/cmd_cd_path.png',
         './media/copy_explorer_path.png', './media/python_add_to_path.png', './media/cuda.png', './media/environment_variables.png',
@@ -314,11 +278,45 @@ def Install_TensorRT():
     else:
         print('First install cuda 12.1.')
         
-def install_cuda():
+def Install_cuda():
     os.system('cls')
     print('Cuda 12.1 is being downloaded, and installation will begin after downloading.')
     download_file('https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_531.14_windows.exe', './cuda_12.1.0_531.14_windows.exe')
     subprocess.call('{}/cuda_12.1.0_531.14_windows.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
+    
+def Test_detections():
+    cuda_support = ultralytics.utils.checks.cuda_is_available()
+    if cuda_support == True:
+        print('Cuda support True')
+    else:
+        print('Cuda is not supported\nTrying to reinstall torch with GPU support...')
+        os.system('pip uninstall torch torchvision torchaudio')
+        os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
+        
+    model = YOLO('models/{}'.format(cfg.AI_model_path), task='detect')
+    cap = cv2.VideoCapture('media/tests/test_det.mp4')
+    # TOPMOST
+    cv2.namedWindow('Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size))
+    debug_window_hwnd = win32gui.FindWindow(None, 'Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size))
+    win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
+    
+    while cap.isOpened():
+        success, frame = cap.read()
+
+        if success:
+            result = model(frame, stream=False, show=False, imgsz=cfg.AI_image_size, device=cfg.AI_device, verbose=False)
+            annotated_frame = result[0].plot()
+
+            cv2.putText(annotated_frame, 'TEST 1234567890', (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+            
+            cv2.imshow('Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size), annotated_frame)
+            if cv2.waitKey(30) & 0xFF == ord("q"):
+                break
+        else:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
     
 def print_menu():
     os.system('cls')
@@ -329,6 +327,7 @@ def print_menu():
     print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
     print("3: Install TensorRT")
+    print("4: Test the object detector")
     print("0: Exit")
 
 def main():
@@ -341,10 +340,13 @@ def main():
                 Update_yolov8_aimbot()
             
             elif choice == "2":
-                install_cuda()
+                Install_cuda()
             
             elif choice == "3":
                 Install_TensorRT()
+                
+            elif choice == "4":
+                Test_detections()
                 
             elif choice == "0":
                 print("Exiting the program...")
