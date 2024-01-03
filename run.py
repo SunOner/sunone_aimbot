@@ -23,38 +23,40 @@ class Targets:
         self.w = w
         self.h = h
         self.cls = cls
-
+        
+class Overlay:
+    def __init__(self):
+        self.overlay_detector = tk.Tk()
+        self.overlay_detector.geometry(f'{cfg.detection_window_width}x{cfg.detection_window_height}+{frames.Calculate_screen_offset()[0]}+{frames.Calculate_screen_offset()[1]}')
+        self.overlay_detector.lift()
+        self.overlay_detector.wm_attributes("-topmost", True)
+        self.overlay_detector.wm_attributes("-disabled", True)
+        self.overlay_detector.wm_attributes("-transparentcolor", "white")
+        self.overlay_detector.title('new.txt')
+        self.overlay_detector.overrideredirect(True)
+        
+        self.canvas = tk.Canvas(self.overlay_detector, bg='white', height=cfg.detection_window_height, width=cfg.detection_window_width)
+        self.canvas.pack()
+        
 @torch.no_grad()
 def init():
     if cfg.show_overlay_detector:
-        overlay_detector = tk.Tk()
-        overlay_detector.overrideredirect(True)
-        overlay_detector.geometry('{0}x{1}+{2}+{3}'.format(cfg.detection_window_width, cfg.detection_window_height, frames.Calculate_screen_offset()[0], frames.Calculate_screen_offset()[1]))
-        overlay_detector.lift()
-        overlay_detector.wm_attributes("-topmost", True)
-        overlay_detector.wm_attributes("-disabled", True)
-        overlay_detector.wm_attributes("-transparentcolor", "white")
-
-        canvas = tk.Canvas(overlay_detector, bg='white', height=cfg.detection_window_height, width=cfg.detection_window_width)
-        canvas.pack()
-
+        overlay = Overlay()
+        
     if cfg.show_window and cfg.show_fps:
         prev_frame_time = 0
         new_frame_time = 0
     try:
-        model = YOLO('models/{}'.format(cfg.AI_model_path), task='detect')
+        model = YOLO(f'models/{cfg.AI_model_path}', task='detect')
     except Exception as e:
         print(e)
         quit(0)
 
-    if '.pt' in cfg.AI_model_path:
-        print('PT Model loaded.\nYou are using .pt model, exporting the model to the .engine format will give a huge increase in performance!')
-    if '.onnx' in cfg.AI_model_path:
-        print('Onnx CPU loaded.')
-    if '.engine' in cfg.AI_model_path:
-        print('Engine loaded')
-
-    print('\033[32mAimbot is started. Enjoy!\033[0m\n[\033[33m' + cfg.hotkey_targeting + '\033[0m] - Aiming at the target\n[\033[33m' + cfg.hotkey_exit + '\033[0m] - EXIT\n[\033[33m' + cfg.hotkey_pause + '\033[0m] - PAUSE AIM\n[\033[33m' + cfg.hotkey_reload_config + '\033[0m] - Reload config')
+    print('Aimbot is started. Enjoy!\n'
+        f'[{cfg.hotkey_targeting}] - Aiming at the target\n'
+        f'[{cfg.hotkey_exit}] - EXIT\n'
+        f'[{cfg.hotkey_pause}] - PAUSE AIM\n'
+        f'[{cfg.hotkey_reload_config}] - Reload config')
     
     if cfg.show_window:
         print('An open debug window can affect performance.')
@@ -72,9 +74,9 @@ def init():
     cfg_reload_prev_state = 0
     shooting_queue = []
     while True:
-        app_pause = win32api.GetKeyState(Keyboard.KeyCodes.get(cfg.hotkey_pause))
+        app_pause = win32api.GetKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_pause))
 
-        app_reload_cfg = win32api.GetKeyState(Keyboard.KeyCodes.get(cfg.hotkey_reload_config))
+        app_reload_cfg = win32api.GetKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_reload_config))
         if app_reload_cfg != cfg_reload_prev_state:
             if app_reload_cfg == 1 or app_reload_cfg == 0:
                 cfg.Read(verbose=True)
@@ -147,10 +149,10 @@ def init():
                         if cfg.show_overlay_detector and cfg.show_overlay_boxes:
                             x1, y1 = target.x - target.w / 2, target.y - target.h / 2
                             x2, y2 = target.x + target.w / 2, target.y + target.h / 2
-                            canvas.create_rectangle(x1.item(), y1.item(), x2.item(), y2.item(), width=2, outline='green')
+                            overlay.canvas.create_rectangle(x1.item(), y1.item(), x2.item(), y2.item(), width=2, outline='green')
                             
                         if cfg.show_overlay_detector and cfg.show_overlay_line:
-                            canvas.create_line(cfg.detection_window_width / 2, cfg.detection_window_height / 2, target.mouse_x.item() + frames.screen_x_center, target.mouse_y.item() + frames.screen_y_center + cfg.body_y_offset / target.h.item(), width=2, fill='red')
+                            overlay.canvas.create_line(cfg.detection_window_width / 2, cfg.detection_window_height / 2, target.mouse_x.item() + frames.screen_x_center, target.mouse_y.item() + frames.screen_y_center + cfg.body_y_offset / target.h.item(), width=2, fill='red')
                             
                     except IndexError:
                         mouse_worker.queue.put(None)
@@ -169,11 +171,11 @@ def init():
             prev_frame_time = new_frame_time
             
             if cfg.show_speed:
-                cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+                cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
             else:
-                cv2.putText(annotated_frame, 'FPS: {0}'.format(str(int(fps))), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+                cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
-        if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_exit)) & 0xFF:
+        if win32api.GetAsyncKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_exit)) & 0xFF:
             if cfg.show_window:
                 cv2.destroyWindow(cfg.debug_window_name)
             frames.Quit()
@@ -189,8 +191,8 @@ def init():
                 break
             
         if cfg.show_overlay_detector:
-            overlay_detector.update()
-            canvas.delete("all")
+            overlay.overlay_detector.update()
+            overlay.canvas.delete("all")
 
 if __name__ == "__main__":
     frames = Capture()

@@ -6,12 +6,12 @@
    - Open the file config.ini using Notepad or another text editor, after changing options save the file.
 4. Model export interrupts at `ONNX: starting export with onnx 1.15.0 opset 17...`
    - This is a bug of the onnx module. Each time before exporting a model, execute the command `pip uninstall onnx`.
-5. I want the mouse movement to be even smoother.
-   - Increase the value of `mouse_smoothing` by 2, 4, 8, 16, etc., also increase the fps value.
+5. Does it only work with Arduino?
+   - No, Arduino is needed to trick the anti-cheat into thinking you are using a physical mouse.
 6. The model does not export, and the line appears TensorRT: export failure ❌ 0.5s: Could not find: cublas64_12.dll. Is it on your PATH?
    - Download [cudnn64_8.zip](https://disk.yandex.ru/d/cm1Wi7OdkLtcLQ) and unpack it in C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/(your cuda version)/bin
 7. How to install a new model that I downloaded from boosty?
-   - Place it in the `models/` folder, go to config.ini and change AI_model_path = sunxds_0.3.4.pt or AI_model_path = sunxds_0.3.4.engine, if you exported the model to .engine.
+   - Place it in the `models/` folder, go to config.ini and change AI_model_path = sunxds_0.3.4.pt or AI_model_path = sunxds_0.3.4.engine, if you exported the model to .engine. Also, don't forget to change the model size `AI_image_size` (currently the size is 640).
 8. How to export a model?
    - Go to the [export](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#export-pt-model-to-engine) section on the github page.
 9. How to run it if the game is in full screen mode? / Why does the aimbot crash when I enter the game in full screen mode?

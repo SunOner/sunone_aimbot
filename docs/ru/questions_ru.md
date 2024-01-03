@@ -6,12 +6,12 @@
    - Откройте файл config.ini с помощью блокнота или другого текстового редактора, после изменения опций сохраните файл.
 4. Экспорт модели прерывается на `ONNX: starting export with onnx 1.15.0 opset 17...`
    - Это баг модуля onnx. Каждый раз перед экспортом модели выполняйте комманду `pip uninstall onnx`.
-5. Я хочу, чтобы движение мыши было еще более плавным.
-   - Увеличьте значение `mouse_smoothing` на 2, 4, 8, 16 и т.д., также увеличьте значение fps.
+5. Она работает только с Arduino?
+   - Нет, Arduino нужно для того что бы обмануть античит, сделать так что-бы игра думала что вы используете физическую мышь.
 6. The model does not export, and the line appears TensorRT: export failure ❌ 0.5s: Could not find: cublas64_12.dll. Is it on your PATH?
    - Скачайте [cudnn64_8.zip](https://disk.yandex.ru/d/cm1Wi7OdkLtcLQ) и распакуйте его в C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/(версия cuda)/bin
 7. Как установить новую модель, которую я скачал с boosty?
-   - Разместите ее в папке `models/`, перейдите в config.ini и измените AI_model_path = sunxds_0.3.4.pt или AI_model_path = sunxds_0.3.4.engine, если вы экспортировали модель в .engine.
+   - Разместите ее в папке `models/`, перейдите в config.ini и измените AI_model_path = sunxds_0.3.4.pt или AI_model_path = sunxds_0.3.4.engine, если вы экспортировали модель в .engine. Так же не забудьте поменять размер модели `AI_image_size` (на данный момент размер составляет 640).
 8. Как экспортировать модель?
    - Перейдите в раздел [export](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#export-pt-model-to-engine) на странице github.
 9. Как запустить его, если игра находится в полноэкранном режиме? / Почему аимбот вылетает когда я захожу в игру в полноэкранном режиме?
@@ -22,13 +22,14 @@
     - Некоторые игры имеют защиту от программных кликов мыши. Используйте [Arduino](https://github.com/SunOner/HID_Arduino).
 12. Ошибки сообщаются и исправляются [здесь](https://github.com/SunOner/yolov8_aimbot/issues?q=is%3Aissue)
 13. У меня есть предложение по улучшению!
-    - [Создайте тему здесь](https://github.com/SunOner/yolov8_aimbot/discussions)
+    - [Создайте тему здесь](https://github.com/SunOner/yolov8_aimbot/discussions).
 14. Долго наводится аимбот. Как то рывками. / WARNING NMS time limit exceeded
 	- Не перегружайте видеокарту!
 	- Не ставьте высокие настройки игры.
 	- Заблокируйте показатель кадров в секунду( к примеру у вас монитор 144 гц, залочте фпс на 144 в игре).
 	- Выключите мнгновенные повторы.
 	- Попробуйте сменить разрешение экрана в системе на более низкое.
+	- Экспортируйте модель в .engine.
 	- И так далее...
 15. Где скачать новые модели?
 	- Их можно получить за поддержку проекта [тут](https://boosty.to/sunone).

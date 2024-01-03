@@ -111,8 +111,8 @@ class MouseThread(threading.Thread):
 
     def get_shooting_key_state(self):
         if cfg.mouse_lock_target:
-            return win32api.GetKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
-        return win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting))
+            return win32api.GetKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_targeting))
+        return win32api.GetAsyncKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_targeting))
 
     def adjust_mouse_movement(self, x, y, distance, target_x, target_y):
         offset_x = target_x - self.center_x
@@ -165,7 +165,7 @@ class MouseThread(threading.Thread):
     def shoot(self, bScope):
         # By GetAsyncKeyState
         if cfg.mouse_auto_shoot == True and cfg.mouse_triggerbot == False:
-            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting)) == -32768 and bScope:
+            if win32api.GetAsyncKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_targeting)) == -32768 and bScope:
                 if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
                 if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
@@ -173,7 +173,7 @@ class MouseThread(threading.Thread):
                 if cfg.mouse_shoot_by_arduino: # arduino
                     Arduino.press()
 
-            if win32api.GetAsyncKeyState(Keyboard.KeyCodes.get(cfg.hotkey_targeting)) == 0 or bScope == False:
+            if win32api.GetAsyncKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_targeting)) == 0 or bScope == False:
                 if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
                 if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
