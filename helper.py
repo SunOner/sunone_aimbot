@@ -29,14 +29,6 @@ except:
     os.system('py helper.py')
     print('restarting...')
     quit()
-
-try:
-    from logic.config_watcher import Config
-    cfg = Config()
-except:
-    print('logic/config_watcher.py not found, please reinstall Yolov8_aimbot.')
-    time.sleep(3)
-    quit()
     
 def download_file(url, filename):
     response = requests.get(url, stream=True)
@@ -102,9 +94,9 @@ def get_aimbot_current_version():
                 
     except:
         print('The version file was not found, we will consider it an old version of the program.')
-        return '0.0.0'
+        return None
 
-def get_aimbot_version():
+def get_aimbot_online_version():
     app = 0
     config = 0
     content = requests.get('https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/version').content.decode('utf-8').split('\n')
@@ -138,29 +130,36 @@ def Update_yolov8_aimbot():
         delete_files_in_folder('./media')
     except:
         pass
-    base_dir_files = ['.gitattributes', '.gitignore', 'LICENSE', 'README.md', './helper.py', './run.py', './version', './requirements.txt']
+    base_dir_files = ['./.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', './run.py', './requirements.txt']
     for file in base_dir_files:
         try:
             os.remove(file)
         except:
             print(file, 'not found, continued')
     # Config
-    try:
-        replace_config = False
-        config_online_version = int(get_aimbot_version()[1])
-        config_current_version = int(get_aimbot_current_version()[1])
-        
-        if config_online_version > config_current_version:
-            print('Removing config with old version and installing fresh.')
-            os.remove('./config.ini')
-            replace_config = True
-        if config_online_version == config_current_version:
-            print('Config has a fresh version. We don\'t touch him.')
-    except:
-        print('File config.ini is not found, continued')
+    replace_config = False
+    
+    config_online_version = int(get_aimbot_online_version()[1])
+    config_current_version = get_aimbot_current_version()
+    
+    if config_current_version != None:
+        config_current_version = int(config_current_version[1])
+    
+    print(f'Config current version: {config_current_version}\nConfig online version {config_online_version}')
+    
+    if config_online_version != config_current_version:
+        print('Removing config with old version and installing fresh.')
+        os.remove('./config.ini')
         replace_config = True
+    if config_online_version == config_current_version:
+        print('Config has a fresh version. We don\'t touch him.')
+        
+    # Refrash version file
+    try:
+        os.remove('./version')
+    except:
         pass
-
+    
     print("Downloading repo. Please wait...")
     
     download_file('https://github.com/SunOner/yolov8_aimbot/archive/refs/heads/main.zip', 'main.zip')
@@ -188,7 +187,7 @@ def Update_yolov8_aimbot():
         os.makedirs('./models')
 
     temp_aimbot_files = [
-        '.gitattributes', '.gitignore', './config.ini', './helper.py', 'LICENSE', 'README.md', './run.py', './requirements.txt', './version', 
+        './.gitattributes', './.gitignore', './config.ini', './helper.py', './LICENSE', './README.md', './run.py', './requirements.txt', './version', 
         './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/keyboard.py', './logic/mouse.py', 
         './media/aimbot.png', './media/cmd_admin_en.png', './media/cmd_admin_ru.png', './media/cmd_cd_path.png',
         './media/copy_explorer_path.png', './media/python_add_to_path.png', './media/cuda.png', './media/environment_variables.png',
@@ -319,7 +318,7 @@ def print_menu():
     os.system('cls')
     print('Run this script as an administrator to work correctly.')
     # TODO: print last error
-    print('Installed version is: {0}, latest: {1}\n'.format(get_aimbot_current_version()[0], get_aimbot_version()[0]))
+    print('Installed version is: {0}, online: {1}\n'.format(get_aimbot_current_version()[0], get_aimbot_online_version()[0]))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
@@ -355,6 +354,13 @@ def main():
         quit()
 
 if __name__ == "__main__":
+    try:
+        from logic.config_watcher import Config
+        cfg = Config()
+    except:
+        print('logic/config_watcher.py not found, updating Yolov8_aimbot...')
+        Update_yolov8_aimbot()
+        
     upgrade_pip()
     upgrade_ultralytics()
     main()
