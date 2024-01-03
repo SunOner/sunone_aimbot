@@ -138,7 +138,7 @@ def Update_yolov8_aimbot():
         delete_files_in_folder('./media')
     except:
         pass
-    base_dir_files = ['./helper.py', './run.py', './version', './requirements.txt']
+    base_dir_files = ['.gitattributes', '.gitignore', 'LICENSE', 'README.md', './helper.py', './run.py', './version', './requirements.txt']
     for file in base_dir_files:
         try:
             os.remove(file)
@@ -188,7 +188,7 @@ def Update_yolov8_aimbot():
         os.makedirs('./models')
 
     temp_aimbot_files = [
-        './config.ini', './helper.py', './run.py', './requirements.txt', './version', 
+        '.gitattributes', '.gitignore', './config.ini', './helper.py', 'LICENSE', 'README.md', './run.py', './requirements.txt', './version', 
         './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/keyboard.py', './logic/mouse.py', 
         './media/aimbot.png', './media/cmd_admin_en.png', './media/cmd_admin_ru.png', './media/cmd_cd_path.png',
         './media/copy_explorer_path.png', './media/python_add_to_path.png', './media/cuda.png', './media/environment_variables.png',
