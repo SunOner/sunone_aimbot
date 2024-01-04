@@ -13,7 +13,7 @@ import win32api, win32con, win32gui
 if cfg.show_overlay_detector:
     import tkinter as tk
 
-class Targets:
+class Target:
     def __init__(self, x, y, w, h, cls):
         self.mouse_x = x - frames.screen_x_center
         self.mouse_y = (y - frames.screen_y_center) if cls == 7 else (y - frames.screen_y_center - cfg.body_y_offset * h)
@@ -24,7 +24,7 @@ class Targets:
         self.h = h
         self.cls = cls
         
-class Overlay:
+class OverlayWindow:
     def __init__(self):
         self.overlay_detector = tk.Tk()
         self.overlay_detector.geometry(f'{cfg.detection_window_width}x{cfg.detection_window_height}+{frames.Calculate_screen_offset()[0]}+{frames.Calculate_screen_offset()[1]}')
@@ -38,25 +38,65 @@ class Overlay:
         self.canvas = tk.Canvas(self.overlay_detector, bg='white', height=cfg.detection_window_height, width=cfg.detection_window_width)
         self.canvas.pack()
         
+def perform_detection(model, image, clss):
+    return model.predict(
+        source=image,
+        stream=True,
+        cfg='logic/game.yaml',
+        imgsz=cfg.AI_image_size,
+        stream_buffer=False,
+        visualize=False,
+        augment=True,
+        agnostic_nms=False,
+        save=False,
+        conf=cfg.AI_conf,
+        iou=cfg.AI_iou,
+        device=cfg.AI_device,
+        half=False,
+        max_det=cfg.AI_max_det,
+        vid_stride=False,
+        classes=clss,
+        verbose=False,
+        show_boxes=False,
+        show_labels=False,
+        show_conf=False,
+        show=False)
+    
+def print_startup_messages():
+    print('Aimbot is started. Enjoy!\n'
+          f'[{cfg.hotkey_targeting}] - Aiming at the target\n'
+          f'[{cfg.hotkey_exit}] - EXIT\n'
+          f'[{cfg.hotkey_pause}] - PAUSE AIM\n'
+          f'[{cfg.hotkey_reload_config}] - Reload config')
+    
+def process_hotkeys(cfg_reload_prev_state):
+    global app_pause
+    app_pause = win32api.GetKeyState(Keyboard.KEY_CODES[cfg.hotkey_pause])
+    app_reload_cfg = win32api.GetKeyState(Keyboard.KEY_CODES[cfg.hotkey_reload_config])
+    if app_reload_cfg != cfg_reload_prev_state:
+        if app_reload_cfg in (1, 0):
+            cfg.Read(verbose=True)
+            frames.reload_capture()
+            mouse_worker.Update_settings()
+    cfg_reload_prev_state = app_reload_cfg
+    return cfg_reload_prev_state
+
+def update_overlay_window(overlay):
+    if cfg.show_overlay_detector:
+        overlay.overlay_detector.update()
+        overlay.canvas.delete("all")
+        
 @torch.no_grad()
 def init():
-    if cfg.show_overlay_detector:
-        overlay = Overlay()
+    overlay = OverlayWindow() if cfg.show_overlay_detector else None
+    prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
         
-    if cfg.show_window and cfg.show_fps:
-        prev_frame_time = 0
-        new_frame_time = 0
     try:
         model = YOLO(f'models/{cfg.AI_model_path}', task='detect')
+        print_startup_messages()
     except Exception as e:
         print(e)
         quit(0)
-
-    print('Aimbot is started. Enjoy!\n'
-        f'[{cfg.hotkey_targeting}] - Aiming at the target\n'
-        f'[{cfg.hotkey_exit}] - EXIT\n'
-        f'[{cfg.hotkey_pause}] - PAUSE AIM\n'
-        f'[{cfg.hotkey_reload_config}] - Reload config')
     
     if cfg.show_window:
         print('An open debug window can affect performance.')
@@ -65,54 +105,22 @@ def init():
             debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
             win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
 
-    clss = []
-    if cfg.hideout_targets:
-        clss = [0,1,5,6,7]
-    if cfg.hideout_targets == False:
-        clss = [0,1,7]
-
+    clss = [0, 1, 5, 6, 7] if cfg.hideout_targets else [0, 1, 7]
     cfg_reload_prev_state = 0
     shooting_queue = []
-    while True:
-        app_pause = win32api.GetKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_pause))
 
-        app_reload_cfg = win32api.GetKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_reload_config))
-        if app_reload_cfg != cfg_reload_prev_state:
-            if app_reload_cfg == 1 or app_reload_cfg == 0:
-                cfg.Read(verbose=True)
-                frames.reload_capture()
-                mouse_worker.Update_settings()
-        cfg_reload_prev_state = app_reload_cfg
-        
+    while True:
+        cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame()
-        result = model.predict(
-            source=image,
-            stream=True,
-            cfg='logic/game.yaml',
-            imgsz=cfg.AI_image_size,
-            stream_buffer=False,
-            visualize=False,
-            augment=True,
-            agnostic_nms=False,
-            save=False,
-            conf=cfg.AI_conf,
-            iou=cfg.AI_iou,
-            device=cfg.AI_device,
-            half=False,
-            max_det=cfg.AI_max_det,
-            vid_stride=False,
-            classes=clss,
-            verbose=False,
-            show_boxes=False,
-            show_labels=False,
-            show_conf=False,
-            show=False)
+        result = perform_detection(model, image, clss)
+        update_overlay_window(overlay)
         
-        if cfg.show_window:
+        if cfg.show_window and cfg.debug_window_scale_percent != 100:
             height = int(cfg.detection_window_height * cfg.debug_window_scale_percent / 100)
             width = int(cfg.detection_window_width * cfg.debug_window_scale_percent / 100)
             dim = (width, height)
             
+        if cfg.show_window:
             annotated_frame = image
 
         for frame in result:
@@ -124,9 +132,9 @@ def init():
                     for box in frame.boxes:
                         cls = int(box.cls.item())
                         if not cfg.disable_headshot:
-                            shooting_queue.append(Targets(*box.xywh[0], cls))
+                            shooting_queue.append(Target(*box.xywh[0], cls))
                         elif cls in (0, 1, 5, 6):
-                            shooting_queue.append(Targets(*box.xywh[0], cls))
+                            shooting_queue.append(Target(*box.xywh[0], cls))
 
                     if not cfg.disable_headshot:
                         shooting_queue.sort(key=lambda x: (x.cls != 7, x.distance))
@@ -183,16 +191,15 @@ def init():
 
         if cfg.show_window:
             try:
-                cv2.resizeWindow(cfg.debug_window_name, dim)
+                if cfg.debug_window_scale_percent != 100:
+                    cv2.resizeWindow(cfg.debug_window_name, dim)
+                    resised = cv2.resize(annotated_frame, dim, cv2.INTER_NEAREST)
+                    cv2.imshow(cfg.debug_window_name, resised)
+                else:
+                    cv2.imshow(cfg.debug_window_name, annotated_frame)
             except: exit(0)
-            resised = cv2.resize(annotated_frame, dim, cv2.INTER_NEAREST)
-            cv2.imshow(cfg.debug_window_name, resised)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cfg.show_window and cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            
-        if cfg.show_overlay_detector:
-            overlay.overlay_detector.update()
-            overlay.canvas.delete("all")
 
 if __name__ == "__main__":
     frames = Capture()

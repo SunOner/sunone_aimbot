@@ -1,6 +1,8 @@
 import cv2
 import bettercam
+import numpy as np
 import torch
+import win32gui, win32ui, win32con
 from logic.config_watcher import *
 from run import cfg
 from screeninfo import get_monitors
@@ -33,8 +35,34 @@ class Capture():
             self.ret_val, self.img = self.obs_camera.read()
             return self.img
         
-        if cfg.native_Windows_capture:
+        if cfg.win32_capture:
             return self.windows_native_grab_screen(self.Calculate_screen_offset())
+    
+    def windows_native_grab_screen(self, region):
+        hwin = win32gui.GetDesktopWindow()
+
+        left,top,x2,y2 = region
+        width = x2 - left
+        height = y2 - top
+
+        hwindc = win32gui.GetWindowDC(hwin)
+        srcdc = win32ui.CreateDCFromHandle(hwindc)
+        memdc = srcdc.CreateCompatibleDC()
+        bmp = win32ui.CreateBitmap()
+        bmp.CreateCompatibleBitmap(srcdc, width, height)
+        memdc.SelectObject(bmp)
+        memdc.BitBlt((0, 0), (width, height), srcdc, (left, top), win32con.SRCCOPY)
+
+        signedIntsArray = bmp.GetBitmapBits(True)
+        img = np.fromstring(signedIntsArray, dtype='uint8')
+        img.shape = (height, width, 4)
+
+        srcdc.DeleteDC()
+        memdc.DeleteDC()
+        win32gui.ReleaseDC(hwin, hwindc)
+        win32gui.DeleteObject(bmp.GetHandle())
+
+        return img
     
     def reload_capture(self):
         if cfg.Bettercam_capture and self.prev_detection_window_height != cfg.detection_window_height or cfg.Bettercam_capture and self.prev_detection_window_width != cfg.detection_window_width or cfg.Bettercam_capture and self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps:

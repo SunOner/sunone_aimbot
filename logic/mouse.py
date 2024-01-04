@@ -146,7 +146,7 @@ class MouseThread(threading.Thread):
 
         if (x > x1 and x < x2 and y > y1 and y < y2) :
             return True
-        else :
+        else:
             return False
 
     def move_mouse(self, x, y, shooting_key):
