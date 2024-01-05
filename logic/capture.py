@@ -17,7 +17,7 @@ class Capture():
         self.prev_bettercam_capture_fps = cfg.bettercam_capture_fps
 
         if cfg.Bettercam_capture:
-            self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id, output_idx=cfg.bettercam_gpu_id, output_color="BGR", max_buffer_len=64)
+            self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id, output_idx=cfg.bettercam_gpu_id, output_color="BGR", max_buffer_len=64, region=self.Calculate_screen_offset())
             if self.bc.is_capturing == False:
                 self.bc.start(self.Calculate_screen_offset(), target_fps=cfg.bettercam_capture_fps)
         

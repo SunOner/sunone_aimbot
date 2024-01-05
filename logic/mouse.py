@@ -100,7 +100,7 @@ class MouseThread(threading.Thread):
                 pass
             else:
                 self.process_data(data)
-
+    
     def process_data(self, data):
         shooting_key = self.get_shooting_key_state()
         x, y, target_x, target_y, target_w, target_h, distance = data

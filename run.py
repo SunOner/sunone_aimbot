@@ -86,6 +86,14 @@ def update_overlay_window(overlay):
         overlay.overlay_detector.update()
         overlay.canvas.delete("all")
         
+def spawn_debug_window():
+    if cfg.show_window:
+        print('An open debug window can affect performance.')
+        cv2.namedWindow(cfg.debug_window_name)
+        if cfg.debug_window_always_on_top:
+            debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
+            win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
+        
 @torch.no_grad()
 def init():
     overlay = OverlayWindow() if cfg.show_overlay_detector else None
@@ -98,13 +106,8 @@ def init():
         print(e)
         quit(0)
     
-    if cfg.show_window:
-        print('An open debug window can affect performance.')
-        cv2.namedWindow(cfg.debug_window_name)
-        if cfg.debug_window_always_on_top:
-            debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
-            win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
-
+    spawn_debug_window()
+    
     clss = [0, 1, 5, 6, 7] if cfg.hideout_targets else [0, 1, 7]
     cfg_reload_prev_state = 0
     shooting_queue = []
@@ -114,11 +117,6 @@ def init():
         image = frames.get_new_frame()
         result = perform_detection(model, image, clss)
         update_overlay_window(overlay)
-        
-        if cfg.show_window and cfg.debug_window_scale_percent != 100:
-            height = int(cfg.detection_window_height * cfg.debug_window_scale_percent / 100)
-            width = int(cfg.detection_window_width * cfg.debug_window_scale_percent / 100)
-            dim = (width, height)
             
         if cfg.show_window:
             annotated_frame = image
@@ -192,6 +190,9 @@ def init():
         if cfg.show_window:
             try:
                 if cfg.debug_window_scale_percent != 100:
+                    height = int(cfg.detection_window_height * cfg.debug_window_scale_percent / 100)
+                    width = int(cfg.detection_window_width * cfg.debug_window_scale_percent / 100)
+                    dim = (width, height)
                     cv2.resizeWindow(cfg.debug_window_name, dim)
                     resised = cv2.resize(annotated_frame, dim, cv2.INTER_NEAREST)
                     cv2.imshow(cfg.debug_window_name, resised)
