@@ -22,9 +22,6 @@ class Config():
         self.Obs_camera_id = int(self.config_Obs_capture['Obs_camera_id'])
         self.Obs_capture_fps = int(self.config_Obs_capture['Obs_capture_fps'])
         
-        self.config_win32_capture = self.config['win32 Capture']
-        self.win32_capture = self.config_win32_capture.getboolean('win32_capture')
-        
         self.config_Aim_settings = self.config['Aim settings']
         self.body_y_offset = float(self.config_Aim_settings['body_y_offset'])
         self.hideout_targets = self.config_Aim_settings.getboolean('hideout_targets')

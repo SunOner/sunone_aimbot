@@ -15,13 +15,11 @@ if cfg.show_overlay_detector:
 
 class Target:
     def __init__(self, x, y, w, h, cls):
-        self.mouse_x = x - frames.screen_x_center
-        self.mouse_y = (y - frames.screen_y_center) if cls == 7 else (y - frames.screen_y_center - cfg.body_y_offset * h)
-        self.distance = math.sqrt((x - frames.screen_x_center)**2 + (y - frames.screen_y_center)**2)
         self.x = x
         self.y = y
         self.w = w
         self.h = h
+        self.distance = math.sqrt((x - frames.screen_x_center)**2 + (y - frames.screen_y_center)**2)
         self.cls = cls
         
 class OverlayWindow:
@@ -38,7 +36,8 @@ class OverlayWindow:
         self.canvas = tk.Canvas(self.overlay_detector, bg='white', height=cfg.detection_window_height, width=cfg.detection_window_width)
         self.canvas.pack()
         
-def perform_detection(model, image, clss):
+def perform_detection(model, image):
+    clss = [0, 1, 5, 6, 7] if cfg.hideout_targets else [0, 1, 7]
     return model.predict(
         source=image,
         stream=True,
@@ -108,14 +107,12 @@ def init():
     
     spawn_debug_window()
     
-    clss = [0, 1, 5, 6, 7] if cfg.hideout_targets else [0, 1, 7]
     cfg_reload_prev_state = 0
     shooting_queue = []
-
     while True:
         cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame()
-        result = perform_detection(model, image, clss)
+        result = perform_detection(model, image)
         update_overlay_window(overlay)
             
         if cfg.show_window:
@@ -127,30 +124,25 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    for box in frame.boxes:
-                        cls = int(box.cls.item())
-                        if not cfg.disable_headshot:
-                            shooting_queue.append(Target(*box.xywh[0], cls))
-                        elif cls in (0, 1, 5, 6):
-                            shooting_queue.append(Target(*box.xywh[0], cls))
+                    boxes_array = frame.boxes.xywh.cpu().numpy()
+
+                    distances_sq = np.sum((boxes_array[:, :2] - [frames.screen_x_center, frames.screen_y_center]) ** 2, axis=1)
+
+                    shooting_queue = [Target(*box[:4], cls) for box, cls in zip(boxes_array, frame.boxes.cls.cpu().numpy())]
 
                     if not cfg.disable_headshot:
-                        shooting_queue.sort(key=lambda x: (x.cls != 7, x.distance))
+                        sort_indices = np.lexsort((distances_sq, frame.boxes.cls.cpu().numpy() != 7))
                     else:
-                        shooting_queue.sort(key=lambda x: x.distance, reverse=False)
-                    try:
+                        sort_indices = np.argsort(distances_sq)
+
+                    shooting_queue = [shooting_queue[i] for i in sort_indices]
+
+                    if shooting_queue:
                         target = shooting_queue[0]
-                        mouse_worker.queue.put((
-                            target.mouse_x,
-                            target.mouse_y,
-                            target.x,
-                            target.y,
-                            target.w,
-                            target.h,
-                            target.distance))
-                        
+
+                        mouse_worker.queue.put((target.x, target.y, target.w, target.h))
                         if cfg.show_window and cfg.show_target_line:
-                            draw_target_line(annotated_frame=annotated_frame, screen_x_center=cfg.detection_window_width / 2, screen_y_center=cfg.detection_window_height / 2, target_x=target.mouse_x + frames.screen_x_center, target_y=target.mouse_y + frames.screen_y_center + cfg.body_y_offset / target.h)
+                            draw_target_line(annotated_frame=annotated_frame, screen_x_center=cfg.detection_window_width / 2, screen_y_center=cfg.detection_window_height / 2, target_x=target.x, target_y=target.y + cfg.body_y_offset / target.h)
                             
                         if cfg.show_overlay_detector and cfg.show_overlay_boxes:
                             x1, y1 = target.x - target.w / 2, target.y - target.h / 2
@@ -158,11 +150,8 @@ def init():
                             overlay.canvas.create_rectangle(x1.item(), y1.item(), x2.item(), y2.item(), width=2, outline='green')
                             
                         if cfg.show_overlay_detector and cfg.show_overlay_line:
-                            overlay.canvas.create_line(cfg.detection_window_width / 2, cfg.detection_window_height / 2, target.mouse_x.item() + frames.screen_x_center, target.mouse_y.item() + frames.screen_y_center + cfg.body_y_offset / target.h.item(), width=2, fill='red')
+                            overlay.canvas.create_line(cfg.detection_window_width / 2, cfg.detection_window_height / 2, target.x, target.y + cfg.body_y_offset / target.h, width=2, fill='red')
                             
-                    except IndexError:
-                        mouse_worker.queue.put(None)
-                        shooting_queue.clear()
                     shooting_queue.clear()
                 else: pass
 

@@ -78,7 +78,7 @@ if cfg.mouse_native == False:
     def ghub_mouse_close():
         if gmok:
             return gm.mouse_close()
-
+    
 class MouseThread(threading.Thread):
     def __init__(self):
         super(MouseThread, self).__init__()
@@ -103,18 +103,18 @@ class MouseThread(threading.Thread):
     
     def process_data(self, data):
         shooting_key = self.get_shooting_key_state()
-        x, y, target_x, target_y, target_w, target_h, distance = data
+        target_x, target_y, target_w, target_h = data
         bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h) if cfg.mouse_auto_shoot or cfg.mouse_triggerbot else False
-        x, y = self.adjust_mouse_movement(x, y, distance, target_x, target_y)
+        x, y = self.adjust_mouse_movement(target_x, target_y)
         self.move_mouse(x, y, shooting_key)
         self.shoot(bScope)
-
+        
     def get_shooting_key_state(self):
         if cfg.mouse_lock_target:
             return win32api.GetKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_targeting))
         return win32api.GetAsyncKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_targeting))
 
-    def adjust_mouse_movement(self, x, y, distance, target_x, target_y):
+    def adjust_mouse_movement(self, target_x, target_y):
         offset_x = target_x - self.center_x
         offset_y = target_y - self.center_y
 
