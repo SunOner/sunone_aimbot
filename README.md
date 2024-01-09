@@ -15,9 +15,10 @@
 YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
+> Starting in January 2024, the program is switching only to Nvidia graphics cards.
 
 ## Requirements
-Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot:
+Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot.
 
 - Information in English:
   - [Auto-Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/helper_en.md)
@@ -137,7 +138,7 @@ yolo export model="models/sunxds_0.2.9.6.pt" format=engine half=true device=0 im
   - `verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
 
 ## Notes / Recommendations
-- Limit the maximum value of frames per second in the game in which you will use it. Do not overload the graphics card.
+- Limit the maximum value of frames per second in the game in which you will use it. And also do not set the screen resolution to high. Do not overload the graphics card.
 - Do not set high graphics settings in games.
 - Limit the browser (try not to watch YouTube while playing and working AI at the same time, for example (of course if you don't have a super duper graphics card)) and so on, which loads the video card.
 - Try to use TensorRT for acceleration. `.pt` model is good, but does not have as much speed as `.engine`.

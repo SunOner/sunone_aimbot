@@ -141,7 +141,19 @@ def init():
                     if not cfg.disable_headshot:
                         sort_indices = np.lexsort((distances_sq.cpu().numpy(), classes_np != 7))
                     else:
-                        sort_indices = torch.argsort(distances_sq).cpu().numpy()
+                        class7_indices = torch.where(frame.boxes.cls == 7)[0]
+                        if len(class7_indices) > 0:
+                            class7_distances_sq = distances_sq[class7_indices]
+                            sort_indices_class7 = torch.argsort(class7_distances_sq)
+                            class7_indices = class7_indices[sort_indices_class7]
+                        else:
+                            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=cfg.AI_device)
+
+                        other_indices = torch.where(frame.boxes.cls != 7)[0]
+                        other_distances_sq = distances_sq[other_indices]
+                        sort_indices_other = torch.argsort(other_distances_sq)
+
+                        sort_indices = torch.cat((class7_indices, other_indices[sort_indices_other])).cpu().numpy()
                     
                     shooting_queue = [shooting_queue[i] for i in sort_indices]
                     
