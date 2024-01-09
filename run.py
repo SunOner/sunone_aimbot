@@ -37,7 +37,12 @@ class OverlayWindow:
         self.canvas.pack()
         
 def perform_detection(model, image):
-    clss = [0, 1, 5, 6, 7] if cfg.hideout_targets else [0, 1, 7]
+    clss = [0, 1]
+    if cfg.hideout_targets:
+        clss += 5, 6
+    if cfg.disable_headshot == False:
+        clss.append(7)
+
     return model.predict(
         source=image,
         stream=True,
