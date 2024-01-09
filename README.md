@@ -15,8 +15,8 @@
 YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
-> [!NOTE]
-> Starting in January 2024, the program is switching only to Nvidia graphics cards.
+- [!NOTE]
+	-Starting in January 2024, the program is switching only to Nvidia graphics cards.
 
 ## Requirements
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot.
