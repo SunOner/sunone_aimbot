@@ -3,6 +3,8 @@ from tkinter import ttk
 import configparser
 import subprocess
 import threading
+import sys
+import ctypes
 
 class SettingsGUI:
     def __init__(self, root):
@@ -38,14 +40,24 @@ class SettingsGUI:
         except Exception as e:
             print(f"Error writing to config file: {e}")
 
-    def run_script(self):
-        threading.Thread(target=self.run_script_in_thread).start()
+    def run_script(self, script_name):
+        threading.Thread(target=self.run_script_in_thread, args=(script_name,)).start()
 
-    def run_script_in_thread(self):
+    def run_script_in_thread(self, script_name):
         try:
-            subprocess.run(["python", "run.py"])
+            if sys.platform.startswith('win'):
+                # Check if the process is elevated (run as administrator)
+                if ctypes.windll.shell32.IsUserAnAdmin() == 0:
+                    # If not, relaunch the script as an administrator
+                    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, script_name, None, 1)
+                    sys.exit(0)
+                else:
+                    # If already elevated, run the script
+                    subprocess.run(['python', script_name], check=True)
+            else:
+                subprocess.run(['sudo', 'python', script_name], check=True)
         except Exception as e:
-            print(f"Error running 'run.py': {e}")
+            print(f"Error running '{script_name}': {e}")
 
     def create_widgets(self):
         notebook = ttk.Notebook(self.root)
@@ -79,11 +91,11 @@ class SettingsGUI:
                         'W', 'X', 'Y', 'LeftWindowsKey',
                         'RightWindowsKey', 'Application', 'Sleep',
                         'NumpadKey0', 'NumpadKey1', 'NumpadKey2',
-                        'NumpadKey3', 'NumpadKey4', 'NumpadKey5',
+                        'NumpadKey3', 'NumpadKey4, NumpadKey5',
                         'NumpadKey6', 'NumpadKey7', 'NumpadKey8',
                         'NumpadKey9', 'Multiply', 'Add', 'Separator',
                         'Subtract', 'Decimal', 'Divide', 'F1',
-                        'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8',
+                        'F2', 'F3, F4', 'F5', 'F6', 'F7', 'F8',
                         'F9', 'F10', 'F11', 'F12', 'NumLock',
                         'ScrollLock', 'LeftShift', 'RightShift',
                         'LeftControl', 'RightControl', 'LeftMenu',
@@ -116,8 +128,11 @@ class SettingsGUI:
         save_button = ttk.Button(self.root, text="Save Config", command=self.save_config)
         save_button.pack(pady=10)
 
-        run_button = ttk.Button(self.root, text="Run", command=self.run_script)
-        run_button.pack(pady=10)
+        run_button_script = ttk.Button(self.root, text="Run Script", command=lambda: self.run_script("run.py"))
+        run_button_script.pack(pady=10)
+
+        run_button_helper = ttk.Button(self.root, text="Run Helper", command=lambda: self.run_script("helper.py"))
+        run_button_helper.pack(pady=10)
 
 if __name__ == "__main__":
     root = tk.Tk()
