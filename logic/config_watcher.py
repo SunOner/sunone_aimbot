@@ -51,7 +51,6 @@ class Config():
         self.AI_conf = float(self.config_AI_options['AI_conf'])
         self.AI_iou = float(self.config_AI_options['AI_iou'])
         self.AI_device = str(self.config_AI_options['AI_device'])
-        self.AI_max_det = int(self.config_AI_options['AI_max_det'])
         
         self.config_Overlay_detector = self.config['Overlay detector']
         self.show_overlay_detector = self.config_Overlay_detector.getboolean('show_overlay_detector')

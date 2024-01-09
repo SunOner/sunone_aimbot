@@ -16,7 +16,7 @@ if cfg.show_overlay_detector:
 class Target:
     def __init__(self, x, y, w, h, cls):
         self.x = x
-        self.y = y
+        self.y = y if cls == 7 else (y - cfg.body_y_offset * h)
         self.w = w
         self.h = h
         self.distance = math.sqrt((x - frames.screen_x_center)**2 + (y - frames.screen_y_center)**2)
@@ -52,7 +52,7 @@ def perform_detection(model, image):
         iou=cfg.AI_iou,
         device=cfg.AI_device,
         half=False,
-        max_det=cfg.AI_max_det,
+        max_det=10,
         vid_stride=False,
         classes=clss,
         verbose=False,
@@ -109,6 +109,7 @@ def init():
     
     cfg_reload_prev_state = 0
     shooting_queue = []
+    screen_center = torch.tensor([frames.screen_x_center, frames.screen_y_center], device='cuda:0')
     while True:
         cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame()
@@ -124,22 +125,24 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    boxes_array = frame.boxes.xywh.cpu().numpy()
-
-                    distances_sq = np.sum((boxes_array[:, :2] - [frames.screen_x_center, frames.screen_y_center]) ** 2, axis=1)
-
-                    shooting_queue = [Target(*box[:4], cls) for box, cls in zip(boxes_array, frame.boxes.cls.cpu().numpy())]
-
+                    boxes_array = frame.boxes.xywh
+        
+                    distances_sq = torch.sum((boxes_array[:, :2] - screen_center) ** 2, dim=1)
+                    
+                    classes_np = frame.boxes.cls.cpu().numpy()
+                    
+                    shooting_queue = [Target(*box[:4].cpu().numpy(), cls) for box, cls in zip(boxes_array, classes_np)]
+                    
                     if not cfg.disable_headshot:
-                        sort_indices = np.lexsort((distances_sq, frame.boxes.cls.cpu().numpy() != 7))
+                        sort_indices = np.lexsort((distances_sq.cpu().numpy(), classes_np != 7))
                     else:
-                        sort_indices = np.argsort(distances_sq)
-
+                        sort_indices = torch.argsort(distances_sq).cpu().numpy()
+                    
                     shooting_queue = [shooting_queue[i] for i in sort_indices]
-
+                    
                     if shooting_queue:
                         target = shooting_queue[0]
-
+                        
                         mouse_worker.queue.put((target.x, target.y, target.w, target.h))
                         if cfg.show_window and cfg.show_target_line:
                             draw_target_line(annotated_frame=annotated_frame, screen_x_center=cfg.detection_window_width / 2, screen_y_center=cfg.detection_window_height / 2, target_x=target.x, target_y=target.y + cfg.body_y_offset / target.h)
@@ -165,10 +168,7 @@ def init():
             fps = 1/(new_frame_time-prev_frame_time)
             prev_frame_time = new_frame_time
             
-            if cfg.show_speed:
-                cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
-            else:
-                cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+            cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 80) if cfg.show_speed else (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
         if win32api.GetAsyncKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_exit)) & 0xFF:
             if cfg.show_window:
