@@ -61,7 +61,7 @@ def upgrade_ultralytics():
     ultralytics_current_version = ultralytics.__version__
 
     ultralytics_repo_version = requests.get('https://raw.githubusercontent.com/ultralytics/ultralytics/main/ultralytics/__init__.py').content.decode('utf-8')
-    ultralytics_repo_version = re.search(r"__version__\s*=\s*'([^']+)'", ultralytics_repo_version).group(1)
+    ultralytics_repo_version = re.search(r"__version__\s*=\s*\"([^']+)\"", ultralytics_repo_version).group(1)
 
     if ultralytics_current_version != ultralytics_repo_version:
         print('The versions of ultralytics do not match\nAn update is in progress...')
