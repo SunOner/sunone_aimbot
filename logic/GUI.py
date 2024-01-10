@@ -15,7 +15,7 @@ class SettingsGUI:
         self.create_widgets()
 
     def load_config(self):
-        config_file_path = "config.ini"
+        config_file_path = "./config.ini"
         self.config.read(config_file_path)
 
     def update_config(self):
@@ -128,7 +128,7 @@ class SettingsGUI:
         save_button = ttk.Button(self.root, text="Save Config", command=self.save_config)
         save_button.pack(pady=10)
 
-        run_button_script = ttk.Button(self.root, text="Run Script", command=lambda: self.run_script("run.py"))
+        run_button_script = ttk.Button(self.root, text="Run Aimbot", command=lambda: self.run_script("run.py"))
         run_button_script.pack(pady=10)
 
         run_button_helper = ttk.Button(self.root, text="Run Helper", command=lambda: self.run_script("helper.py"))
