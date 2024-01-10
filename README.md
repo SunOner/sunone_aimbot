@@ -44,7 +44,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>TensorRT Version:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python Version:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>PyTorch Version:</th><td>2.1.2+cu121</td></tr></thead>
-  <thead><tr><th>Ultralytics Version:</th><td>YOLOv8.0.232</td></tr></thead>
+  <thead><tr><th>Ultralytics Version:</th><td>YOLOv8.1.0</td></tr></thead>
   <thead><tr><th>OpenCV Version:</th><td>4.9.0.80</td></tr></thead>
   <thead><tr><th>NumPy Version:</th><td>1.26.0</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.3.8</td></tr></thead>
