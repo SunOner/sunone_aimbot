@@ -57,7 +57,7 @@ def perform_detection(model, image):
         iou=cfg.AI_iou,
         device=cfg.AI_device,
         half=False,
-        max_det=10,
+        max_det=25,
         vid_stride=False,
         classes=clss,
         verbose=False,
@@ -147,7 +147,7 @@ def init():
                             sort_indices_class7 = torch.argsort(class7_distances_sq)
                             class7_indices = class7_indices[sort_indices_class7]
                         else:
-                            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=cfg.AI_device)
+                            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}'if cfg.AI_device.isdigit else 'cpu')
 
                         other_indices = torch.where(frame.boxes.cls != 7)[0]
                         other_distances_sq = distances_sq[other_indices]
