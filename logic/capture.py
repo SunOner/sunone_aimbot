@@ -22,7 +22,14 @@ class Capture():
                 self.bc.start(self.Calculate_screen_offset(), target_fps=cfg.bettercam_capture_fps)
         
         if cfg.Obs_capture:
-            self.obs_camera = cv2.VideoCapture(cfg.Obs_camera_id)
+            if cfg.Obs_camera_id == 'auto':
+                camera_id = self.find_obs_virtual_camera()
+                if camera_id == -1:
+                    print('OBS Virtual Camera not found')
+                    exit(0)
+            elif cfg.Obs_camera_id.isdigit:
+                camera_id = int(cfg.Obs_camera_id)
+            self.obs_camera = cv2.VideoCapture(camera_id)
             self.obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.detection_window_width)
             self.obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.detection_window_height)
             self.obs_camera.set(cv2.CAP_PROP_FPS, cfg.Obs_capture_fps)
@@ -32,8 +39,12 @@ class Capture():
             return self.bc.get_latest_frame()
         
         if cfg.Obs_capture:
-            self.ret_val, self.img = self.obs_camera.read()
-            return self.img
+            ret_val, img = self.obs_camera.read()
+            if ret_val:
+                return img
+            else:
+                print('OBS Virtual Camera not found')
+                exit(0)
     
     def reload_capture(self):
         if cfg.Bettercam_capture and self.prev_detection_window_height != cfg.detection_window_height or cfg.Bettercam_capture and self.prev_detection_window_width != cfg.detection_window_width or cfg.Bettercam_capture and self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps:
@@ -63,6 +74,23 @@ class Capture():
         for m in _:
             if m.is_primary:
                 return m.width, m.height
+            
+    def find_obs_virtual_camera(self):
+        max_tested = 10
+        obs_camera_name = 'DSHOW'
+        
+        for i in range(max_tested):
+            cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+            if not cap.isOpened():
+                continue
+            backend_name = cap.getBackendName()
+            if backend_name == obs_camera_name:
+                print(f'OBS Virtual Camera found at index {i}')
+                cap.release()
+                return i
+            cap.release()
+
+        return -1
     
     def Quit(self):
         if cfg.Bettercam_capture:

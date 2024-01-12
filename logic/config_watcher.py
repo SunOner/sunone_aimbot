@@ -19,7 +19,7 @@ class Config():
 
         self.config_Obs_capture = self.config['Capture Methods']
         self.Obs_capture = self.config_Obs_capture.getboolean('Obs_capture')
-        self.Obs_camera_id = int(self.config_Obs_capture['Obs_camera_id'])
+        self.Obs_camera_id = str(self.config_Obs_capture['Obs_camera_id'])
         self.Obs_capture_fps = int(self.config_Obs_capture['Obs_capture_fps'])
         
         self.config_Aim_settings = self.config['Aim settings']

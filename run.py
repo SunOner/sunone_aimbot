@@ -109,7 +109,6 @@ def spawn_debug_window():
 def init():
     if cfg.AI_device.lower == 'cpu':
         print('CPU is not supported, please select Nvidia GPU device.\nExample: AI_device=0')
-        time.sleep(3)
         exit(0)
     overlay = OverlayWindow() if cfg.show_overlay_detector else None
     prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
