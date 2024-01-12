@@ -135,6 +135,8 @@ class MouseThread(threading.Thread):
         self.fov = cfg.mouse_fov
         self.screen_width = cfg.detection_window_width
         self.screen_height = cfg.detection_window_height
+        self.center_x = self.screen_width / 2
+        self.center_y = self.screen_height / 2
         
     def check_target_in_scope(self, target_x, target_y, target_w, target_h):
         x = cfg.detection_window_width / 2

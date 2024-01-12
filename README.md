@@ -15,7 +15,7 @@
 YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
-- NOTE: Starting in January 2024, the program is switching only to Nvidia graphics cards.
+- NOTE: Starting in January 2024, the program is switching only to Nvidia graphics cards. We have also stopped supporting the old architecture. The minimum graphics card to run is 1050-TI.
 
 ## Requirements
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot.
@@ -32,7 +32,7 @@ Before you get started, make sure you have the following prerequisites installed
   - [Вопросы и ответы](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/questions_ru.md)
   - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
 <br></br>
-- To launch the aimbot after all installations, type `python run.py` or `py run.py` in cmd.
+- To launch the aimbot after all installations, type `py run.py` or `py launcher.py` in cmd.
 
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
@@ -87,18 +87,19 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_sensitivity  `float`: Aim sensitivity.
 - mouse_fov  `float`: Ingame fov.
 - mouse_lock_target `bool`: Lock targeting.
-- mouse_auto_shoot `bool`: Automatic shooting. (For some games need arduino).
+- mouse_auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_native `bool`: Use windows native mouse input.
+- mouse_triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
 - mouse_move_by_arduino `bool`: Sends a command to the arduino to move the mouse.
-- mouse_shoot_by_arduino `bool`: Sends a command to the arduino to fire with the mouse
+- mouse_shoot_by_arduino `bool`: Sends a command to the arduino to fire with the mouse.
 
 ### AI options:
-- AI_model_path `str`: AI model path.
+- AI_model_path `str`: AI model name.
 - AI_image_size `int`: Model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_iou `float`: Intersection over union (IoU) threshold for NMS.
-- AI_device `int` or `str`: Device to run on, i.e. cuda AI_device=0/1/2/3 or AI_device='cpu'.
+- AI_device `int`: Device with CUDA support to run on, `AI_device=0` or `AI_device=1` or `AI_device=2`.
 
 ### Overlay detector:
 - show_overlay_detector `bool`: Show the detector overlay.
@@ -107,15 +108,15 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 
 ### Cv2 debug window settings:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
-- show_speed `bool`: Displays speed information inside the OpenCV2 window.
+- show_speed `bool`: Displays speed information inside the debug window.
 - show_fps `bool`: Displays FPS in the corner.
 - show_boxes `bool`: Displays detectable objects.
 - show_labels `bool`: Displays the name of the detected object.
 - show_conf `bool`: Displays object confidence threshold for detection.
 - show_target_line `bool`: Shows the mouse finishing line.
 - debug_window_always_on_top `bool`: The debug window will always be on top of other windows.
-- debug_window_scale_percent `int`: Adjusts the size of the OpenCV2 window.
-- debug_window_name `str`: Specifies the title of the OpenCV2 window.
+- debug_window_scale_percent `int`: Adjusts the size of the debug window.
+- debug_window_name `str`: Specifies the title of the debug window.
 
 ## AI Models
 - *.pt: Default AI model.

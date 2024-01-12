@@ -82,6 +82,13 @@ def process_hotkeys(cfg_reload_prev_state):
             cfg.Read(verbose=True)
             frames.reload_capture()
             mouse_worker.Update_settings()
+            
+            if cfg.show_window == False:
+                cv2.destroyAllWindows()
+            
+            # : TODO
+            # if cfg.show_window:
+            #     spawn_debug_window()
     cfg_reload_prev_state = app_reload_cfg
     return cfg_reload_prev_state
 
@@ -100,6 +107,10 @@ def spawn_debug_window():
         
 @torch.no_grad()
 def init():
+    if cfg.AI_device.lower == 'cpu':
+        print('CPU is not supported, please select Nvidia GPU device.\nExample: AI_device=0')
+        time.sleep(3)
+        exit(0)
     overlay = OverlayWindow() if cfg.show_overlay_detector else None
     prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
         
@@ -111,13 +122,12 @@ def init():
         quit(0)
     
     spawn_debug_window()
-    
     cfg_reload_prev_state = 0
     shooting_queue = []
-    screen_center = torch.tensor([frames.screen_x_center, frames.screen_y_center], device='cuda:0')
+    screen_center = torch.tensor([frames.screen_x_center, frames.screen_y_center], device=f'cuda:{cfg.AI_device}')
     while True:
         cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
-        image = frames.get_new_frame()
+        image = frames.get_new_frame().astype(np.float32)
         result = perform_detection(model, image)
         update_overlay_window(overlay)
             
@@ -147,7 +157,7 @@ def init():
                             sort_indices_class7 = torch.argsort(class7_distances_sq)
                             class7_indices = class7_indices[sort_indices_class7]
                         else:
-                            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}'if cfg.AI_device.isdigit else 'cpu')
+                            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}')
 
                         other_indices = torch.where(frame.boxes.cls != 7)[0]
                         other_distances_sq = distances_sq[other_indices]
@@ -201,9 +211,9 @@ def init():
                     dim = (width, height)
                     cv2.resizeWindow(cfg.debug_window_name, dim)
                     resised = cv2.resize(annotated_frame, dim, cv2.INTER_NEAREST)
-                    cv2.imshow(cfg.debug_window_name, resised)
+                    cv2.imshow(cfg.debug_window_name, resised.astype(np.uint8))
                 else:
-                    cv2.imshow(cfg.debug_window_name, annotated_frame)
+                    cv2.imshow(cfg.debug_window_name, annotated_frame.astype(np.uint8))
             except: exit(0)
             if cfg.show_window and cv2.waitKey(1) & 0xFF == ord('q'):
                 break
