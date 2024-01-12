@@ -130,7 +130,7 @@ def Update_yolov8_aimbot():
         delete_files_in_folder('./media')
     except:
         pass
-    base_dir_files = ['./.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', './run.py', './requirements.txt']
+    base_dir_files = ['./.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', './run.py', './requirements.txt', './launcher.py']
     for file in base_dir_files:
         try:
             os.remove(file)
