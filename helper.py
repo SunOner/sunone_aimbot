@@ -1,3 +1,5 @@
+# python default
+import pickle
 import re
 import os, ctypes
 import os.path
@@ -6,26 +8,77 @@ import time
 import shutil
 import zipfile
 import winreg
+import threading
 
+reload_prestart = False
 
 try:
     from tqdm import tqdm
+except:
+    os.system('pip install tqdm')
+    reload_prestart = True
+try:
     import requests
+except:
+    os.system('pip install requests')
+    reload_prestart = True
+try:
     import cuda
+except:
+    os.system('pip install cuda_python')
+    reload_prestart = True
+try:
     import bettercam
+except:
+    os.system('pip install bettercam')
+    reload_prestart = True
+try:
     import numpy
+except:
+    os.system('pip install numpy')
+    reload_prestart = True
+try:
     import win32gui, win32ui, win32con
+except:
+    os.system('pip install pywin32')
+    reload_prestart = True
+try:
     import ultralytics
     from ultralytics import YOLO
+except:
+    os.system('pip install ultralytics')
+    reload_prestart = True
+try:
     import screeninfo
+except:
+    os.system('pip install screeninfo')
+    reload_prestart = True
+try:
     import asyncio
+except:
+    os.system('pip install asyncio')
+    reload_prestart = True
+try:
     import onnxruntime
+except:
+    os.system('pip install onnxruntime onnxruntime-gpu')
+    reload_prestart = True
+try:
     import serial
+except:
+    os.system('pip install pyserial')
+try:
     import torch
+except:
+    os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
+    reload_prestart = True
+try:
     import cv2
 except:
-    os.system('pip install -r requirements.txt')
-    os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
+    os.system('pip install opencv-python')
+    reload_prestart = True
+    
+if reload_prestart:
     os.system('py helper.py')
     print('restarting...')
     quit()

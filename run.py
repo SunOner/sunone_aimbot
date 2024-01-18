@@ -1,3 +1,4 @@
+import os
 from logic.config_watcher import Config
 cfg = Config()
 from logic.keyboard import *
@@ -21,7 +22,7 @@ class Target:
         self.h = h
         self.distance = math.sqrt((x - frames.screen_x_center)**2 + (y - frames.screen_y_center)**2)
         self.cls = cls
-        
+      
 class OverlayWindow:
     def __init__(self):
         self.overlay_detector = tk.Tk()
@@ -57,7 +58,7 @@ def perform_detection(model, image):
         iou=cfg.AI_iou,
         device=cfg.AI_device,
         half=False,
-        max_det=25,
+        max_det=10,
         vid_stride=False,
         classes=clss,
         verbose=False,
@@ -67,10 +68,19 @@ def perform_detection(model, image):
         show=False)
     
 def print_startup_messages():
-    print('Aimbot is started. Enjoy!\n'
-          f'[{cfg.hotkey_targeting}] - Aiming at the target\n'
-          f'[{cfg.hotkey_exit}] - EXIT\n'
-          f'[{cfg.hotkey_pause}] - PAUSE AIM\n'
+    version = 0
+    try:
+        with open('./version', 'r') as f:
+            lines = f.read().split('\n')
+            version = lines[0].replace('app=', '')
+    except:
+        print('version file is not found')
+        
+    print('Aimbot is started. Enjoy!\n',
+          f'Version {version}\n',
+          f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
+          f'[{cfg.hotkey_exit}] - EXIT\n',
+          f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
           f'[{cfg.hotkey_reload_config}] - Reload config')
     
 def process_hotkeys(cfg_reload_prev_state):
@@ -124,6 +134,7 @@ def init():
     cfg_reload_prev_state = 0
     shooting_queue = []
     screen_center = torch.tensor([frames.screen_x_center, frames.screen_y_center], device=f'cuda:{cfg.AI_device}')
+    
     while True:
         cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame().astype(np.float32)
@@ -139,18 +150,17 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    boxes_array = frame.boxes.xywh
-        
-                    distances_sq = torch.sum((boxes_array[:, :2] - screen_center) ** 2, dim=1)
-                    
-                    classes_np = frame.boxes.cls.cpu().numpy()
-                    
-                    shooting_queue = [Target(*box[:4].cpu().numpy(), cls) for box, cls in zip(boxes_array, classes_np)]
-                    
+                    boxes_array = frame.boxes.xywh.to(f'cuda:{cfg.AI_device}')
+                    distances_sq = torch.sum((boxes_array[:, :2] - screen_center.to(f'cuda:{cfg.AI_device}')) ** 2, dim=1)
+                    classes_tensor = frame.boxes.cls.to(f'cuda:{cfg.AI_device}')
+
                     if not cfg.disable_headshot:
-                        sort_indices = np.lexsort((distances_sq.cpu().numpy(), classes_np != 7))
+                        score = distances_sq + 10000 * (classes_tensor != 7).float()
+                        sort_indices = torch.argsort(score).cpu().numpy()
                     else:
-                        class7_indices = torch.where(frame.boxes.cls == 7)[0]
+                        class7_indices = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
+                        other_indices = torch.nonzero(classes_tensor != 7, as_tuple=False).squeeze(1)
+
                         if len(class7_indices) > 0:
                             class7_distances_sq = distances_sq[class7_indices]
                             sort_indices_class7 = torch.argsort(class7_distances_sq)
@@ -158,28 +168,40 @@ def init():
                         else:
                             sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}')
 
-                        other_indices = torch.where(frame.boxes.cls != 7)[0]
                         other_distances_sq = distances_sq[other_indices]
                         sort_indices_other = torch.argsort(other_distances_sq)
 
                         sort_indices = torch.cat((class7_indices, other_indices[sort_indices_other])).cpu().numpy()
                     
-                    shooting_queue = [shooting_queue[i] for i in sort_indices]
-                    
+                    shooting_queue = [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
+
                     if shooting_queue:
                         target = shooting_queue[0]
                         
                         mouse_worker.queue.put((target.x, target.y, target.w, target.h))
-                        if cfg.show_window and cfg.show_target_line:
-                            draw_target_line(annotated_frame=annotated_frame, screen_x_center=cfg.detection_window_width / 2, screen_y_center=cfg.detection_window_height / 2, target_x=target.x, target_y=target.y + cfg.body_y_offset / target.h)
+
+                        if cfg.show_window or cfg.show_overlay_detector:
+                            screen_x_center = cfg.detection_window_width / 2
+                            screen_y_center = cfg.detection_window_height / 2
                             
-                        if cfg.show_overlay_detector and cfg.show_overlay_boxes:
-                            x1, y1 = target.x - target.w / 2, target.y - target.h / 2
-                            x2, y2 = target.x + target.w / 2, target.y + target.h / 2
-                            overlay.canvas.create_rectangle(x1.item(), y1.item(), x2.item(), y2.item(), width=2, outline='green')
+                            if cfg.show_target_line and cfg.show_window:
+                                draw_target_line(annotated_frame, screen_x_center, screen_y_center, target.x, target.y + cfg.body_y_offset / target.h)
                             
-                        if cfg.show_overlay_detector and cfg.show_overlay_line:
-                            overlay.canvas.create_line(cfg.detection_window_width / 2, cfg.detection_window_height / 2, target.x, target.y + cfg.body_y_offset / target.h, width=2, fill='red')
+                        if cfg.show_overlay_detector:
+                            x1 = target.x - target.w / 2
+                            y1 = target.y - target.h / 2
+                            x2 = target.x + target.w / 2
+                            y2 = target.y + target.h / 2
+                            
+                            if cfg.disable_headshot:
+                                y1 += cfg.body_y_offset * target.h
+                                y2 += cfg.body_y_offset * target.h
+                            
+                            if cfg.show_overlay_boxes:
+                                overlay.canvas.create_rectangle(x1.item(), y1.item(), x2.item(), y2.item(), width=2, outline='green')
+                            
+                            if cfg.show_overlay_line:
+                                overlay.canvas.create_line(screen_x_center, screen_y_center, target.x, target.y + cfg.body_y_offset / target.h, width=2, fill='red')
                             
                     shooting_queue.clear()
                 else: pass

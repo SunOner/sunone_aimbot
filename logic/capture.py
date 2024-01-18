@@ -93,7 +93,7 @@ class Capture():
         return -1
     
     def Quit(self):
-        if cfg.Bettercam_capture:
+        if cfg.Bettercam_capture and self.bc.is_capturing:
             self.bc.stop()
 
 def draw_target_line(annotated_frame, screen_x_center, screen_y_center, target_x, target_y):

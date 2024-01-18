@@ -46,7 +46,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Ultralytics:</th><td>8.1.0</td></tr></thead>
   <thead><tr><th>OpenCV:</th><td>4.9.0.80</td></tr></thead>
   <thead><tr><th>NumPy:</th><td>1.26.0</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.3.9</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.3.9.5</td></tr></thead>
 </table>
 <details><summary><b>Tested GPUs:</b></summary><table style="table-layout: fixed; width: 100%">
    <thead><tr><td>RTX 4080</td><td>RTX 4070</td><td>RTX 4060</td><td>RTX 3090</td><td>RTX 3080-ti</td><td>RTX 3070</td><td>RTX 3060</td><td>RTX 3050</td>
@@ -86,7 +86,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_dpi `float`: Mouse DPI.
 - mouse_sensitivity  `float`: Aim sensitivity.
 - mouse_fov  `float`: Ingame fov.
-- mouse_lock_target `bool`: Lock targeting.
+- mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
 - mouse_auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_native `bool`: Use windows native mouse input.
