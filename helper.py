@@ -1,5 +1,4 @@
 # python default
-import pickle
 import re
 import os, ctypes
 import os.path
@@ -8,7 +7,6 @@ import time
 import shutil
 import zipfile
 import winreg
-import threading
 
 reload_prestart = False
 
@@ -145,22 +143,26 @@ def get_aimbot_current_version():
                 config = value
         return app, config
                 
-    except:
+    except FileNotFoundError:
         print('The version file was not found, we will consider it an old version of the program.')
-        return None
+        return 0, 0
 
 def get_aimbot_online_version():
     app = 0
     config = 0
     content = requests.get('https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/version').content.decode('utf-8').split('\n')
-    for line in content:
-            key, value = line.strip().split('=')
-            if key == "app":
-                app = value
-            if key == 'config':
-                config = value
-    return app, config
-        
+    if content == ['404: Not Found']:
+        print('Something wrong with https://raw.githubusercontent.com.\nSunOner repository is still alive?')
+        return 0, 0
+    else:
+        for line in content:
+                key, value = line.strip().split('=')
+                if key == "app":
+                    app = value
+                if key == 'config':
+                    config = value
+        return app, config
+    
 def delete_files_in_folder(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
@@ -371,7 +373,8 @@ def print_menu():
     os.system('cls')
     print('Run this script as an administrator to work correctly.')
     # TODO: print last error
-    print('Installed version is: {0}, online: {1}\n'.format(get_aimbot_current_version()[0], get_aimbot_online_version()[0]))
+    
+    print('Installed version: {0}, online version: {1}\n'.format(get_aimbot_current_version()[0], get_aimbot_online_version()[0]))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
     print("2: Download Cuda 12.1")
@@ -396,6 +399,9 @@ def main():
                 
             elif choice == "4":
                 Test_detections()
+            
+            elif choice == "5":
+                print(get_aimbot_online_version()[0])
                 
             elif choice == "0":
                 print("Exiting the program...")
