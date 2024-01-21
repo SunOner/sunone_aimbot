@@ -42,6 +42,7 @@ class Config():
         self.mouse_auto_aim = self.config_Mouse_settings.getboolean('mouse_auto_aim')
         self.mouse_native = self.config_Mouse_settings.getboolean('mouse_native')
         self.mouse_triggerbot = self.config_Mouse_settings.getboolean('mouse_triggerbot')
+        self.mouse_force_click = self.config_Mouse_settings.getboolean('mouse_force_click')
         self.mouse_move_by_arduino = self.config_Mouse_settings.getboolean('mouse_move_by_arduino')
         self.mouse_shoot_by_arduino = self.config_Mouse_settings.getboolean('mouse_shoot_by_arduino')
         

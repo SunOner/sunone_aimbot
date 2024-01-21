@@ -1,15 +1,16 @@
-import os
 from logic.config_watcher import Config
 cfg = Config()
-from logic.keyboard import *
+from logic.buttons import *
 from logic.capture import *
 from logic.mouse import MouseThread
 
 from ultralytics import YOLO
+from threading import Thread
 import math
 import torch
 import cv2
 import time
+from typing import List
 import win32api, win32con, win32gui
 if cfg.show_overlay_detector:
     import tkinter as tk
@@ -36,7 +37,7 @@ class OverlayWindow:
         
         self.canvas = tk.Canvas(self.overlay_detector, bg='white', height=cfg.detection_window_height, width=cfg.detection_window_width)
         self.canvas.pack()
-        
+
 def perform_detection(model, image):
     clss = [0, 1]
     if cfg.hideout_targets:
@@ -58,7 +59,7 @@ def perform_detection(model, image):
         iou=cfg.AI_iou,
         device=cfg.AI_device,
         half=False,
-        max_det=10,
+        max_det=25,
         vid_stride=False,
         classes=clss,
         verbose=False,
@@ -85,8 +86,8 @@ def print_startup_messages():
     
 def process_hotkeys(cfg_reload_prev_state):
     global app_pause
-    app_pause = win32api.GetKeyState(Keyboard.KEY_CODES[cfg.hotkey_pause])
-    app_reload_cfg = win32api.GetKeyState(Keyboard.KEY_CODES[cfg.hotkey_reload_config])
+    app_pause = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_pause])
+    app_reload_cfg = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_reload_config])
     if app_reload_cfg != cfg_reload_prev_state:
         if app_reload_cfg in (1, 0):
             cfg.Read(verbose=True)
@@ -95,10 +96,6 @@ def process_hotkeys(cfg_reload_prev_state):
             
             if cfg.show_window == False:
                 cv2.destroyAllWindows()
-            
-            # : TODO
-            # if cfg.show_window:
-            #     spawn_debug_window()
     cfg_reload_prev_state = app_reload_cfg
     return cfg_reload_prev_state
 
@@ -109,17 +106,39 @@ def update_overlay_window(overlay):
         
 def spawn_debug_window():
     if cfg.show_window:
-        print('An open debug window can affect performance.')
         cv2.namedWindow(cfg.debug_window_name)
         if cfg.debug_window_always_on_top:
             debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
             win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
-        
+            
+def sort_targets(frame, cfg) -> List[Target]:
+    boxes_array = frame.boxes.xywh.to(f'cuda:{cfg.AI_device}')
+    distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([frames.screen_x_center, frames.screen_y_center], device=f'cuda:{cfg.AI_device}')) ** 2, dim=1)
+    classes_tensor = frame.boxes.cls.to(f'cuda:{cfg.AI_device}')
+
+    if not cfg.disable_headshot:
+        score = distances_sq + 10000 * (classes_tensor != 7).float()
+        sort_indices = torch.argsort(score).cpu().numpy()
+    else:
+        class7_indices = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
+        other_indices = torch.nonzero(classes_tensor != 7, as_tuple=False).squeeze(1)
+
+        if len(class7_indices) > 0:
+            class7_distances_sq = distances_sq[class7_indices]
+            sort_indices_class7 = torch.argsort(class7_distances_sq)
+            class7_indices = class7_indices[sort_indices_class7]
+        else:
+            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}')
+
+        other_distances_sq = distances_sq[other_indices]
+        sort_indices_other = torch.argsort(other_distances_sq)
+
+        sort_indices = torch.cat((class7_indices, other_indices[sort_indices_other])).cpu().numpy()
+
+    return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
+
 @torch.no_grad()
 def init():
-    if cfg.AI_device.lower == 'cpu':
-        print('CPU is not supported, please select Nvidia GPU device.\nExample: AI_device=0')
-        exit(0)
     overlay = OverlayWindow() if cfg.show_overlay_detector else None
     prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
         
@@ -133,11 +152,10 @@ def init():
     spawn_debug_window()
     cfg_reload_prev_state = 0
     shooting_queue = []
-    screen_center = torch.tensor([frames.screen_x_center, frames.screen_y_center], device=f'cuda:{cfg.AI_device}')
     
     while True:
         cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
-        image = frames.get_new_frame().astype(np.float32)
+        image = frames.get_new_frame()
         result = perform_detection(model, image)
         update_overlay_window(overlay)
             
@@ -150,33 +168,11 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    boxes_array = frame.boxes.xywh.to(f'cuda:{cfg.AI_device}')
-                    distances_sq = torch.sum((boxes_array[:, :2] - screen_center.to(f'cuda:{cfg.AI_device}')) ** 2, dim=1)
-                    classes_tensor = frame.boxes.cls.to(f'cuda:{cfg.AI_device}')
-
-                    if not cfg.disable_headshot:
-                        score = distances_sq + 10000 * (classes_tensor != 7).float()
-                        sort_indices = torch.argsort(score).cpu().numpy()
-                    else:
-                        class7_indices = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
-                        other_indices = torch.nonzero(classes_tensor != 7, as_tuple=False).squeeze(1)
-
-                        if len(class7_indices) > 0:
-                            class7_distances_sq = distances_sq[class7_indices]
-                            sort_indices_class7 = torch.argsort(class7_distances_sq)
-                            class7_indices = class7_indices[sort_indices_class7]
-                        else:
-                            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}')
-
-                        other_distances_sq = distances_sq[other_indices]
-                        sort_indices_other = torch.argsort(other_distances_sq)
-
-                        sort_indices = torch.cat((class7_indices, other_indices[sort_indices_other])).cpu().numpy()
-                    
-                    shooting_queue = [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
+                    shooting_queue = sort_targets(frame, cfg)
 
                     if shooting_queue:
                         target = shooting_queue[0]
+                        shooting_queue.clear()
                         
                         mouse_worker.queue.put((target.x, target.y, target.w, target.h))
 
@@ -203,7 +199,6 @@ def init():
                             if cfg.show_overlay_line:
                                 overlay.canvas.create_line(screen_x_center, screen_y_center, target.x, target.y + cfg.body_y_offset / target.h, width=2, fill='red')
                             
-                    shooting_queue.clear()
                 else: pass
 
                 if cfg.show_window and cfg.show_boxes:
@@ -218,12 +213,6 @@ def init():
             
             cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 80) if cfg.show_speed else (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
-        if win32api.GetAsyncKeyState(Keyboard.KEY_CODES.get(cfg.hotkey_exit)) & 0xFF:
-            if cfg.show_window:
-                cv2.destroyWindow(cfg.debug_window_name)
-            frames.Quit()
-            break
-
         if cfg.show_window:
             try:
                 if cfg.debug_window_scale_percent != 100:
@@ -232,14 +221,21 @@ def init():
                     dim = (width, height)
                     cv2.resizeWindow(cfg.debug_window_name, dim)
                     resised = cv2.resize(annotated_frame, dim, cv2.INTER_NEAREST)
-                    cv2.imshow(cfg.debug_window_name, resised.astype(np.uint8))
+                    cv2.imshow(cfg.debug_window_name, resised)
                 else:
-                    cv2.imshow(cfg.debug_window_name, annotated_frame.astype(np.uint8))
+                    cv2.imshow(cfg.debug_window_name, annotated_frame)
             except: exit(0)
             if cfg.show_window and cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+            
+        if win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_exit)) & 0xFF:
+            if cfg.show_window:
+                cv2.destroyWindow(cfg.debug_window_name)
+            frames.Quit()
+            break
 
 if __name__ == "__main__":
     frames = Capture()
     mouse_worker = MouseThread()
-    init()
+    Thread(target=init(), name='Init()', daemon=True).start()
+    

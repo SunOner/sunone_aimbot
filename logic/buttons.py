@@ -1,4 +1,4 @@
-class Keyboard:
+class Buttons:
     KEY_CODES = {
         'LeftMouseButton': 1, 'RightMouseButton': 2, 'ControlBreak': 3,
         'MiddleMouseButton': 4, 'X1MouseButton': 5, 'X2MouseButton': 6,

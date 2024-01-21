@@ -243,7 +243,7 @@ def Update_yolov8_aimbot():
 
     temp_aimbot_files = [
         './.gitattributes', './.gitignore', './config.ini', './helper.py', './LICENSE', './README.md', './run.py', './requirements.txt', './version', 'launcher.py',
-        './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/keyboard.py', './logic/mouse.py', './logic/GUI.py',
+        './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/buttons.py', './logic/mouse.py',
         './media/aimbot.png', './media/cmd_admin_en.png', './media/cmd_admin_ru.png', './media/cmd_cd_path.png',
         './media/copy_explorer_path.png', './media/python_add_to_path.png', './media/cuda.png', './media/environment_variables.png',
         './media/environment_variables_path.png', './media/one.gif', './media/python.png', './media/tests/test_det.mp4',
@@ -346,7 +346,6 @@ def Test_detections():
         
     model = YOLO('models/{}'.format(cfg.AI_model_path), task='detect')
     cap = cv2.VideoCapture('media/tests/test_det.mp4')
-    # TOPMOST
     cv2.namedWindow('Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size))
     debug_window_hwnd = win32gui.FindWindow(None, 'Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size))
     win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)

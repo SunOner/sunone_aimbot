@@ -9,6 +9,7 @@ from screeninfo import get_monitors
 
 class Capture():
     def __init__(self):
+        self.Warnings()
         self.screen_x_center = cfg.detection_window_width / 2
         self.screen_y_center = cfg.detection_window_height / 2
 
@@ -92,6 +93,46 @@ class Capture():
 
         return -1
     
+    def Warnings(self):
+        # FATAL ERRORS
+        if torch.cuda.is_available == False:
+            print('`Torch` is installed without CUDA support.')
+            exit(0)
+        if cfg.AI_device.lower == 'cpu':
+            print('CPU is not supported, please select Nvidia GPU device.\nExample: AI_device=0')
+            exit(0)
+        if cfg.Bettercam_capture == False and cfg.Obs_capture == False:
+            print('Use at least one image capture method.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.')
+            exit(0)
+        if cfg.Bettercam_capture and cfg.Obs_capture:
+            print('Only one capture method is possible.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.')
+            exit(0)
+        # WARNINGS
+        if '.pt' in cfg.AI_model_path:
+            print('WARNING: Export the model to `.engine` for better performance.')
+        if cfg.mouse_native and cfg.mouse_move_by_arduino == False and cfg.mouse_shoot_by_arduino == False:
+            print('WARNING: win32api is detected in some games.')
+        if cfg.mouse_native == False and cfg.mouse_move_by_arduino == False and cfg.mouse_shoot_by_arduino == False:
+            print('WARNING: ghub_mouse.dll is detected in some games.')
+        if cfg.show_window:
+            print('WARNING: An open debug window can affect performance.')
+        if cfg.debug_window_name == 'Calculator':
+            print('WARNING: For more security, change the name of the debug window.')
+        if cfg.show_overlay_detector:
+            print('WARNING: An activated overlay may affect performance, not work properly in some games, and may also be visible as an anti-cheat in some games.')
+        if cfg.bettercam_capture_fps >= 90:
+            print('WARNING: A large number of frames per second can affect the behavior of automatic aiming. (Shaking).')
+        if cfg.detection_window_width >= 700:
+            print('WARNING: The object detector window is more than 700 pixels wide, and a large object detector window can have a bad effect on performance.')
+        if cfg.detection_window_height >= 700:
+            print('WARNING: The object detector window is more than 700 pixels in height, a large object detector window can have a bad effect on performance.')
+        if cfg.mouse_move_by_arduino == False:
+            print('WARNING: Using standard libraries for mouse moving such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
+        if cfg.mouse_shoot_by_arduino == False:
+            print('WARNING: Using standard libraries for mouse shooting such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
+        if cfg.AI_conf <= 0.15:
+            print('WARNING: A small value of `AI_conf ` can lead to a large number of false positives.')
+            
     def Quit(self):
         if cfg.Bettercam_capture and self.bc.is_capturing:
             self.bc.stop()
