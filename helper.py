@@ -75,7 +75,7 @@ try:
 except:
     os.system('pip install opencv-python')
     reload_prestart = True
-    
+        
 if reload_prestart:
     os.system('py helper.py')
     print('restarting...')
@@ -204,7 +204,10 @@ def Update_yolov8_aimbot():
     
     if config_online_version != config_current_version:
         print('Removing config with old version and installing fresh.')
-        os.remove('./config.ini')
+        try:
+            os.remove('./config.ini')
+        except:
+            pass
         replace_config = True
     if config_online_version == config_current_version:
         print('Config has a fresh version. We don\'t touch him.')
@@ -398,9 +401,6 @@ def main():
                 
             elif choice == "4":
                 Test_detections()
-            
-            elif choice == "5":
-                print(get_aimbot_online_version()[0])
                 
             elif choice == "0":
                 print("Exiting the program...")
@@ -416,9 +416,8 @@ if __name__ == "__main__":
         from logic.config_watcher import Config
         cfg = Config()
     except:
-        print('logic/config_watcher.py not found, updating Yolov8_aimbot...')
+        print('File config_watcher.py not found, reinstalling...')
         Update_yolov8_aimbot()
-        
     upgrade_pip()
     upgrade_ultralytics()
     main()
