@@ -36,7 +36,8 @@ class Config():
         self.config_Mouse_settings = self.config['Mouse settings']
         self.mouse_dpi = float(self.config_Mouse_settings['mouse_dpi'])
         self.mouse_sensitivity = float(self.config_Mouse_settings['mouse_sensitivity'])
-        self.mouse_fov = float(self.config_Mouse_settings['mouse_fov'])
+        self.mouse_fov_width = float(self.config_Mouse_settings['mouse_fov_width'])
+        self.mouse_fov_height = float(self.config_Mouse_settings['mouse_fov_height'])
         self.mouse_lock_target = self.config_Mouse_settings.getboolean('mouse_lock_target')
         self.mouse_auto_shoot = self.config_Mouse_settings.getboolean('mouse_auto_shoot')
         self.mouse_auto_aim = self.config_Mouse_settings.getboolean('mouse_auto_aim')

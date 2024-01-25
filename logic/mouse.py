@@ -30,7 +30,6 @@ if cfg.mouse_native == False: # TODO
                     ('time', DWORD),
                     ('dwExtraInfo', ULONG_PTR))
 
-
     class _INPUTunion(Union):
         _fields_ = (('mi', MOUSEINPUT), ('mi', MOUSEINPUT))
 
@@ -87,7 +86,8 @@ class MouseThread(threading.Thread):
         self.daemon = True
         self.dpi = cfg.mouse_dpi
         self.mouse_sensitivity = cfg.mouse_sensitivity
-        self.fov = cfg.mouse_fov
+        self.fov_x = cfg.mouse_fov_width
+        self.fov_y = cfg.mouse_fov_height
         self.screen_width = cfg.detection_window_width
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
@@ -120,13 +120,14 @@ class MouseThread(threading.Thread):
         offset_x = target_x - self.center_x
         offset_y = target_y - self.center_y
 
-        degrees_per_pixel_x = self.fov / self.screen_width
-
+        degrees_per_pixel_x = self.fov_x / self.screen_width
+        degrees_per_pixel_y = self.fov_y / self.screen_height
+        
         mouse_move_x = offset_x * degrees_per_pixel_x
 
         mouse_dpi_move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity))
 
-        mouse_move_y = offset_y * degrees_per_pixel_x
+        mouse_move_y = offset_y * degrees_per_pixel_y
         mouse_dpi_move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
         
         return mouse_dpi_move_x, mouse_dpi_move_y
@@ -134,7 +135,8 @@ class MouseThread(threading.Thread):
     def Update_settings(self):
         self.dpi = cfg.mouse_dpi
         self.mouse_sensitivity = cfg.mouse_sensitivity
-        self.fov = cfg.mouse_fov
+        self.fov_x = cfg.mouse_fov_width
+        self.fov_y = cfg.mouse_fov_height
         self.screen_width = cfg.detection_window_width
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2

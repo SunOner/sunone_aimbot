@@ -90,7 +90,6 @@ class Capture():
                 cap.release()
                 return i
             cap.release()
-
         return -1
     
     def Warnings(self):
@@ -116,8 +115,8 @@ class Capture():
             print('WARNING: ghub_mouse.dll is detected in some games.')
         if cfg.show_window:
             print('WARNING: An open debug window can affect performance.')
-        if cfg.debug_window_name == 'Calculator':
-            print('WARNING: For more security, change the name of the debug window.')
+        if cfg.debug_window_name == 'Calculator' and cfg.show_window:
+            print('WARNING: For more security, change the name of the debug window. `debug_window_name` option.')
         if cfg.show_overlay_detector:
             print('WARNING: An activated overlay may affect performance, not work properly in some games, and may also be visible as an anti-cheat in some games.')
         if cfg.bettercam_capture_fps >= 90:
@@ -128,7 +127,7 @@ class Capture():
             print('WARNING: The object detector window is more than 700 pixels in height, a large object detector window can have a bad effect on performance.')
         if cfg.mouse_move_by_arduino == False:
             print('WARNING: Using standard libraries for mouse moving such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
-        if cfg.mouse_shoot_by_arduino == False:
+        if cfg.mouse_shoot_by_arduino == False and cfg.mouse_auto_shoot:
             print('WARNING: Using standard libraries for mouse shooting such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
         if cfg.AI_conf <= 0.15:
             print('WARNING: A small value of `AI_conf ` can lead to a large number of false positives.')

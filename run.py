@@ -1,3 +1,4 @@
+
 from logic.config_watcher import Config
 cfg = Config()
 from logic.buttons import *
@@ -32,19 +33,14 @@ class OverlayWindow:
         self.overlay_detector.wm_attributes("-topmost", True)
         self.overlay_detector.wm_attributes("-disabled", True)
         self.overlay_detector.wm_attributes("-transparentcolor", "white")
-        self.overlay_detector.title('new.txt')
+        self.overlay_detector.title('new1.txt')
         self.overlay_detector.overrideredirect(True)
         
         self.canvas = tk.Canvas(self.overlay_detector, bg='white', height=cfg.detection_window_height, width=cfg.detection_window_width)
         self.canvas.pack()
 
-def perform_detection(model, image):
-    clss = [0, 1]
-    if cfg.hideout_targets:
-        clss += 5, 6
-    if cfg.disable_headshot == False:
-        clss.append(7)
-
+@torch.no_grad()
+def perform_detection(model, image, clss):
     return model.predict(
         source=image,
         stream=True,
@@ -58,7 +54,7 @@ def perform_detection(model, image):
         conf=cfg.AI_conf,
         iou=cfg.AI_iou,
         device=cfg.AI_device,
-        half=False,
+        half=True,
         max_det=25,
         vid_stride=False,
         classes=clss,
@@ -86,6 +82,7 @@ def print_startup_messages():
     
 def process_hotkeys(cfg_reload_prev_state):
     global app_pause
+    global clss
     app_pause = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_pause])
     app_reload_cfg = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_reload_config])
     if app_reload_cfg != cfg_reload_prev_state:
@@ -93,6 +90,7 @@ def process_hotkeys(cfg_reload_prev_state):
             cfg.Read(verbose=True)
             frames.reload_capture()
             mouse_worker.Update_settings()
+            clss = active_classes()
             
             if cfg.show_window == False:
                 cv2.destroyAllWindows()
@@ -137,11 +135,17 @@ def sort_targets(frame, cfg) -> List[Target]:
 
     return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
 
-@torch.no_grad()
+def active_classes():
+    clss = [0, 1]
+    if cfg.hideout_targets:
+        clss += 5, 6
+    if cfg.disable_headshot == False:
+        clss.append(7)
+    return clss
+
 def init():
     overlay = OverlayWindow() if cfg.show_overlay_detector else None
     prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
-        
     try:
         model = YOLO(f'models/{cfg.AI_model_path}', task='detect')
         print_startup_messages()
@@ -156,7 +160,7 @@ def init():
     while True:
         cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame()
-        result = perform_detection(model, image)
+        result = perform_detection(model, image, clss)
         update_overlay_window(overlay)
             
         if cfg.show_window:
@@ -237,5 +241,6 @@ def init():
 if __name__ == "__main__":
     frames = Capture()
     mouse_worker = MouseThread()
-    Thread(target=init(), name='Init()', daemon=True).start()
+    clss = active_classes()
+    init()
     
