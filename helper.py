@@ -383,6 +383,7 @@ def print_menu():
     print("2: Download Cuda 12.1")
     print("3: Install TensorRT")
     print("4: Test the object detector")
+    print("5: Force reinstall Torch")
     print("0: Exit")
 
 def main():
@@ -402,6 +403,9 @@ def main():
                 
             elif choice == "4":
                 Test_detections()
+                
+            elif choice == "5":
+                force_reinstall_torch()
                 
             elif choice == "0":
                 print("Exiting the program...")
