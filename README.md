@@ -43,10 +43,10 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>PyTorch:</th><td>2.1.2+cu121</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.5</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.9</td></tr></thead>
   <thead><tr><th>OpenCV:</th><td>4.9.0.80</td></tr></thead>
   <thead><tr><th>NumPy:</th><td>1.26.0</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.4.2</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.4.4</td></tr></thead>
 </table>
 <details><summary><b>Tested GPUs:</b></summary><table style="table-layout: fixed; width: 100%">
    <thead><tr><td>RTX 4080</td><td>RTX 4070</td><td>RTX 4060</td><td>RTX 3090</td><td>RTX 3080-ti</td><td>RTX 3070</td><td>RTX 3060</td><td>RTX 3050</td>
