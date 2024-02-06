@@ -123,7 +123,7 @@ def upgrade_ultralytics():
 def upgrade_pip(): # TODO newest version checks
     print('Checks new pip version...')
     ver = os.popen('pip -V').read().split(' ')[1]
-    if ver != '23.3.2':
+    if ver != '24.0':
         print('The pip version does not match the required one.\nAn update is in progress...')
         os.system("python -m pip install --upgrade pip")
     else:
@@ -344,8 +344,7 @@ def Test_detections():
         print('Cuda support True')
     else:
         print('Cuda is not supported\nTrying to reinstall torch with GPU support...')
-        os.system('pip uninstall torch torchvision torchaudio')
-        os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
+        force_reinstall_torch()
         
     model = YOLO('models/{}'.format(cfg.AI_model_path), task='detect')
     cap = cv2.VideoCapture('media/tests/test_det.mp4')
@@ -371,11 +370,13 @@ def Test_detections():
     cap.release()
     cv2.destroyAllWindows()
     
+def force_reinstall_torch():
+    os.system('pip uninstall torch torchvision torchaudio')
+    os.system('pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121')
+        
 def print_menu():
     os.system('cls')
-    print('Run this script as an administrator to work correctly.')
-    # TODO: print last error
-    
+    print('Run this script as an administrator for install TensorRT correctly.')
     print('Installed version: {0}, online version: {1}\n'.format(get_aimbot_current_version()[0], get_aimbot_online_version()[0]))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
@@ -408,7 +409,7 @@ def main():
             
             else:
                 print("Incorrect input, try again.")
-    except: # ctrl + z
+    except:
         quit()
 
 if __name__ == "__main__":
