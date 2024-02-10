@@ -42,7 +42,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>NVIDIA cuDNN:</th><td>8.9.4.25</td></thead>
   <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
-  <thead><tr><th>PyTorch:</th><td>2.1.2+cu121</td></tr></thead>
+  <thead><tr><th>PyTorch:</th><td>2.2.0+cu121</td></tr></thead>
   <thead><tr><th>Ultralytics:</th><td>8.1.9</td></tr></thead>
   <thead><tr><th>OpenCV:</th><td>4.9.0.80</td></tr></thead>
   <thead><tr><th>NumPy:</th><td>1.26.0</td></tr></thead>
