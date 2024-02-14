@@ -15,7 +15,9 @@
 YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
-- NOTE: Starting in January 2024, the program is switching only to Nvidia graphics cards. We have also stopped supporting the old architecture. The minimum graphics card to run is 1050-TI.
+> [!NOTE] 
+> This application only works on Nvidia graphics cards.
+> The recommended graphics card for starting and more productive and stable operation starts with the rtx 20 series.
 
 ## Requirements
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot.
@@ -43,15 +45,11 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>PyTorch:</th><td>2.2.0+cu121</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.9</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.12</td></tr></thead>
   <thead><tr><th>OpenCV:</th><td>4.9.0.80</td></tr></thead>
   <thead><tr><th>NumPy:</th><td>1.26.0</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.4.4</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.4.5</td></tr></thead>
 </table>
-<details><summary><b>Tested GPUs:</b></summary><table style="table-layout: fixed; width: 100%">
-   <thead><tr><td>RTX 4080</td><td>RTX 4070</td><td>RTX 4060</td><td>RTX 3090</td><td>RTX 3080-ti</td><td>RTX 3070</td><td>RTX 3060</td><td>RTX 3050</td>
-   <td>RTX 2080</td><td>RTX 2060-super</td><td>GTX 1660-super</td><td>GTX 1660</td><td>GTX 1650</td><td>GTX 1080</td><td>GTX 1060</td><td>GTX 1050-ti</td><td>GTX 1050</td><td>GTX 750-ti</td><td>GTX 750</td></tr></thead>
-</table></details>
 
 ## Options
 The behavior of the aim bot can be configured via the [`config.ini`](https://github.com/SunOner/yolov8_aimbot/blob/main/config.ini) file. Here are the available options:
