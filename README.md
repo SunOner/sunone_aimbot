@@ -21,7 +21,7 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 > The recommended graphics card for starting and more productive and stable operation starts with the rtx 20 series.
 
 ## Requirements
-Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in `Tested Environment` block, this may cause errors in launching the aimbot.
+Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in [Tested Environment](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#tested-environment) block, this may cause errors in launching the aimbot.
 
 - Information in English:
   - [Auto-Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/helper_en.md)
