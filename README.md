@@ -10,7 +10,7 @@
       <img width="75%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
   </p>
 </div>
-
+<div align="center">[Join the discord server](https://discord.gg/sunone)</div>
 ## Overview
 YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 > [!WARNING]
@@ -46,7 +46,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>PyTorch:</th><td>2.2.0+cu121</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.12</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.14</td></tr></thead>
   <thead><tr><th>OpenCV:</th><td>4.9.0.80</td></tr></thead>
   <thead><tr><th>NumPy:</th><td>1.26.0</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.4.5</td></tr></thead>
@@ -89,7 +89,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
 - mouse_auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
 - mouse_auto_aim `bool`: Automatic targeting.
-- mouse_native `bool`: Use windows native mouse input.
+- mouse_native `bool`: Use win32 mouse input. If the value is False, the ghub dll is used for movement.
 - mouse_triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
 - mouse_force_click `bool`: Shooting will be performed even if the sight is not located within the object.
 - mouse_move_by_arduino `bool`: Sends a command to the arduino to move the mouse.
