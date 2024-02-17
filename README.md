@@ -1,19 +1,15 @@
 <div align="center">
-  
+
 ### YOLOv8 Aimbot
 [![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/yolov8_aimbot)
 [![License MIT](https://badgen.net/github/license/SunOner/yolov8_aimbot)](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)
-[![Discord server](https://badgen.net/discord/online-members/sunone)](https://discord.gg/sunone)
 [![Github stars](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
+[![Discord server](https://badgen.net/discord/online-members/sunone)](https://discord.gg/sunone)
   <p>
     <a href="https://github.com/SunOner/yolov8_aimbot/releases" target="_blank">
       <img width="75%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
   </p>
 </div>
-
-<p align="center">
-[Join the discord server](https://discord.gg/sunone)
-</p>
 
 ## Overview
 YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
@@ -32,12 +28,14 @@ Before you get started, make sure you have the following prerequisites installed
   - [Self install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/install_guide_en.md)
   - [Questions and answers](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/questions_en.md)
   - [Arduino setup](https://github.com/SunOner/HID_Arduino)
+  - [Discord server](https://discord.gg/sunone)
 <br></br>
 - Информация на Русском языке:
   - [Инструкция по автоматической установке](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/helper_ru.md)
   - [Инструкция по установке в ручную](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/install_guide_ru.md)
   - [Вопросы и ответы](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/questions_ru.md)
   - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
+  - [Discord сервер](https://discord.gg/sunone)
 <br></br>
 - To launch the aimbot after all installations, type `py run.py` or `py launcher.py` in cmd.
 
