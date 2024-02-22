@@ -1,4 +1,3 @@
-
 from logic.config_watcher import Config
 cfg = Config()
 from logic.buttons import *
@@ -6,7 +5,6 @@ from logic.capture import *
 from logic.mouse import MouseThread
 
 from ultralytics import YOLO
-from threading import Thread
 import math
 import torch
 import cv2
@@ -24,7 +22,7 @@ class Target:
         self.h = h
         self.distance = math.sqrt((x - frames.screen_x_center)**2 + (y - frames.screen_y_center)**2)
         self.cls = cls
-      
+        
 class OverlayWindow:
     def __init__(self):
         self.overlay_detector = tk.Tk()
@@ -94,6 +92,7 @@ def process_hotkeys(cfg_reload_prev_state):
             
             if cfg.show_window == False:
                 cv2.destroyAllWindows()
+                
     cfg_reload_prev_state = app_reload_cfg
     return cfg_reload_prev_state
 
@@ -118,20 +117,20 @@ def sort_targets(frame, cfg) -> List[Target]:
         score = distances_sq + 10000 * (classes_tensor != 7).float()
         sort_indices = torch.argsort(score).cpu().numpy()
     else:
-        class7_indices = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
-        other_indices = torch.nonzero(classes_tensor != 7, as_tuple=False).squeeze(1)
+        heads = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
+        other = torch.nonzero(classes_tensor != 7, as_tuple=False).squeeze(1)
 
-        if len(class7_indices) > 0:
-            class7_distances_sq = distances_sq[class7_indices]
-            sort_indices_class7 = torch.argsort(class7_distances_sq)
-            class7_indices = class7_indices[sort_indices_class7]
+        if len(heads) > 0:
+            heads_distances_sq = distances_sq[heads]
+            sort_heads = torch.argsort(heads_distances_sq)
+            heads = heads[sort_heads]
         else:
-            sort_indices_class7 = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}')
+            sort_heads = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}')
 
-        other_distances_sq = distances_sq[other_indices]
+        other_distances_sq = distances_sq[other]
         sort_indices_other = torch.argsort(other_distances_sq)
 
-        sort_indices = torch.cat((class7_indices, other_indices[sort_indices_other])).cpu().numpy()
+        sort_indices = torch.cat((heads, other[sort_indices_other])).cpu().numpy()
 
     return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
 
@@ -144,7 +143,6 @@ def active_classes():
     return clss
 
 def init():
-    overlay = OverlayWindow() if cfg.show_overlay_detector else None
     prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
     try:
         model = YOLO(f'models/{cfg.AI_model_path}', task='detect')
@@ -161,7 +159,7 @@ def init():
         cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame()
         result = perform_detection(model, image, clss)
-        update_overlay_window(overlay)
+        update_overlay_window(overlay) if cfg.show_overlay_detector else None
             
         if cfg.show_window:
             annotated_frame = image
@@ -241,6 +239,7 @@ def init():
 if __name__ == "__main__":
     frames = Capture()
     mouse_worker = MouseThread()
+    overlay = OverlayWindow() if cfg.show_overlay_detector else None
     clss = active_classes()
     init()
     

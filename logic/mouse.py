@@ -1,9 +1,12 @@
+import math
 import queue
 import threading
 import time
+import torch
 import win32con, win32api
 from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
 from os import path
+import torch.nn as nn
 from logic.buttons import *
 from logic.config_watcher import *
 from run import cfg
@@ -78,6 +81,19 @@ if cfg.mouse_native == False: # TODO
     def ghub_mouse_close():
         if gmok:
             return gm.mouse_close()
+
+class Mouse_net(nn.Module):
+    def __init__(self):
+        super(Mouse_net, self).__init__()
+        self.fc1 = nn.Linear(10, 64)
+        self.fc2 = nn.Linear(64, 64)
+        self.fc3 = nn.Linear(64, 2)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
     
 class MouseThread(threading.Thread):
     def __init__(self):
@@ -92,6 +108,17 @@ class MouseThread(threading.Thread):
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
         self.center_y = self.screen_height / 2
+        self.prev_x = 0
+        self.prev_y = 0
+        if cfg.AI_mouse_net:
+            self.device = torch.device(f'cuda:{cfg.AI_device}')
+            self.model = Mouse_net().to(self.device)
+            try:
+                self.model.load_state_dict(torch.load('mouse_net.pth', map_location=self.device))
+            except:
+                print('Please train mouse_net model. Instruction here: https://github.com/SunOner/mouse_net')
+                exit()
+            self.model.eval()
         self.start()
 
     def run(self):
@@ -110,27 +137,55 @@ class MouseThread(threading.Thread):
         x, y = self.adjust_mouse_movement(target_x, target_y)
         self.move_mouse(x, y, shooting_key)
         self.shoot(bScope)
-        
+                    
     def get_shooting_key_state(self):
         if cfg.mouse_lock_target:
             return win32api.GetKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting))
         return win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting))
 
     def adjust_mouse_movement(self, target_x, target_y):
-        offset_x = target_x - self.center_x
-        offset_y = target_y - self.center_y
+        if cfg.AI_mouse_net == False:
+            offset_x = target_x - self.center_x
+            offset_y = target_y - self.center_y
 
-        degrees_per_pixel_x = self.fov_x / self.screen_width
-        degrees_per_pixel_y = self.fov_y / self.screen_height
+            degrees_per_pixel_x = self.fov_x / self.screen_width
+            degrees_per_pixel_y = self.fov_y / self.screen_height
+            
+            mouse_move_x = offset_x * degrees_per_pixel_x
+
+            mouse_dpi_move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+
+            mouse_move_y = offset_y * degrees_per_pixel_y
+            mouse_dpi_move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+            
+            vector_x = mouse_dpi_move_x - self.prev_x
+            vector_y = mouse_dpi_move_y - self.prev_y
+
+            self.prev_x = mouse_dpi_move_x
+            self.prev_y = mouse_dpi_move_y
+            
+            mouse_dpi_move_x = mouse_dpi_move_x + vector_x
+            mouse_dpi_move_y = mouse_dpi_move_y + vector_y
+            
+            return mouse_dpi_move_x, mouse_dpi_move_y
+        else:
+            input_data = [self.screen_width,
+                        self.screen_height,
+                        self.center_x,
+                        self.center_y,
+                        self.dpi,
+                        self.mouse_sensitivity,
+                        self.fov_x,
+                        self.fov_y,
+                        target_x,
+                        target_y]
+            
+            input_tensor = torch.tensor(input_data, dtype=torch.float32).to(self.device)
         
-        mouse_move_x = offset_x * degrees_per_pixel_x
-
-        mouse_dpi_move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity))
-
-        mouse_move_y = offset_y * degrees_per_pixel_y
-        mouse_dpi_move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
-        
-        return mouse_dpi_move_x, mouse_dpi_move_y
+            with torch.no_grad():
+                prediction = self.model(input_tensor).cpu().numpy()
+            
+            return prediction[0], prediction[1]
     
     def Update_settings(self):
         self.dpi = cfg.mouse_dpi
@@ -159,7 +214,7 @@ class MouseThread(threading.Thread):
         if shooting_key == -32768 or shooting_key == 1 and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
             if cfg.mouse_native == True and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # Native move
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
-
+                
             if cfg.mouse_native == False and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # ghub move
                 ghub_mouse_xy(int(x), int(y))
 
@@ -169,7 +224,7 @@ class MouseThread(threading.Thread):
     def shoot(self, bScope): # TODO
         # By GetAsyncKeyState
         if cfg.mouse_auto_shoot == True and cfg.mouse_triggerbot == False:
-            if win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting)) == -32768 and bScope:
+            if win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting)) == -32768 and bScope or cfg.mouse_auto_aim and bScope:
                 if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
                 if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
@@ -186,7 +241,7 @@ class MouseThread(threading.Thread):
                     Arduino.release()
         
         # By triggerbot
-        if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope:
+        if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope or cfg.mouse_auto_aim and bScope:
             if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
             if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub

@@ -105,6 +105,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_iou `float`: Intersection over union (IoU) threshold for NMS.
 - AI_device `int`: Device with CUDA support to run on, `AI_device=0` or `AI_device=1` or `AI_device=2`.
+- AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
 ### Overlay detector:
 - show_overlay_detector `bool`: Show the detector overlay.
