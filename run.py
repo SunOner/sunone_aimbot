@@ -50,7 +50,7 @@ def perform_detection(model, image, clss):
         agnostic_nms=False,
         save=False,
         conf=cfg.AI_conf,
-        iou=cfg.AI_iou,
+        iou=0.1,
         device=cfg.AI_device,
         half=True,
         max_det=25,
@@ -70,7 +70,7 @@ def print_startup_messages():
             version = lines[0].replace('app=', '')
     except:
         print('version file is not found')
-        
+
     print('Aimbot is started. Enjoy!\n',
           f'Version {version}\n',
           f'[{cfg.hotkey_targeting}] - Aiming at the target\n',

@@ -11,7 +11,7 @@ from logic.buttons import *
 from logic.config_watcher import *
 from run import cfg
 
-if cfg.mouse_move_by_arduino or cfg.mouse_shoot_by_arduino:
+if cfg.move_by_arduino or cfg.shoot_by_arduino:
     from logic.arduino import ArduinoMouse
     Arduino = ArduinoMouse()
 
@@ -139,9 +139,16 @@ class MouseThread(threading.Thread):
         self.shoot(bScope)
                     
     def get_shooting_key_state(self):
-        if cfg.mouse_lock_target:
-            return win32api.GetKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting))
-        return win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting))
+        for key_name in cfg.hotkey_targeting_list:
+            key_code = Buttons.KEY_CODES.get(key_name.strip())
+            if key_code is not None:
+                if cfg.mouse_lock_target:
+                    state = win32api.GetKeyState(key_code)
+                else:
+                    state = win32api.GetAsyncKeyState(key_code)
+                if state < 0 or state == 1:
+                    return True
+        return False
 
     def adjust_mouse_movement(self, target_x, target_y):
         if cfg.AI_mouse_net == False:
@@ -211,48 +218,48 @@ class MouseThread(threading.Thread):
     def move_mouse(self, x, y, shooting_key):
         if x == None or y == None:
             pass
-        if shooting_key == -32768 or shooting_key == 1 and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
-            if cfg.mouse_native == True and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # Native move
+        if self.get_shooting_key_state() and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
+            if cfg.mouse_native == True and x is not None and y is not None and cfg.move_by_arduino == False: # Native move
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
                 
-            if cfg.mouse_native == False and x is not None and y is not None and cfg.mouse_move_by_arduino == False: # ghub move
+            if cfg.mouse_native == False and x is not None and y is not None and cfg.move_by_arduino == False: # ghub move
                 ghub_mouse_xy(int(x), int(y))
 
-            if cfg.mouse_move_by_arduino and x is not None and y is not None: # Arduino
+            if cfg.move_by_arduino and x is not None and y is not None: # Arduino
                 Arduino.move(int(x), int(y))
     
     def shoot(self, bScope): # TODO
         # By GetAsyncKeyState
         if cfg.mouse_auto_shoot == True and cfg.mouse_triggerbot == False:
-            if win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting)) == -32768 and bScope or cfg.mouse_auto_aim and bScope:
-                if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+            if self.get_shooting_key_state() and bScope or cfg.mouse_auto_aim and bScope:
+                if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+                if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
                     ghub_mouse_down()
-                if cfg.mouse_shoot_by_arduino: # arduino
+                if cfg.shoot_by_arduino: # arduino
                     Arduino.press()
 
-            if win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_targeting)) == 0 or bScope == False:
-                if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+            if self.get_shooting_key_state() == False or bScope == False:
+                if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+                if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
                     ghub_mouse_up()
-                if cfg.mouse_shoot_by_arduino: # arduino
+                if cfg.shoot_by_arduino: # arduino
                     Arduino.release()
         
         # By triggerbot
         if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope or cfg.mouse_auto_aim and bScope:
-            if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+            if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-            if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+            if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
                 ghub_mouse_down()
-            if cfg.mouse_shoot_by_arduino: # arduino
+            if cfg.shoot_by_arduino: # arduino
                 Arduino.press()
 
         if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope == False:
-            if cfg.mouse_native and cfg.mouse_shoot_by_arduino == False: # native
+            if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-            if cfg.mouse_native == False and cfg.mouse_shoot_by_arduino == False: #ghub
+            if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
                 ghub_mouse_up()
-            if cfg.mouse_shoot_by_arduino: # arduino
+            if cfg.shoot_by_arduino: # arduino
                 Arduino.release()

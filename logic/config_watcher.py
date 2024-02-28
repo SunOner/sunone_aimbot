@@ -29,6 +29,7 @@ class Config():
         
         self.config_Hotkeys_settings = self.config['Hotkeys settings']
         self.hotkey_targeting = str(self.config_Hotkeys_settings['hotkey_targeting'])
+        self.hotkey_targeting_list = self.hotkey_targeting.split(',')
         self.hotkey_exit = str(self.config_Hotkeys_settings['hotkey_exit'])
         self.hotkey_pause = str(self.config_Hotkeys_settings['hotkey_pause'])
         self.hotkey_reload_config = str(self.config_Hotkeys_settings['hotkey_reload_config'])
@@ -44,14 +45,15 @@ class Config():
         self.mouse_native = self.config_Mouse_settings.getboolean('mouse_native')
         self.mouse_triggerbot = self.config_Mouse_settings.getboolean('mouse_triggerbot')
         self.mouse_force_click = self.config_Mouse_settings.getboolean('mouse_force_click')
-        self.mouse_move_by_arduino = self.config_Mouse_settings.getboolean('mouse_move_by_arduino')
-        self.mouse_shoot_by_arduino = self.config_Mouse_settings.getboolean('mouse_shoot_by_arduino')
+        
+        self.config_Arduino_settings = self.config['Arduino']
+        self.move_by_arduino = self.config_Arduino_settings.getboolean('mouse_move_by_arduino')
+        self.shoot_by_arduino = self.config_Arduino_settings.getboolean('mouse_shoot_by_arduino')
         
         self.config_AI_options = self.config['AI options']
         self.AI_model_path = str(self.config_AI_options['AI_model_path'])
         self.AI_image_size = int(self.config_AI_options['AI_image_size'])
         self.AI_conf = float(self.config_AI_options['AI_conf'])
-        self.AI_iou = float(self.config_AI_options['AI_iou'])
         self.AI_device = str(self.config_AI_options['AI_device'])
         self.AI_mouse_net = self.config_AI_options.getboolean('AI_mouse_net')
         

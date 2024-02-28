@@ -1,6 +1,6 @@
 <div align="center">
 
-### YOLOv8 Aimbot
+# YOLOv8 Aimbot
 [![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/yolov8_aimbot)
 [![License MIT](https://badgen.net/github/license/SunOner/yolov8_aimbot)](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)
 [![Github stars](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
@@ -12,7 +12,7 @@
 </div>
 
 ## Overview
-YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 17,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
+YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 20,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
 
@@ -43,15 +43,11 @@ Before you get started, make sure you have the following prerequisites installed
 ### The YOLOv8 Aimbot has been tested on the following environment:
 <table>
   <thead><tr><th>Windows</th><td>10 and 11</td></thead>
-  <thead><tr><th>NVIDIA CUDA:</th><td>12.1</td></tr></thead>
-  <thead><tr><th>NVIDIA cuDNN:</th><td>8.9.4.25</td></thead>
-  <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
-  <thead><tr><th>PyTorch:</th><td>2.2.0+cu121</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.14</td></tr></thead>
-  <thead><tr><th>OpenCV:</th><td>4.9.0.80</td></tr></thead>
-  <thead><tr><th>NumPy:</th><td>1.26.0</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.4.5</td></tr></thead>
+  <thead><tr><th>NVIDIA CUDA:</th><td>12.1</td></tr></thead>
+  <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.19</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.4.6</td></tr></thead>
 </table>
 
 ## Options
@@ -78,10 +74,11 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - disable_headshot `bool`: Disable head targerting.
 
 ### Hot keys:
-- Right mouse button `str`: Aiming at the target.
-- F2 `str`: Exit.
-- F3 `str`: Pause AIM.
-- F4 `str`: Reload config.
+- The names of all the keys are [here](https://github.com/SunOner/yolov8_aimbot/blob/main/logic/buttons.py).
+- hotkey_targeting `str`: Aiming at the target. Supports multi keys, for example `hotkey_targeting = RightMouseButton,X2MouseButton`
+- hotkey_exit `str`: Exit.
+- hotkey_pause `str`: Pause AIM.
+- hotkey_reload_config `str`: Reload config.
 
 ### Mouse settings:
 - mouse_dpi `float`: Mouse DPI.
@@ -101,7 +98,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - AI_model_path `str`: AI model name.
 - AI_image_size `int`: Model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
-- AI_iou `float`: Intersection over union (IoU) threshold for NMS.
 - AI_device `int`: Device with CUDA support to run on, `AI_device=0` or `AI_device=1` or `AI_device=2`.
 - AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
