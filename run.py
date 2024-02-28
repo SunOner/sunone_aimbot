@@ -72,7 +72,7 @@ def print_startup_messages():
         print('version file is not found')
 
     print('Aimbot is started. Enjoy!\n',
-          f'Version {version}\n',
+          f'Yolov8 Aimbot version {version}\n',
           f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
           f'[{cfg.hotkey_exit}] - EXIT\n',
           f'[{cfg.hotkey_pause}] - PAUSE AIM\n',

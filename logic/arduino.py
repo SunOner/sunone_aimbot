@@ -1,7 +1,6 @@
-import threading
 import serial
 import serial.tools.list_ports
-import time
+from logic.config_watcher import *
 
 class ArduinoMouse:
     def __init__(self):
@@ -9,11 +8,15 @@ class ArduinoMouse:
         self.serial_port.baudrate = 9600
         self.serial_port.timeout = 0
         self.serial_port.write_timeout = 0
-        self.serial_port.port = self.__detect_port()
-
+        self.cfg = Config()
+        if self.cfg.arduino_port == 'auto':
+            self.serial_port.port = self.__detect_port()
+        else:
+            self.serial_port.port = self.cfg.arduino_port()
+        
         try:
             self.serial_port.open()
-            print('Arduino: Connected!')
+            print(f'Arduino: Connected! {self.serial_port.port}')
         except:
             serial.SerialException('Arduino: Device not found. Enter (mode) in cmd and check devices.')
 
@@ -43,18 +46,17 @@ class ArduinoMouse:
         self.serial_port.write(b'\n')
         
     def split_value(self, value):
-        MAX_VALUE = 127
         values = []
-
         sign = -1 if value < 0 else 1
 
-        while abs(value) > MAX_VALUE:
-            values.append(sign * MAX_VALUE)
-            value -= sign * MAX_VALUE
+        while abs(value) > 127:
+            values.append(sign * 127)
+            value -= sign * 127
 
         values.append(value)
 
         return values
+    
     def close(self):
         self.serial_port.close()
 

@@ -4,27 +4,22 @@ import threading
 import time
 import torch
 import win32con, win32api
-from ctypes import windll, c_long, c_ulong, Structure, Union, c_int, POINTER, sizeof, CDLL
+from ctypes import *
 from os import path
 import torch.nn as nn
 from logic.buttons import *
 from logic.config_watcher import *
 from run import cfg
 
-if cfg.move_by_arduino or cfg.shoot_by_arduino:
+if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import ArduinoMouse
     Arduino = ArduinoMouse()
 
-if cfg.mouse_native == False: # TODO
-    basedir = path.dirname(path.abspath(__file__))
-    dlldir = path.join(basedir, 'ghub_mouse.dll')
-    dlldir2 = path.join(basedir, 'LogitechGkey.dll')
+if cfg.mouse_ghub:
     LONG = c_long
     DWORD = c_ulong
     ULONG_PTR = POINTER(DWORD)
-    gm = CDLL(dlldir)
-    gmok = gm.mouse_open()
-
+                
     class MOUSEINPUT(Structure):
         _fields_ = (('dx', LONG),
                     ('dy', LONG),
@@ -34,60 +29,70 @@ if cfg.mouse_native == False: # TODO
                     ('dwExtraInfo', ULONG_PTR))
 
     class _INPUTunion(Union):
-        _fields_ = (('mi', MOUSEINPUT), ('mi', MOUSEINPUT))
-
+        _fields_ = (('mi', MOUSEINPUT),)
 
     class INPUT(Structure):
         _fields_ = (('type', DWORD),
                     ('union', _INPUTunion))
+        
+    class GhubMouse:
+        def __init__(self):
+            self.basedir = path.dirname(path.abspath(__file__))
+            self.dlldir = path.join(self.basedir, 'ghub_mouse.dll')
+            self.gm = CDLL(self.dlldir)
+            self.gmok = self.gm.mouse_open()
 
-    def ghub_SendInput(*inputs):
-        nInputs = len(inputs)
-        LPINPUT = INPUT * nInputs
-        pInputs = LPINPUT(*inputs)
-        cbSize = c_int(sizeof(INPUT))
-        return windll.user32.SendInput(nInputs, pInputs, cbSize)
+        @staticmethod
+        def _ghub_SendInput(*inputs):
+            nInputs = len(inputs)
+            LPINPUT = GhubMouse.INPUT * nInputs
+            pInputs = LPINPUT(*inputs)
+            cbSize = c_int(sizeof(GhubMouse.INPUT))
+            return windll.user32.SendInput(nInputs, pInputs, cbSize)
 
-    def ghub_Input(structure):
-        return INPUT(0, _INPUTunion(mi=structure))
+        @staticmethod
+        def _ghub_Input(structure):
+            return GhubMouse.INPUT(0, GhubMouse._INPUTunion(mi=structure))
 
-    def ghub_MouseInput(flags, x, y, data):
-        return MOUSEINPUT(x, y, data, flags, 0, None)
+        @staticmethod
+        def _ghub_MouseInput(flags, x, y, data):
+            return GhubMouse.MOUSEINPUT(x, y, data, flags, 0, None)
 
-    def ghub_Mouse(flags, x=0, y=0, data=0):
-        return ghub_Input(ghub_MouseInput(flags, x, y, data))
+        @staticmethod
+        def _ghub_Mouse(flags, x=0, y=0, data=0):
+            return GhubMouse._ghub_Input(GhubMouse._ghub_MouseInput(flags, x, y, data))
 
-    def ghub_mouse_xy(x, y):
-        if gmok:
-            return gm.moveR(x, y)
-        return ghub_SendInput(ghub_Mouse(0x0001, x, y))
+        def mouse_xy(self, x, y):
+            if self.gmok:
+                return self.gm.moveR(x, y)
+            return self._ghub_SendInput(self._ghub_Mouse(0x0001, x, y))
 
-    def ghub_mouse_down(key = 1):
-        if gmok:
-            return gm.press(key)
-        if key == 1:
-            return ghub_SendInput(ghub_Mouse(0x0002))
-        elif key == 2:
-            return ghub_SendInput(ghub_Mouse(0x0008))
+        def mouse_down(self, key=1):
+            if self.gmok:
+                return self.gm.press(key)
+            if key == 1:
+                return self._ghub_SendInput(self._ghub_Mouse(0x0002))
+            elif key == 2:
+                return self._ghub_SendInput(self._ghub_Mouse(0x0008))
 
-    def ghub_mouse_up(key = 1):
-        if gmok:
-            return gm.release()
-        if key == 1:
-            return ghub_SendInput(ghub_Mouse(0x0004))
-        elif key == 2:
-            return ghub_SendInput(ghub_Mouse(0x0010))
+        def mouse_up(self, key=1):
+            if self.gmok:
+                return self.gm.release()
+            if key == 1:
+                return self._ghub_SendInput(self._ghub_Mouse(0x0004))
+            elif key == 2:
+                return self._ghub_SendInput(self._ghub_Mouse(0x0010))
 
-    def ghub_mouse_close():
-        if gmok:
-            return gm.mouse_close()
+        def mouse_close(self):
+            if self.gmok:
+                return self.gm.mouse_close()
 
 class Mouse_net(nn.Module):
     def __init__(self):
         super(Mouse_net, self).__init__()
-        self.fc1 = nn.Linear(10, 64)
-        self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, 2)
+        self.fc1 = nn.Linear(in_features=10, out_features=64, device=f'cuda:{cfg.AI_device}')
+        self.fc2 = nn.Linear(in_features=64, out_features=64, device=f'cuda:{cfg.AI_device}')
+        self.fc3 = nn.Linear(in_features=64, out_features=2, device=f'cuda:{cfg.AI_device}')
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -100,6 +105,7 @@ class MouseThread(threading.Thread):
         super(MouseThread, self).__init__()
         self.queue = queue.Queue(maxsize=1)
         self.daemon = True
+        
         self.dpi = cfg.mouse_dpi
         self.mouse_sensitivity = cfg.mouse_sensitivity
         self.fov_x = cfg.mouse_fov_width
@@ -110,13 +116,17 @@ class MouseThread(threading.Thread):
         self.center_y = self.screen_height / 2
         self.prev_x = 0
         self.prev_y = 0
+        
+        if cfg.mouse_ghub:
+            self.ghub = GhubMouse()
+            
         if cfg.AI_mouse_net:
             self.device = torch.device(f'cuda:{cfg.AI_device}')
             self.model = Mouse_net().to(self.device)
             try:
                 self.model.load_state_dict(torch.load('mouse_net.pth', map_location=self.device))
             except:
-                print('Please train mouse_net model. Instruction here: https://github.com/SunOner/mouse_net')
+                print('Please train mouse_net model. Or download example mouse_net.pth model from repository and place in base folder. Instruction here: https://github.com/SunOner/mouse_net')
                 exit()
             self.model.eval()
         self.start()
@@ -219,47 +229,55 @@ class MouseThread(threading.Thread):
         if x == None or y == None:
             pass
         if self.get_shooting_key_state() and cfg.mouse_auto_aim == False and cfg.mouse_triggerbot == False or cfg.mouse_auto_aim:
-            if cfg.mouse_native == True and x is not None and y is not None and cfg.move_by_arduino == False: # Native move
+            if cfg.mouse_ghub == False and x is not None and y is not None and cfg.arduino_move == False: # Native move
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
                 
-            if cfg.mouse_native == False and x is not None and y is not None and cfg.move_by_arduino == False: # ghub move
-                ghub_mouse_xy(int(x), int(y))
+            if cfg.mouse_ghub and x is not None and y is not None and cfg.arduino_move == False: # ghub move
+                self.ghub.mouse_xy(int(x), int(y))
 
-            if cfg.move_by_arduino and x is not None and y is not None: # Arduino
+            if cfg.arduino_move and x is not None and y is not None: # Arduino
                 Arduino.move(int(x), int(y))
     
     def shoot(self, bScope): # TODO
         # By GetAsyncKeyState
         if cfg.mouse_auto_shoot == True and cfg.mouse_triggerbot == False:
             if self.get_shooting_key_state() and bScope or cfg.mouse_auto_aim and bScope:
-                if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
+                if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
-                    ghub_mouse_down()
-                if cfg.shoot_by_arduino: # arduino
+                    
+                if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
+                    self.ghub.mouse_down()
+                    
+                if cfg.arduino_shoot: # arduino
                     Arduino.press()
 
             if self.get_shooting_key_state() == False or bScope == False:
-                if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
+                if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
-                    ghub_mouse_up()
-                if cfg.shoot_by_arduino: # arduino
+                    
+                if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
+                    self.ghub.mouse_up()
+                    
+                if cfg.arduino_shoot: # arduino
                     Arduino.release()
         
         # By triggerbot
         if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope or cfg.mouse_auto_aim and bScope:
-            if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
+            if cfg.mouse_native and cfg.arduino_shoot == False: # native
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-            if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
-                ghub_mouse_down()
-            if cfg.shoot_by_arduino: # arduino
+                
+            if cfg.mouse_native == False and cfg.arduino_shoot == False: #ghub
+                self.ghub.mouse_down()
+                
+            if cfg.arduino_shoot: # arduino
                 Arduino.press()
 
         if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope == False:
-            if cfg.mouse_native and cfg.shoot_by_arduino == False: # native
+            if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-            if cfg.mouse_native == False and cfg.shoot_by_arduino == False: #ghub
-                ghub_mouse_up()
-            if cfg.shoot_by_arduino: # arduino
+                
+            if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
+                self.ghub.mouse_up()
+                
+            if cfg.arduino_shoot: # arduino
                 Arduino.release()

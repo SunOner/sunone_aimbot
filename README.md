@@ -68,7 +68,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - Obs_camera_id `str` or `int`: `auto` or number of Virtual Camera ID.
 - Obs_capture_fps `int`: Specific fps value for screen capture.
 
-### Aim settings:
+### Aim:
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
 - disable_headshot `bool`: Disable head targerting.
@@ -80,7 +80,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - hotkey_pause `str`: Pause AIM.
 - hotkey_reload_config `str`: Reload config.
 
-### Mouse settings:
+### Mouse:
 - mouse_dpi `float`: Mouse DPI.
 - mouse_sensitivity  `float`: Aim sensitivity.
 - mouse_fov_width  `float`: The current horizontal value of the viewing angle in the game.
@@ -88,25 +88,28 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
 - mouse_auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
 - mouse_auto_aim `bool`: Automatic targeting.
-- mouse_native `bool`: Use win32 mouse input. If the value is False, the ghub dll is used for movement.
+- mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse movement. If the value is False, native win32 library is used for movement.
 - mouse_triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
 - mouse_force_click `bool`: Shooting will be performed even if the sight is not located within the object.
-- mouse_move_by_arduino `bool`: Sends a command to the arduino to move the mouse.
-- mouse_shoot_by_arduino `bool`: Sends a command to the arduino to fire with the mouse.
 
-### AI options:
+### Arduino:
+- arduino_move `bool`: Sends a command to the arduino to move the mouse.
+- arduino_shoot `bool`: Sends a command to the arduino to fire with the mouse.
+- arduino_port `str`: Arduino COM port. Use `COM1` or `COM2` ... or `auto`.
+
+### AI:
 - AI_model_path `str`: AI model name.
 - AI_image_size `int`: Model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_device `int`: Device with CUDA support to run on, `AI_device=0` or `AI_device=1` or `AI_device=2`.
 - AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
-### Overlay detector:
+### Overlay:
 - show_overlay_detector `bool`: Show the detector overlay.
 - show_overlay_boxes `bool`: Show goals inside the overlay.
 - show_overlay_line `bool`: Show line from crosshair to target.
 
-### Cv2 debug window settings:
+### Debug window:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
 - show_speed `bool`: Displays speed information inside the debug window.
 - show_fps `bool`: Displays FPS in the corner.

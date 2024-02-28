@@ -109,10 +109,10 @@ class Capture():
         # WARNINGS
         if '.pt' in cfg.AI_model_path:
             print('WARNING: Export the model to `.engine` for better performance.')
-        if cfg.mouse_native and cfg.move_by_arduino == False and cfg.shoot_by_arduino == False:
+        if cfg.mouse_ghub == False and cfg.arduino_move == False and cfg.arduino_shoot == False:
             print('WARNING: win32api is detected in some games.')
-        if cfg.mouse_native == False and cfg.move_by_arduino == False and cfg.shoot_by_arduino == False:
-            print('WARNING: ghub_mouse.dll is detected in some games.')
+        if cfg.mouse_ghub and cfg.arduino_move == False and cfg.arduino_shoot == False:
+            print('WARNING: ghub is detected in some games.')
         if cfg.show_window:
             print('WARNING: An open debug window can affect performance.')
         if cfg.debug_window_name == 'Calculator' and cfg.show_window:
@@ -125,9 +125,9 @@ class Capture():
             print('WARNING: The object detector window is more than 700 pixels wide, and a large object detector window can have a bad effect on performance.')
         if cfg.detection_window_height >= 700:
             print('WARNING: The object detector window is more than 700 pixels in height, a large object detector window can have a bad effect on performance.')
-        if cfg.move_by_arduino == False:
+        if cfg.arduino_move == False:
             print('WARNING: Using standard libraries for mouse moving such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
-        if cfg.shoot_by_arduino == False and cfg.mouse_auto_shoot:
+        if cfg.arduino_shoot == False and cfg.mouse_auto_shoot:
             print('WARNING: Using standard libraries for mouse shooting such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
         if cfg.AI_conf <= 0.15:
             print('WARNING: A small value of `AI_conf ` can lead to a large number of false positives.')
