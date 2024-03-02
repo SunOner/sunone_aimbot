@@ -12,11 +12,11 @@ class ArduinoMouse:
         if self.cfg.arduino_port == 'auto':
             self.serial_port.port = self.__detect_port()
         else:
-            self.serial_port.port = self.cfg.arduino_port()
+            self.serial_port.port = self.cfg.arduino_port
         
         try:
             self.serial_port.open()
-            print(f'Arduino: Connected! {self.serial_port.port}')
+            print(f'Arduino: Connected! Port: {self.serial_port.port}')
         except:
             serial.SerialException('Arduino: Device not found. Enter (mode) in cmd and check devices.')
 
