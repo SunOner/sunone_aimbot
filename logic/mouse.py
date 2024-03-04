@@ -88,11 +88,11 @@ if cfg.mouse_ghub:
                 return self.gm.mouse_close()
 
 class Mouse_net(nn.Module):
-    def __init__(self):
+    def __init__(self, arch):
         super(Mouse_net, self).__init__()
-        self.fc1 = nn.Linear(in_features=10, out_features=64, device=f'cuda:{cfg.AI_device}')
-        self.fc2 = nn.Linear(in_features=64, out_features=64, device=f'cuda:{cfg.AI_device}')
-        self.fc3 = nn.Linear(in_features=64, out_features=2, device=f'cuda:{cfg.AI_device}')
+        self.fc1 = nn.Linear(in_features=10, out_features=64, device=f'{arch}')
+        self.fc2 = nn.Linear(in_features=64, out_features=64, device=f'{arch}')
+        self.fc3 = nn.Linear(in_features=64, out_features=2, device=f'{arch}')
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -117,12 +117,18 @@ class MouseThread(threading.Thread):
         self.prev_x = 0
         self.prev_y = 0
         
+        self.arch = f'cuda:{cfg.AI_device}'
+        if cfg.AI_enable_AMD:
+            self.arch = f'hip:{cfg.AI_device}'
+        if 'cpu' in cfg.AI_device:
+            self.arch = 'cpu'
+        
         if cfg.mouse_ghub:
             self.ghub = GhubMouse()
             
         if cfg.AI_mouse_net:
-            self.device = torch.device(f'cuda:{cfg.AI_device}')
-            self.model = Mouse_net().to(self.device)
+            self.device = torch.device(f'{self.arch}')
+            self.model = Mouse_net(arch=self.arch).to(self.device)
             try:
                 self.model.load_state_dict(torch.load('mouse_net.pth', map_location=self.device))
             except:
@@ -238,7 +244,7 @@ class MouseThread(threading.Thread):
             if cfg.arduino_move and x is not None and y is not None: # Arduino
                 Arduino.move(int(x), int(y))
     
-    def shoot(self, bScope): # TODO
+    def shoot(self, bScope):
         # By GetAsyncKeyState
         if cfg.mouse_auto_shoot == True and cfg.mouse_triggerbot == False:
             if self.get_shooting_key_state() and bScope or cfg.mouse_auto_aim and bScope:

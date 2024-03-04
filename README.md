@@ -17,7 +17,7 @@ YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 > Use it at your own risk, we do not guarantee that you may be blocked!
 
 > [!NOTE] 
-> This application only works on Nvidia graphics cards.
+> This application only works on Nvidia graphics cards. AMD support is testing. See [AI_enable_AMD](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#ai) option.
 > The recommended graphics card for starting and more productive and stable operation starts with the rtx 20 series.
 
 ## Requirements
@@ -46,8 +46,8 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>NVIDIA CUDA:</th><td>12.1</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.19</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.4.6</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.20</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.4.7</td></tr></thead>
 </table>
 
 ## Options
@@ -81,10 +81,10 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - hotkey_reload_config `str`: Reload config.
 
 ### Mouse:
-- mouse_dpi `float`: Mouse DPI.
+- mouse_dpi `int`: Mouse DPI.
 - mouse_sensitivity  `float`: Aim sensitivity.
-- mouse_fov_width  `float`: The current horizontal value of the viewing angle in the game.
-- mouse_fov_height  `float`: The current vertical value of the viewing angle in the game.
+- mouse_fov_width  `int`: The current horizontal value of the viewing angle in the game.
+- mouse_fov_height  `int`: The current vertical value of the viewing angle in the game.
 - mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
 - mouse_auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
 - mouse_auto_aim `bool`: Automatic targeting.
@@ -96,12 +96,14 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - arduino_move `bool`: Sends a command to the arduino to move the mouse.
 - arduino_shoot `bool`: Sends a command to the arduino to fire with the mouse.
 - arduino_port `str`: Arduino COM port. Use `COM1` or `COM2` ... or `auto`.
+- arduino_baudrate `int`: Custom Arduino baudrate.
 
 ### AI:
 - AI_model_path `str`: AI model name.
 - AI_image_size `int`: Model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_device `int`: Device with CUDA support to run on, `AI_device=0` or `AI_device=1` or `AI_device=2`.
+- AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm and pytorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
 - AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
 ### Overlay:

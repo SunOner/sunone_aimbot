@@ -1,8 +1,6 @@
 import cv2
 import bettercam
-import numpy as np
 import torch
-import win32gui, win32ui, win32con
 from logic.config_watcher import *
 from run import cfg
 from screeninfo import get_monitors
@@ -51,6 +49,7 @@ class Capture():
         if cfg.Bettercam_capture and self.prev_detection_window_height != cfg.detection_window_height or cfg.Bettercam_capture and self.prev_detection_window_width != cfg.detection_window_width or cfg.Bettercam_capture and self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps:
             self.bc.stop()
             del self.bc
+            
             self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id, output_idx=cfg.bettercam_gpu_id, output_color="BGR", max_buffer_len=64)
             self.bc.start(self.Calculate_screen_offset(), target_fps=cfg.bettercam_capture_fps)
 
@@ -97,9 +96,6 @@ class Capture():
         if torch.cuda.is_available == False:
             print('`Torch` is installed without CUDA support.')
             exit(0)
-        if cfg.AI_device.lower == 'cpu':
-            print('CPU is not supported, please select Nvidia GPU device.\nExample: AI_device=0')
-            exit(0)
         if cfg.Bettercam_capture == False and cfg.Obs_capture == False:
             print('Use at least one image capture method.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.')
             exit(0)
@@ -107,7 +103,7 @@ class Capture():
             print('Only one capture method is possible.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.')
             exit(0)
         # WARNINGS
-        if '.pt' in cfg.AI_model_path:
+        if '.pt' in cfg.AI_model_name:
             print('WARNING: Export the model to `.engine` for better performance.')
         if cfg.mouse_ghub == False and cfg.arduino_move == False and cfg.arduino_shoot == False:
             print('WARNING: win32api is detected in some games.')

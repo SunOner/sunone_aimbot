@@ -47,12 +47,12 @@ def perform_detection(model, image, clss):
         stream_buffer=False,
         visualize=False,
         augment=True,
-        agnostic_nms=False,
+        agnostic_nms=True,
         save=False,
         conf=cfg.AI_conf,
         iou=0.1,
         device=cfg.AI_device,
-        half=True,
+        half=False if 'cpu' in cfg.AI_device else True,
         max_det=25,
         vid_stride=False,
         classes=clss,
@@ -67,16 +67,16 @@ def print_startup_messages():
     try:
         with open('./version', 'r') as f:
             lines = f.read().split('\n')
-            version = lines[0].replace('app=', '')
+            version = lines[0].split('=')[1]
     except:
         print('version file is not found')
 
-    print('Aimbot is started. Enjoy!\n',
-          f'Yolov8 Aimbot version {version}\n',
-          f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
-          f'[{cfg.hotkey_exit}] - EXIT\n',
-          f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
-          f'[{cfg.hotkey_reload_config}] - Reload config')
+    print(f'Yolov8 Aimbot is started! (Version {version})\n\n',
+            'Hotkeys:\n',
+            f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
+            f'[{cfg.hotkey_exit}] - EXIT\n',
+            f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
+            f'[{cfg.hotkey_reload_config}] - Reload config\n')
     
 def process_hotkeys(cfg_reload_prev_state):
     global app_pause
@@ -108,10 +108,10 @@ def spawn_debug_window():
             debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
             win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
             
-def sort_targets(frame, cfg) -> List[Target]:
-    boxes_array = frame.boxes.xywh.to(f'cuda:{cfg.AI_device}')
-    distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([frames.screen_x_center, frames.screen_y_center], device=f'cuda:{cfg.AI_device}')) ** 2, dim=1)
-    classes_tensor = frame.boxes.cls.to(f'cuda:{cfg.AI_device}')
+def sort_targets(frame, cfg, arch) -> List[Target]:
+    boxes_array = frame.boxes.xywh.to(f'{arch}')
+    distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([frames.screen_x_center, frames.screen_y_center], device=f'{arch}')) ** 2, dim=1)
+    classes_tensor = frame.boxes.cls.to(f'{arch}')
 
     if not cfg.disable_headshot:
         score = distances_sq + 10000 * (classes_tensor != 7).float()
@@ -125,7 +125,7 @@ def sort_targets(frame, cfg) -> List[Target]:
             sort_heads = torch.argsort(heads_distances_sq)
             heads = heads[sort_heads]
         else:
-            sort_heads = torch.tensor([], dtype=torch.int64, device=f'cuda:{cfg.AI_device}')
+            sort_heads = torch.tensor([], dtype=torch.int64, device=f'{arch}')
 
         other_distances_sq = distances_sq[other]
         sort_indices_other = torch.argsort(other_distances_sq)
@@ -134,18 +134,27 @@ def sort_targets(frame, cfg) -> List[Target]:
 
     return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
 
-def active_classes():
+def active_classes() -> List[int]:
     clss = [0, 1]
+    
     if cfg.hideout_targets:
-        clss += 5, 6
-    if cfg.disable_headshot == False:
+        clss.extend([5, 6])
+
+    if not cfg.disable_headshot:
         clss.append(7)
+    
     return clss
 
 def init():
+    arch = f'cuda:{cfg.AI_device}'
+    if cfg.AI_enable_AMD:
+        arch = f'hip:{cfg.AI_device}'
+    if 'cpu' in cfg.AI_device:
+        arch = 'cpu'
+    
     prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
     try:
-        model = YOLO(f'models/{cfg.AI_model_path}', task='detect')
+        model = YOLO(f'models/{cfg.AI_model_name}', task='detect')
         print_startup_messages()
     except Exception as e:
         print(e)
@@ -170,7 +179,7 @@ def init():
 
             if len(frame.boxes):
                 if app_pause == 0:
-                    shooting_queue = sort_targets(frame, cfg)
+                    shooting_queue = sort_targets(frame, cfg, arch)
 
                     if shooting_queue:
                         target = shooting_queue[0]

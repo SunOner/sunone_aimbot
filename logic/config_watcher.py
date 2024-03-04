@@ -7,62 +7,64 @@ class Config():
     
     def Read(self, verbose=False):
         self.config.read('./config.ini')
+        # Detection window
         self.config_Detection_window = self.config['Detection window']
         self.detection_window_width = int(self.config_Detection_window['detection_window_width'])
         self.detection_window_height = int(self.config_Detection_window['detection_window_height'])
-        
+        # Capture Methods
         self.config_Bettercam_Capture = self.config['Capture Methods']
         self.Bettercam_capture = self.config_Bettercam_Capture.getboolean('Bettercam_capture')
         self.bettercam_capture_fps = int(self.config_Bettercam_Capture['bettercam_capture_fps'])
         self.bettercam_monitor_id = int(self.config_Bettercam_Capture['bettercam_monitor_id'])
         self.bettercam_gpu_id = int(self.config_Bettercam_Capture['bettercam_gpu_id'])
-
         self.config_Obs_capture = self.config['Capture Methods']
         self.Obs_capture = self.config_Obs_capture.getboolean('Obs_capture')
         self.Obs_camera_id = str(self.config_Obs_capture['Obs_camera_id'])
         self.Obs_capture_fps = int(self.config_Obs_capture['Obs_capture_fps'])
-        
+        # Aim
         self.config_Aim_settings = self.config['Aim']
         self.body_y_offset = float(self.config_Aim_settings['body_y_offset'])
         self.hideout_targets = self.config_Aim_settings.getboolean('hideout_targets')
         self.disable_headshot = self.config_Aim_settings.getboolean('disable_headshot')
-        
+        # Hotkeys
         self.config_Hotkeys_settings = self.config['Hotkeys']
         self.hotkey_targeting = str(self.config_Hotkeys_settings['hotkey_targeting'])
         self.hotkey_targeting_list = self.hotkey_targeting.split(',')
         self.hotkey_exit = str(self.config_Hotkeys_settings['hotkey_exit'])
         self.hotkey_pause = str(self.config_Hotkeys_settings['hotkey_pause'])
         self.hotkey_reload_config = str(self.config_Hotkeys_settings['hotkey_reload_config'])
-        
+        # Mouse
         self.config_Mouse_settings = self.config['Mouse']
-        self.mouse_dpi = float(self.config_Mouse_settings['mouse_dpi'])
+        self.mouse_dpi = int(self.config_Mouse_settings['mouse_dpi'])
         self.mouse_sensitivity = float(self.config_Mouse_settings['mouse_sensitivity'])
-        self.mouse_fov_width = float(self.config_Mouse_settings['mouse_fov_width'])
-        self.mouse_fov_height = float(self.config_Mouse_settings['mouse_fov_height'])
+        self.mouse_fov_width = int(self.config_Mouse_settings['mouse_fov_width'])
+        self.mouse_fov_height = int(self.config_Mouse_settings['mouse_fov_height'])
         self.mouse_lock_target = self.config_Mouse_settings.getboolean('mouse_lock_target')
         self.mouse_auto_shoot = self.config_Mouse_settings.getboolean('mouse_auto_shoot')
         self.mouse_auto_aim = self.config_Mouse_settings.getboolean('mouse_auto_aim')
         self.mouse_ghub = self.config_Mouse_settings.getboolean('mouse_ghub')
         self.mouse_triggerbot = self.config_Mouse_settings.getboolean('mouse_triggerbot')
         self.mouse_force_click = self.config_Mouse_settings.getboolean('mouse_force_click')
-        
+        # Arduino
         self.config_Arduino_settings = self.config['Arduino']
         self.arduino_move = self.config_Arduino_settings.getboolean('arduino_move')
         self.arduino_shoot = self.config_Arduino_settings.getboolean('arduino_shoot')
         self.arduino_port = str(self.config_Arduino_settings['arduino_port'])
-        
+        self.arduino_baudrate = int(self.config_Arduino_settings['arduino_baudrate'])
+        # AI
         self.config_AI_options = self.config['AI']
-        self.AI_model_path = str(self.config_AI_options['AI_model_path'])
+        self.AI_model_name = str(self.config_AI_options['AI_model_name'])
         self.AI_image_size = int(self.config_AI_options['AI_image_size'])
         self.AI_conf = float(self.config_AI_options['AI_conf'])
         self.AI_device = str(self.config_AI_options['AI_device'])
+        self.AI_enable_AMD = self.config_AI_options.getboolean('AI_enable_AMD')
         self.AI_mouse_net = self.config_AI_options.getboolean('AI_mouse_net')
-        
+        # Overlay
         self.config_Overlay_detector = self.config['Overlay']
         self.show_overlay_detector = self.config_Overlay_detector.getboolean('show_overlay_detector')
         self.show_overlay_boxes = self.config_Overlay_detector.getboolean('show_overlay_boxes')
         self.show_overlay_line = self.config_Overlay_detector.getboolean('show_overlay_line')
-        
+        # Debug window
         self.config_Debug_window = self.config['Debug window']
         self.show_window = self.config_Debug_window.getboolean('show_window')
         self.show_speed = self.config_Debug_window.getboolean('show_speed')

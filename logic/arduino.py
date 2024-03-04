@@ -1,14 +1,18 @@
+import os
+import psutil
 import serial
 import serial.tools.list_ports
 from logic.config_watcher import *
 
 class ArduinoMouse:
     def __init__(self):
+        self.cfg = Config()
+        
         self.serial_port = serial.Serial()
-        self.serial_port.baudrate = 9600
+        self.serial_port.baudrate = self.cfg.arduino_baudrate
         self.serial_port.timeout = 0
         self.serial_port.write_timeout = 0
-        self.cfg = Config()
+        
         if self.cfg.arduino_port == 'auto':
             self.serial_port.port = self.__detect_port()
         else:
@@ -18,12 +22,12 @@ class ArduinoMouse:
             self.serial_port.open()
             print(f'Arduino: Connected! Port: {self.serial_port.port}')
         except:
-            serial.SerialException('Arduino: Device not found. Enter (mode) in cmd and check devices.')
+            print('Arduino: Not Connected...')
+            self.checks()
 
         if not self.serial_port.is_open:
-            print('Arduino: Not connected.')
             exit()
-        
+                    
     def click(self):
         self.serial_port.write(b'c')
         self.serial_port.write(b'\n')
@@ -72,3 +76,31 @@ class ArduinoMouse:
                 arduino_port = port[0]
 
         return arduino_port
+    
+    def find_library_directory(self, base_path, library_name_start):
+        for root, dirs, files in os.walk(base_path):
+            for dir_name in dirs:
+                if dir_name.startswith(library_name_start):
+                    return os.path.join(root, dir_name)
+        return None
+
+    def checks(self):
+        for process in psutil.process_iter(['pid', 'name']):
+            if process.info['name'] == 'Arduino IDE.exe':
+                print('Arduino: Arduino IDE is open, close IDE and restart app.')
+                break
+            
+        documents_path = os.path.join(os.environ['USERPROFILE'], 'Documents')
+        arduino_libraries_path = os.path.join(documents_path, 'Arduino', 'libraries')
+        USB_Host_Shield_library_path = self.find_library_directory(arduino_libraries_path, 'USB_Host_Shield')
+        hid_settings = os.path.join(USB_Host_Shield_library_path, 'settings.h')
+        
+        with open(hid_settings, 'r') as file:
+            for line in file:
+                if line.startswith('#define ENABLE_UHS_DEBUGGING'):
+                    parts = line.split()
+                    if len(parts) == 3 and parts[1] == 'ENABLE_UHS_DEBUGGING':
+                        value = parts[2]
+                        if value == '1':
+                            print(f'Arduino: Disable `ENABLE_UHS_DEBUGGING` setting in {hid_settings} file.')
+                            break
