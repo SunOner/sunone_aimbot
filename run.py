@@ -167,6 +167,7 @@ def sort_targets(frame, cfg, arch, mask) -> List[Target]:
             return targets
         else:
             return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
+    return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
                 
 def active_classes() -> List[int]:
     clss = [0, 1]
@@ -219,11 +220,11 @@ def init():
             if cfg.show_window and cfg.show_speed == True:
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
 
-        if cfg.show_overlay_mask and cfg.show_overlay_detector and cfg.mask_enabled:
-            for i in range(len(mask_points)):
-                current_point = mask_points[i]
-                next_point = mask_points[(i + 1) % len(mask_points)]
-                overlay.canvas.create_line(current_point[0], current_point[1], next_point[0], next_point[1], width=2, fill='red')
+            if cfg.show_overlay_mask and cfg.show_overlay_detector and cfg.mask_enabled:
+                for i in range(len(mask_points)):
+                    current_point = mask_points[i]
+                    next_point = mask_points[(i + 1) % len(mask_points)]
+                    overlay.canvas.create_line(current_point[0], current_point[1], next_point[0], next_point[1], width=2, fill='red')
                 
             if len(frame.boxes):
                 if app_pause == 0:
