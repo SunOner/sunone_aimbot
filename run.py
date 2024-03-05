@@ -5,6 +5,7 @@ from logic.capture import *
 from logic.mouse import MouseThread
 
 from ultralytics import YOLO
+import numpy as np
 import math
 import torch
 import cv2
@@ -13,6 +14,10 @@ from typing import List
 import win32api, win32con, win32gui
 if cfg.show_overlay_detector:
     import tkinter as tk
+    
+mask_points = []
+annotated_frame = None
+global_mask = None
 
 class Target:
     def __init__(self, x, y, w, h, cls):
@@ -76,42 +81,63 @@ def print_startup_messages():
             f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
             f'[{cfg.hotkey_exit}] - EXIT\n',
             f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
-            f'[{cfg.hotkey_reload_config}] - Reload config\n')
+            f'[{cfg.hotkey_reload_config}] - Reload config\n',
+            f'[{cfg.hotkey_turn_off_mask}] - Disable exclude mask\n')
     
 def process_hotkeys(cfg_reload_prev_state):
     global app_pause
     global clss
+    global mask_active
     app_pause = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_pause])
     app_reload_cfg = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_reload_config])
+    mask_active = win32api.GetAsyncKeyState(Buttons.KEY_CODES[cfg.hotkey_turn_off_mask])
+    mask_points = cfg.read_mask_points()
     if app_reload_cfg != cfg_reload_prev_state:
         if app_reload_cfg in (1, 0):
             cfg.Read(verbose=True)
             frames.reload_capture()
             mouse_worker.Update_settings()
             clss = active_classes()
-            
             if cfg.show_window == False:
                 cv2.destroyAllWindows()
                 
     cfg_reload_prev_state = app_reload_cfg
-    return cfg_reload_prev_state
+    return cfg_reload_prev_state, mask_points
 
 def update_overlay_window(overlay):
     if cfg.show_overlay_detector:
         overlay.overlay_detector.update()
         overlay.canvas.delete("all")
-        
+
+def create_mask_from_points(image_shape, points):
+    mask = np.zeros([image_shape[1], image_shape[0]], dtype=np.uint8)
+    pts = np.array([points], dtype=np.int32)
+    cv2.fillPoly(mask, pts, 255)
+    return mask
+
+def debug_window_click_handler(event, x, y, flags, param):
+    global mask_points
+    global global_mask
+    if event == cv2.EVENT_LBUTTONDOWN:
+        mask_points.append((x, y))
+        if len(mask_points) == 4:
+            global_mask = create_mask_from_points(param, mask_points)
+            cfg.save_mask_points(mask_points)
+            print('mask created:', mask_points)
+            mask_points = []
+                 
 def spawn_debug_window():
     if cfg.show_window:
         cv2.namedWindow(cfg.debug_window_name)
+        cv2.setMouseCallback(cfg.debug_window_name, debug_window_click_handler, [cfg.detection_window_width, cfg.detection_window_height])
         if cfg.debug_window_always_on_top:
             debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
             win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
             
-def sort_targets(frame, cfg, arch) -> List[Target]:
-    boxes_array = frame.boxes.xywh.to(f'{arch}')
-    distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([frames.screen_x_center, frames.screen_y_center], device=f'{arch}')) ** 2, dim=1)
-    classes_tensor = frame.boxes.cls.to(f'{arch}')
+def sort_targets(frame, cfg, arch, mask) -> List[Target]:
+    boxes_array = frame.boxes.xywh.to(arch)
+    distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([frames.screen_x_center, frames.screen_y_center], device=arch)) ** 2, dim=1)
+    classes_tensor = frame.boxes.cls.to(arch)
 
     if not cfg.disable_headshot:
         score = distances_sq + 10000 * (classes_tensor != 7).float()
@@ -125,15 +151,23 @@ def sort_targets(frame, cfg, arch) -> List[Target]:
             sort_heads = torch.argsort(heads_distances_sq)
             heads = heads[sort_heads]
         else:
-            sort_heads = torch.tensor([], dtype=torch.int64, device=f'{arch}')
+            sort_heads = torch.tensor([], dtype=torch.int64, device=arch)
 
         other_distances_sq = distances_sq[other]
         sort_indices_other = torch.argsort(other_distances_sq)
 
         sort_indices = torch.cat((heads, other[sort_indices_other])).cpu().numpy()
-
-    return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
-
+        
+        if mask is not None and cfg.mask_enabled and mask_active != -32768:
+            targets = []
+            for i in sort_indices:
+                target = Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item())
+                if mask[int(target.y), int(target.x)] == 0:
+                    targets.append(target)
+            return targets
+        else:
+            return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
+                
 def active_classes() -> List[int]:
     clss = [0, 1]
     
@@ -146,26 +180,34 @@ def active_classes() -> List[int]:
     return clss
 
 def init():
-    arch = f'cuda:{cfg.AI_device}'
+    global annotated_frame
+    prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
+    cfg_reload_prev_state = 0
+    shooting_queue = []
+    spawn_debug_window()
+    
     if cfg.AI_enable_AMD:
         arch = f'hip:{cfg.AI_device}'
+    else:
+        arch = f'cuda:{cfg.AI_device}'
     if 'cpu' in cfg.AI_device:
         arch = 'cpu'
     
-    prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
     try:
         model = YOLO(f'models/{cfg.AI_model_name}', task='detect')
         print_startup_messages()
     except Exception as e:
-        print(e)
+        print('Loading model error:\n', e)
         quit(0)
     
-    spawn_debug_window()
-    cfg_reload_prev_state = 0
-    shooting_queue = []
-    
+    global global_mask
+    if cfg.mask_enabled:
+        mask_points = cfg.read_mask_points()
+        if mask_points:
+            global_mask = create_mask_from_points([cfg.detection_window_width, cfg.detection_window_height], mask_points)
+        
     while True:
-        cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
+        cfg_reload_prev_state, mask_points = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame()
         result = perform_detection(model, image, clss)
         update_overlay_window(overlay) if cfg.show_overlay_detector else None
@@ -177,16 +219,22 @@ def init():
             if cfg.show_window and cfg.show_speed == True:
                 annotated_frame = speed(annotated_frame, frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
 
+        if cfg.show_overlay_mask and cfg.show_overlay_detector and cfg.mask_enabled:
+            for i in range(len(mask_points)):
+                current_point = mask_points[i]
+                next_point = mask_points[(i + 1) % len(mask_points)]
+                overlay.canvas.create_line(current_point[0], current_point[1], next_point[0], next_point[1], width=2, fill='red')
+                
             if len(frame.boxes):
                 if app_pause == 0:
-                    shooting_queue = sort_targets(frame, cfg, arch)
+                    shooting_queue = sort_targets(frame, cfg, arch, global_mask)
 
                     if shooting_queue:
                         target = shooting_queue[0]
                         shooting_queue.clear()
                         
                         mouse_worker.queue.put((target.x, target.y, target.w, target.h))
-
+                            
                         if cfg.show_window or cfg.show_overlay_detector:
                             screen_x_center = cfg.detection_window_width / 2
                             screen_y_center = cfg.detection_window_height / 2
@@ -209,7 +257,6 @@ def init():
                             
                             if cfg.show_overlay_line:
                                 overlay.canvas.create_line(screen_x_center, screen_y_center, target.x, target.y + cfg.body_y_offset / target.h, width=2, fill='red')
-                            
                 else: pass
 
                 if cfg.show_window and cfg.show_boxes:
@@ -225,6 +272,9 @@ def init():
             cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 80) if cfg.show_speed else (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
         if cfg.show_window:
+            if cfg.mask_enabled:
+                mask_color = cv2.cvtColor(global_mask, cv2.COLOR_GRAY2BGR)
+                annotated_frame[global_mask > 0] = cv2.addWeighted(annotated_frame[global_mask > 0], 0.5, mask_color[global_mask > 0], 0.5, 0)
             try:
                 if cfg.debug_window_scale_percent != 100:
                     height = int(cfg.detection_window_height * cfg.debug_window_scale_percent / 100)

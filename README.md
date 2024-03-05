@@ -79,6 +79,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - hotkey_exit `str`: Exit.
 - hotkey_pause `str`: Pause AIM.
 - hotkey_reload_config `str`: Reload config.
+- hotkey_turn_off_mask `str`: Turn off exclude mask.
 
 ### Mouse:
 - mouse_dpi `int`: Mouse DPI.
@@ -110,6 +111,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - show_overlay_detector `bool`: Show the detector overlay.
 - show_overlay_boxes `bool`: Show goals inside the overlay.
 - show_overlay_line `bool`: Show line from crosshair to target.
+- show_overlay_mask `bool`: Show exclude mask.
 
 ### Debug window:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
@@ -122,6 +124,10 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - debug_window_always_on_top `bool`: The debug window will always be on top of other windows.
 - debug_window_scale_percent `int`: Adjusts the size of the debug window.
 - debug_window_name `str`: Specifies the title of the debug window.
+
+### Exclude mask:
+- mask_enabled `bool`: Enable exclude mask.
+- mask_points `str`: Saved points exclude mask. If you are playing from a third person, the character can be masked with a mask that will exclude him from targeting targets. Turn on the debugging window and select 4 points, the mask will be automatically saved in the config.
 
 ## AI Models
 - *.pt: Default AI model.

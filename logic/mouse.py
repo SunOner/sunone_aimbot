@@ -1,7 +1,5 @@
-import math
 import queue
 import threading
-import time
 import torch
 import win32con, win32api
 from ctypes import *
@@ -90,9 +88,9 @@ if cfg.mouse_ghub:
 class Mouse_net(nn.Module):
     def __init__(self, arch):
         super(Mouse_net, self).__init__()
-        self.fc1 = nn.Linear(in_features=10, out_features=64, device=f'{arch}')
-        self.fc2 = nn.Linear(in_features=64, out_features=64, device=f'{arch}')
-        self.fc3 = nn.Linear(in_features=64, out_features=2, device=f'{arch}')
+        self.fc1 = nn.Linear(in_features=10, out_features=64, device=arch)
+        self.fc2 = nn.Linear(in_features=64, out_features=64, device=arch)
+        self.fc3 = nn.Linear(in_features=64, out_features=2, device=arch)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
