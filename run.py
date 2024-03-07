@@ -165,10 +165,8 @@ def sort_targets(frame, cfg, arch, mask) -> List[Target]:
                 if mask[int(target.y), int(target.x)] == 0:
                     targets.append(target)
             return targets
-        else:
-            return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
     return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
-                
+
 def active_classes() -> List[int]:
     clss = [0, 1]
     
