@@ -17,7 +17,6 @@ if cfg.show_overlay_detector:
     
 mask_points = []
 annotated_frame = None
-global_mask = None
 
 class Target:
     def __init__(self, x, y, w, h, cls):
@@ -88,10 +87,14 @@ def process_hotkeys(cfg_reload_prev_state):
     global app_pause
     global clss
     global mask_active
+    global mask_points
     app_pause = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_pause])
     app_reload_cfg = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_reload_config])
     mask_active = win32api.GetAsyncKeyState(Buttons.KEY_CODES[cfg.hotkey_turn_off_mask])
-    mask_points = cfg.read_mask_points()
+    
+    if app_reload_cfg != cfg_reload_prev_state and app_reload_cfg in (1, 0):
+        mask_points = cfg.read_mask_points()
+    
     if app_reload_cfg != cfg_reload_prev_state:
         if app_reload_cfg in (1, 0):
             cfg.Read(verbose=True)
@@ -102,7 +105,7 @@ def process_hotkeys(cfg_reload_prev_state):
                 cv2.destroyAllWindows()
                 
     cfg_reload_prev_state = app_reload_cfg
-    return cfg_reload_prev_state, mask_points
+    return cfg_reload_prev_state
 
 def update_overlay_window(overlay):
     if cfg.show_overlay_detector:
@@ -110,22 +113,24 @@ def update_overlay_window(overlay):
         overlay.canvas.delete("all")
 
 def create_mask_from_points(image_shape, points):
-    mask = np.zeros([image_shape[1], image_shape[0]], dtype=np.uint8)
+    mask = np.ones([image_shape[1], image_shape[0], 3], dtype=np.uint8) * 255
     pts = np.array([points], dtype=np.int32)
-    cv2.fillPoly(mask, pts, 255)
+    cv2.fillPoly(mask, pts, (0, 0, 0))
     return mask
 
 def debug_window_click_handler(event, x, y, flags, param):
     global mask_points
-    global global_mask
     if event == cv2.EVENT_LBUTTONDOWN:
-        mask_points.append((x, y))
         if len(mask_points) == 4:
-            global_mask = create_mask_from_points(param, mask_points)
             cfg.save_mask_points(mask_points)
-            print('mask created:', mask_points)
+            print('Starting to make a mask')
             mask_points = []
-                 
+        if len(mask_points) < 4:
+            print(f'A point has been created: {len(mask_points) + 1} : {x,y}')
+            mask_points.append((x, y))
+            if len(mask_points) == 4:
+                print('Mask saved')
+
 def spawn_debug_window():
     if cfg.show_window:
         cv2.namedWindow(cfg.debug_window_name)
@@ -133,8 +138,8 @@ def spawn_debug_window():
         if cfg.debug_window_always_on_top:
             debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
             win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
-            
-def sort_targets(frame, cfg, arch, mask) -> List[Target]:
+        
+def sort_targets(frame, cfg, arch) -> List[Target]:
     boxes_array = frame.boxes.xywh.to(arch)
     distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([frames.screen_x_center, frames.screen_y_center], device=arch)) ** 2, dim=1)
     classes_tensor = frame.boxes.cls.to(arch)
@@ -158,13 +163,6 @@ def sort_targets(frame, cfg, arch, mask) -> List[Target]:
 
         sort_indices = torch.cat((heads, other[sort_indices_other])).cpu().numpy()
         
-        if mask is not None and cfg.mask_enabled and mask_active != -32768:
-            targets = []
-            for i in sort_indices:
-                target = Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item())
-                if mask[int(target.y), int(target.x)] == 0:
-                    targets.append(target)
-            return targets
     return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
 
 def active_classes() -> List[int]:
@@ -180,6 +178,9 @@ def active_classes() -> List[int]:
 
 def init():
     global annotated_frame
+    if cfg.mask_enabled:
+        global mask_points
+        mask_points = cfg.read_mask_points()
     prev_frame_time, new_frame_time = 0, 0 if cfg.show_window and cfg.show_fps else None
     cfg_reload_prev_state = 0
     shooting_queue = []
@@ -198,19 +199,18 @@ def init():
     except Exception as e:
         print('Loading model error:\n', e)
         quit(0)
-    
-    global global_mask
-    if cfg.mask_enabled:
-        mask_points = cfg.read_mask_points()
-        if mask_points:
-            global_mask = create_mask_from_points([cfg.detection_window_width, cfg.detection_window_height], mask_points)
         
     while True:
-        cfg_reload_prev_state, mask_points = process_hotkeys(cfg_reload_prev_state)
+        cfg_reload_prev_state = process_hotkeys(cfg_reload_prev_state)
         image = frames.get_new_frame()
         result = perform_detection(model, image, clss)
         update_overlay_window(overlay) if cfg.show_overlay_detector else None
-            
+        
+        if cfg.mask_enabled and mask_active != -32768:
+            mask_color = create_mask_from_points([cfg.detection_window_width, cfg.detection_window_height], mask_points)
+            black_mask = mask_color == (0, 0, 0)
+            image[black_mask] = 0
+                
         if cfg.show_window:
             annotated_frame = image
 
@@ -226,7 +226,7 @@ def init():
                 
             if len(frame.boxes):
                 if app_pause == 0:
-                    shooting_queue = sort_targets(frame, cfg, arch, global_mask)
+                    shooting_queue = sort_targets(frame, cfg, arch)
 
                     if shooting_queue:
                         target = shooting_queue[0]
@@ -271,9 +271,6 @@ def init():
             cv2.putText(annotated_frame, f'FPS: {str(int(fps))}', (10, 80) if cfg.show_speed else (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
         if cfg.show_window:
-            if cfg.mask_enabled:
-                mask_color = cv2.cvtColor(global_mask, cv2.COLOR_GRAY2BGR)
-                annotated_frame[global_mask > 0] = cv2.addWeighted(annotated_frame[global_mask > 0], 0.5, mask_color[global_mask > 0], 0.5, 0)
             try:
                 if cfg.debug_window_scale_percent != 100:
                     height = int(cfg.detection_window_height * cfg.debug_window_scale_percent / 100)
