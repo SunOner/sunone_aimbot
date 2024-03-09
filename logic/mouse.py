@@ -267,11 +267,17 @@ class MouseThread(threading.Thread):
         
         if UpArrow:
             current_setting = self.setting_names[self.current_setting_index]
-            self.settings.adjust_setting(current_setting, 1)
+            if current_setting == 'mouse_sensitivity':
+                self.settings.adjust_setting(current_setting, 0.1)
+            else:
+                self.settings.adjust_setting(current_setting, 1)
         
         if DownArrow:
             current_setting = self.setting_names[self.current_setting_index]
-            self.settings.adjust_setting(current_setting, -1)
+            if current_setting == 'mouse_sensitivity':
+                self.settings.adjust_setting(current_setting, -0.1)
+            else:
+                self.settings.adjust_setting(current_setting, -1)
 
         if RightArrow and not self.prev_RightArrow:
             self.current_setting_index = (self.current_setting_index + 1) % len(self.setting_names)
