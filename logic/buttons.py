@@ -1,5 +1,6 @@
 class Buttons:
     KEY_CODES = {
+        'None': 0,
         'LeftMouseButton': 1,
         'RightMouseButton': 2,
         'ControlBreak': 3,

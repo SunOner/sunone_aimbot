@@ -74,7 +74,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - disable_headshot `bool`: Disable head targerting.
 
 ### Hot keys:
-- The names of all the keys are [here](https://github.com/SunOner/yolov8_aimbot/blob/main/logic/buttons.py).
+- The names of all the keys are [here](https://github.com/SunOner/yolov8_aimbot/blob/main/logic/buttons.py). Type `None` is empty button.
 - hotkey_targeting `str`: Aiming at the target. Supports multi keys, for example `hotkey_targeting = RightMouseButton,X2MouseButton`
 - hotkey_exit `str`: Exit.
 - hotkey_pause `str`: Pause AIM.

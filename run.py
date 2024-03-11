@@ -50,11 +50,11 @@ def perform_detection(model, image, clss):
         imgsz=cfg.AI_image_size,
         stream_buffer=False,
         visualize=False,
-        augment=True,
-        agnostic_nms=True,
+        augment=False,
+        agnostic_nms=False,
         save=False,
         conf=cfg.AI_conf,
-        iou=0.1,
+        iou=0.5,
         device=cfg.AI_device,
         half=False if 'cpu' in cfg.AI_device else True,
         max_det=25,
@@ -65,7 +65,7 @@ def perform_detection(model, image, clss):
         show_labels=False,
         show_conf=False,
         show=False)
-    
+
 def print_startup_messages():
     version = 0
     try:
@@ -73,7 +73,7 @@ def print_startup_messages():
             lines = f.read().split('\n')
             version = lines[0].split('=')[1]
     except:
-        print('version file is not found')
+        print('(version file is not found)')
 
     print(f'Yolov8 Aimbot is started! (Version {version})\n\n',
             'Hotkeys:\n',
@@ -86,11 +86,13 @@ def print_startup_messages():
 def process_hotkeys(cfg_reload_prev_state):
     global app_pause
     global clss
-    global mask_active
-    global mask_points
     app_pause = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_pause])
     app_reload_cfg = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_reload_config])
-    mask_active = win32api.GetAsyncKeyState(Buttons.KEY_CODES[cfg.hotkey_turn_off_mask])
+    
+    if cfg.mask_enabled:
+        global mask_active
+        global mask_points
+        mask_active = win32api.GetAsyncKeyState(Buttons.KEY_CODES[cfg.hotkey_turn_off_mask])
     
     if app_reload_cfg != cfg_reload_prev_state and app_reload_cfg in (1, 0):
         mask_points = cfg.read_mask_points()
@@ -134,11 +136,12 @@ def debug_window_click_handler(event, x, y, flags, param):
 def spawn_debug_window():
     if cfg.show_window:
         cv2.namedWindow(cfg.debug_window_name)
-        cv2.setMouseCallback(cfg.debug_window_name, debug_window_click_handler, [cfg.detection_window_width, cfg.detection_window_height])
+        if cfg.mask_enabled:
+            cv2.setMouseCallback(cfg.debug_window_name, debug_window_click_handler, [cfg.detection_window_width, cfg.detection_window_height])
         if cfg.debug_window_always_on_top:
             debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
             win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
-        
+
 def sort_targets(frame, cfg, arch) -> List[Target]:
     boxes_array = frame.boxes.xywh.to(arch)
     distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([frames.screen_x_center, frames.screen_y_center], device=arch)) ** 2, dim=1)
@@ -197,7 +200,7 @@ def init():
         model = YOLO(f'models/{cfg.AI_model_name}', task='detect')
         print_startup_messages()
     except Exception as e:
-        print('Loading model error:\n', e)
+        print('An error occurred when loading the AI model:\n', e)
         quit(0)
         
     while True:
