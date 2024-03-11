@@ -46,7 +46,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>NVIDIA CUDA:</th><td>12.1</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.20</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.26</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.4.7</td></tr></thead>
 </table>
 
@@ -103,7 +103,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - AI_model_path `str`: AI model name.
 - AI_image_size `int`: Model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
-- AI_device `int`: Device with CUDA support to run on, `AI_device=0` or `AI_device=1` or `AI_device=2`.
+- AI_device `int` or `str`: Device to run on, `0`, `1`... or `cpu`.
 - AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm and pytorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
 - AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
