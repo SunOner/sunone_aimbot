@@ -277,10 +277,10 @@ class MouseThread(threading.Thread):
         
         # By triggerbot
         if cfg.mouse_auto_shoot and cfg.mouse_triggerbot and bScope or cfg.mouse_auto_aim and bScope:
-            if cfg.mouse_native and cfg.arduino_shoot == False: # native
+            if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
                 
-            if cfg.mouse_native == False and cfg.arduino_shoot == False: #ghub
+            if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
                 self.ghub.mouse_down()
                 
             if cfg.arduino_shoot: # arduino
