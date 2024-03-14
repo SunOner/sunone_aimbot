@@ -12,7 +12,7 @@
 </div>
 
 ## Overview
-YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 20,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
+YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 25,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
 
@@ -45,8 +45,8 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Windows</th><td>10 and 11</td></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>NVIDIA CUDA:</th><td>12.1</td></tr></thead>
-  <thead><tr><th>TensorRT:</th><td>8.6.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.26</td></tr></thead>
+  <thead><tr><th>TensorRT:</th><td>9.3.0.post12.dev1</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.27</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.4.7</td></tr></thead>
 </table>
 
@@ -79,7 +79,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - hotkey_exit `str`: Exit.
 - hotkey_pause `str`: Pause AIM.
 - hotkey_reload_config `str`: Reload config.
-- hotkey_turn_off_mask `str`: Turn off exclude mask.
 
 ### Mouse:
 - mouse_dpi `int`: Mouse DPI.
@@ -92,6 +91,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse movement. If the value is False, native win32 library is used for movement.
 - mouse_triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
 - mouse_force_click `bool`: Shooting will be performed even if the sight is not located within the object.
+- mouse_arrows_settings `bool`: Allows you to smoothly change dpi, mouse_sensitivity, fov_x, fov_y in real time using the arrows on the keyboard. (left - right select option, down - up change option)
 
 ### Arduino:
 - arduino_move `bool`: Sends a command to the arduino to move the mouse.
@@ -101,52 +101,46 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 
 ### AI:
 - AI_model_path `str`: AI model name.
-- AI_image_size `int`: Model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_device `int` or `str`: Device to run on, `0`, `1`... or `cpu`.
 - AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm and pytorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
 - AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
-### Overlay:
-- show_overlay_detector `bool`: Show the detector overlay.
-- show_overlay_boxes `bool`: Show goals inside the overlay.
-- show_overlay_line `bool`: Show line from crosshair to target.
-- show_overlay_mask `bool`: Show exclude mask.
-
 ### Debug window:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
-- show_speed `bool`: Displays speed information inside the debug window.
-- show_fps `bool`: Displays FPS in the corner.
+- show_detection_speed `bool`: Displays speed information inside the debug window.
+- show_window_fps `bool`: Displays FPS in the corner.
 - show_boxes `bool`: Displays detectable objects.
 - show_labels `bool`: Displays the name of the detected object.
 - show_conf `bool`: Displays object confidence threshold for detection.
 - show_target_line `bool`: Shows the mouse finishing line.
+- show_target_prediction_line `bool`: Show mouse prediction line.
 - debug_window_always_on_top `bool`: The debug window will always be on top of other windows.
+- spawn_window_pos_x `int`: When the debugging window starts, it takes the x position.
+- spawn_window_pos_y `int`: When the debugging window starts, it takes the y position.
 - debug_window_scale_percent `int`: Adjusts the size of the debug window.
-- debug_window_name `str`: Specifies the title of the debug window.
-
-### Exclude mask:
-- mask_enabled `bool`: Enable exclude mask.
-- mask_points `str`: Saved points exclude mask. If you are playing from a third person, the character can be masked with a mask that will exclude him from targeting targets. Turn on the debugging window and select 4 points, the mask will be automatically saved in the config.
+- The names of the debugging window can be written in the file window_names.txt they will be randomly selected.
 
 ## AI Models
 - *.pt: Default AI model.
 - *.onnx: The model is optimized to run on processors.
 - *.engine: Final exported model, which is faster than the previous two.
-<br></br>
-- My .engine model was exported using specification version 8.6 (on an rtx 3080-TI graphics card). So if you were to run my .engine model on a gtx 1080 graphics card, the model would not start. You need to export it yourself. See what specification your graphics card [supports](https://ru.wikipedia.org/wiki/CUDA). So if your graphics card supports the 8.6 specification, then the model will start. The error may also occur due to the fact that I exported the model in a different version of TensorRT, it's better to just export the model yourself.
 
 ## Export .pt model to .engine
-Run in console:
+1. All commands are executed in the console window:
+2. First, go to the aimbot directory using the command:
 ```cmd
-yolo export model="models/sunxds_0.2.9.6.pt" format=engine half=true device=0 imgsz=320
+cd C:\Users\your_username\downloads\yolov8_aimbot-main
+```
+3. Then export the model from the .pt format in .engine format.
+```cmd
+yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half=True
 ```
   - `model="model_path/model_name.pt"`: Path to model.
   - `format=engine`: TensorRT model format.
   - `half=true`: Use Half-precision floating-point format.
   - `device=0`: GPU id.
   - `workspace=8`: GPU max video memory.
-  - `imgsz=320`: Model image size.
   - `verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
 
 ## Notes / Recommendations

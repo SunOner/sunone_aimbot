@@ -1,21 +1,19 @@
-import math
 import queue
 import threading
-import time
 import torch
 import win32con, win32api
 from ctypes import *
 from os import path
 import torch.nn as nn
-from logic.buttons import *
-from logic.config_watcher import *
-from run import cfg
+
+from logic.buttons import Buttons
+from logic.config_watcher import cfg
+from logic.visual import visuals
 
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import ArduinoMouse
     Arduino = ArduinoMouse()
 
-    
 class GhubMouse:
     def __init__(self):
         self.basedir = path.dirname(path.abspath(__file__))
@@ -112,7 +110,7 @@ class Settings:
     def adjust_setting(self, setting_name, delta):
         setattr(self, setting_name, getattr(self, setting_name) + delta)
         print(f'{setting_name} adjusted to {getattr(self, setting_name)}')
-        
+
 class MouseThread(threading.Thread):
     def __init__(self):
         super(MouseThread, self).__init__()
@@ -162,7 +160,8 @@ class MouseThread(threading.Thread):
     def run(self):
         while True:
             data = self.queue.get()
-            self.handle_keyboard_input()
+            if cfg.mouse_arrows_settings:
+                self.handle_keyboard_input()
             if data is None:
                 pass
             else:
@@ -174,6 +173,7 @@ class MouseThread(threading.Thread):
         bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h) if cfg.mouse_auto_shoot or cfg.mouse_triggerbot else False
         bScope = True if cfg.mouse_force_click else bScope
         x, y = self.predict_target_position(target_x, target_y)
+        x, y = self.calc_movement(x, y)
         self.move_mouse(x, y)
         self.shoot(bScope)
 
@@ -198,10 +198,11 @@ class MouseThread(threading.Thread):
 
         self.prev_x = target_x
         self.prev_y = target_y
+        
+        if cfg.show_window and cfg.show_target_prediction_line:
+            visuals.draw_predicted_position(target_x, target_y)
 
-        mouse_move_x, mouse_move_y = self.calc_movement(predicted_x, predicted_y)
-
-        return mouse_move_x, mouse_move_y
+        return predicted_x, predicted_y
     
     def calc_movement(self, target_x, target_y):
         if cfg.AI_mouse_net == False:
@@ -217,7 +218,7 @@ class MouseThread(threading.Thread):
 
             mouse_move_y = offset_y * degrees_per_pixel_y
             move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
-
+                
             return move_x, move_y
         else:
             input_data = [self.screen_width,
@@ -237,58 +238,6 @@ class MouseThread(threading.Thread):
                 move = self.model(input_tensor).cpu().numpy()
             
             return move[0], move[1]
-    
-    def Update_settings(self):
-        self.dpi = cfg.mouse_dpi
-        self.mouse_sensitivity = cfg.mouse_sensitivity
-        self.fov_x = cfg.mouse_fov_width
-        self.fov_y = cfg.mouse_fov_height
-        self.screen_width = cfg.detection_window_width
-        self.screen_height = cfg.detection_window_height
-        self.center_x = self.screen_width / 2
-        self.center_y = self.screen_height / 2
-        
-    def check_target_in_scope(self, target_x, target_y, target_w, target_h):
-        x1 = (target_x - target_w)
-        x2 = (target_x + target_w)
-        y1 = (target_y - target_h)
-        y2 = (target_y + target_h)
-
-        if (self.center_x > x1 and self.center_x < x2 and self.center_y > y1 and self.center_y < y2) :
-            return True
-        else:
-            return False
-        
-    def handle_keyboard_input(self):
-        UpArrow = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
-        DownArrow = win32api.GetAsyncKeyState(win32con.VK_DOWN) & 0x8000
-        LeftArrow = win32api.GetAsyncKeyState(win32con.VK_LEFT) & 0x8000
-        RightArrow = win32api.GetAsyncKeyState(win32con.VK_RIGHT) & 0x8000
-        
-        if UpArrow:
-            current_setting = self.setting_names[self.current_setting_index]
-            if current_setting == 'mouse_sensitivity':
-                self.settings.adjust_setting(current_setting, 0.1)
-            else:
-                self.settings.adjust_setting(current_setting, 1)
-        
-        if DownArrow:
-            current_setting = self.setting_names[self.current_setting_index]
-            if current_setting == 'mouse_sensitivity':
-                self.settings.adjust_setting(current_setting, -0.1)
-            else:
-                self.settings.adjust_setting(current_setting, -1)
-
-        if RightArrow and not self.prev_RightArrow:
-            self.current_setting_index = (self.current_setting_index + 1) % len(self.setting_names)
-            print(f'Selected setting: {self.setting_names[self.current_setting_index]}')
-
-        if LeftArrow and not self.prev_LeftArrow:
-            self.current_setting_index = (self.current_setting_index - 1) % len(self.setting_names)
-            print(f'Selected setting: {self.setting_names[self.current_setting_index]}')
-
-        self.prev_LeftArrow = LeftArrow
-        self.prev_RightArrow = RightArrow
         
     def move_mouse(self, x, y):
         if x == None or y == None:
@@ -346,3 +295,57 @@ class MouseThread(threading.Thread):
                 
             if cfg.arduino_shoot: # arduino
                 Arduino.release()
+                
+    def check_target_in_scope(self, target_x, target_y, target_w, target_h):
+        x1 = (target_x - target_w)
+        x2 = (target_x + target_w)
+        y1 = (target_y - target_h)
+        y2 = (target_y + target_h)
+
+        if (self.center_x > x1 and self.center_x < x2 and self.center_y > y1 and self.center_y < y2) :
+            return True
+        else:
+            return False
+
+    def Update_settings(self):
+        self.dpi = cfg.mouse_dpi
+        self.mouse_sensitivity = cfg.mouse_sensitivity
+        self.fov_x = cfg.mouse_fov_width
+        self.fov_y = cfg.mouse_fov_height
+        self.screen_width = cfg.detection_window_width
+        self.screen_height = cfg.detection_window_height
+        self.center_x = self.screen_width / 2
+        self.center_y = self.screen_height / 2
+
+    def handle_keyboard_input(self):
+        UpArrow = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
+        DownArrow = win32api.GetAsyncKeyState(win32con.VK_DOWN) & 0x8000
+        LeftArrow = win32api.GetAsyncKeyState(win32con.VK_LEFT) & 0x8000
+        RightArrow = win32api.GetAsyncKeyState(win32con.VK_RIGHT) & 0x8000
+        
+        if UpArrow:
+            current_setting = self.setting_names[self.current_setting_index]
+            if current_setting == 'mouse_sensitivity':
+                self.settings.adjust_setting(current_setting, 0.1)
+            else:
+                self.settings.adjust_setting(current_setting, 1)
+        
+        if DownArrow:
+            current_setting = self.setting_names[self.current_setting_index]
+            if current_setting == 'mouse_sensitivity':
+                self.settings.adjust_setting(current_setting, -0.1)
+            else:
+                self.settings.adjust_setting(current_setting, -1)
+
+        if RightArrow and not self.prev_RightArrow:
+            self.current_setting_index = (self.current_setting_index + 1) % len(self.setting_names)
+            print(f'Selected setting: {self.setting_names[self.current_setting_index]}')
+
+        if LeftArrow and not self.prev_LeftArrow:
+            self.current_setting_index = (self.current_setting_index - 1) % len(self.setting_names)
+            print(f'Selected setting: {self.setting_names[self.current_setting_index]}')
+
+        self.prev_LeftArrow = LeftArrow
+        self.prev_RightArrow = RightArrow
+                
+mouse = MouseThread()

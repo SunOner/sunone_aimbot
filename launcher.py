@@ -33,10 +33,28 @@ class SettingsGUI:
         self.update_config()
 
         config_file_path = 'config.ini'
-
+        
         try:
+            with open(config_file_path, 'r') as configfile:
+                lines = configfile.readlines()
+
             with open(config_file_path, 'w') as configfile:
-                self.config.write(configfile)
+                current_section = None
+                for line in lines:
+                    stripped_line = line.strip()
+                    if stripped_line.startswith('[') and stripped_line.endswith(']'):
+                        current_section = stripped_line[1:-1]
+                        configfile.write(line)
+                    elif '=' in line and not stripped_line.startswith('#') and current_section:
+                        key, _ = map(str.strip, line.split('=', 1))
+                        if self.config.has_option(current_section, key):
+                            value = self.config.get(current_section, key)
+                            configfile.write(f'{key} = {value}\n')
+                        else:
+                            configfile.write(line)
+                    else:
+                        configfile.write(line)
+
             print('Config saved successfully!')
         except Exception as e:
             print(f'Error writing to config file: {e}')
@@ -75,7 +93,6 @@ class SettingsGUI:
                     hotkey_options = []
                     for i in logic.buttons.Buttons.KEY_CODES:
                         hotkey_options.append(i)
-
                     var = ttk.Combobox(tab, values=hotkey_options, state="readonly")
                     var.set(self.config.get(section, option))
                 elif self.config.get(section, option).lower() in ['true', 'false']:

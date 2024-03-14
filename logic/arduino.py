@@ -21,8 +21,8 @@ class ArduinoMouse:
         try:
             self.serial_port.open()
             print(f'Arduino: Connected! Port: {self.serial_port.port}')
-        except:
-            print('Arduino: Not Connected...')
+        except Exception as e:
+            print(f'Arduino: Not Connected...\n{e}')
             self.checks()
 
         if not self.serial_port.is_open:
