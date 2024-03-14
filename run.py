@@ -29,7 +29,7 @@ def perform_detection(model, image, clss):
         source=image,
         stream=True,
         cfg='logic/game.yaml',
-        imgsz=cfg.AI_image_size,
+        imgsz=480,
         stream_buffer=False,
         visualize=False,
         augment=False,
