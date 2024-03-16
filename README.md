@@ -37,7 +37,7 @@ Before you get started, make sure you have the following prerequisites installed
   - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
   - [Discord сервер](https://discord.gg/sunone)
 <br></br>
-- To launch the aimbot after all installations, type `py run.py` or `py launcher.py` in cmd.
+- To launch the aimbot after all installations, type `py run.py` or `py launcher.py` to open gui settings.
 
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
