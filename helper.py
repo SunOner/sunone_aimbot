@@ -185,7 +185,7 @@ def Update_yolov8_aimbot():
         delete_files_in_folder('./media')
     except:
         pass
-    base_dir_files = ['./.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', './run.py', './requirements.txt', './launcher.py']
+    base_dir_files = ['./.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', './run.py', './requirements.txt', './launcher.py', 'window_names.txt',]
     for file in base_dir_files:
         try:
             os.remove(file)
@@ -219,7 +219,6 @@ def Update_yolov8_aimbot():
         pass
     
     print("Downloading repo. Please wait...")
-    
     download_file('https://github.com/SunOner/yolov8_aimbot/archive/refs/heads/main.zip', 'main.zip')
     print('Unpacking...')
     with zipfile.ZipFile(r'./main.zip', 'r') as zip_ref:
@@ -227,6 +226,7 @@ def Update_yolov8_aimbot():
     print('Deleting downloaded zip...')
     os.remove(r'./main.zip')
     
+    # make new dirs
     if os.path.isdir('./logic') == False:
         os.makedirs('./logic')
         
@@ -244,6 +244,7 @@ def Update_yolov8_aimbot():
     if os.path.isdir('./models') == False:
         os.makedirs('./models')
 
+    # move new files
     temp_aimbot_files = [
         './.gitattributes', './.gitignore', './config.ini', './helper.py', './LICENSE', './README.md', './run.py', './requirements.txt', './version', 'launcher.py', 'window_names.txt', 
         './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/buttons.py', './logic/mouse.py', './logic/visual.py',
