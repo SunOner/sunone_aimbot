@@ -34,4 +34,4 @@
 <br></br>
 12. Попробуйте запустить aimbot. Введите `python run.py`. Если aimbot работает, экспортируйте модель .pt в .engine.
 <br></br>
-13. Введите `yolo export model="models/sunxds_0.2.9.6.pt" format=engine half=true device=0 imgsz=320`
+13. Введите `yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half=True`
