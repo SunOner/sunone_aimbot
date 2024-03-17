@@ -47,7 +47,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>CUDA:</th><td>12.1 or 12.4 (for trt 9.3.0)</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>8.6.1.6 or 9.3.0.post12.dev1</td></tr></thead>
   <thead><tr><th>Ultralytics:</th><td>8.1.29</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.4.7</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.4.8</td></tr></thead>
 </table>
 
 ## Options
