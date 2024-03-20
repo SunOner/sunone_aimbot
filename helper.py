@@ -347,22 +347,22 @@ def Test_detections():
         print('Cuda is not supported\nTrying to reinstall torch with GPU support...')
         force_reinstall_torch()
         
-    model = YOLO('models/{}'.format(cfg.AI_model_path), task='detect')
+    model = YOLO('models/{}'.format(cfg.AI_model_name), task='detect')
     cap = cv2.VideoCapture('media/tests/test_det.mp4')
-    cv2.namedWindow('Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size))
-    debug_window_hwnd = win32gui.FindWindow(None, 'Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size))
+    cv2.namedWindow('Model: {0} imgsz: {1}'.format(cfg.AI_model_name, 480))
+    debug_window_hwnd = win32gui.FindWindow(None, 'Model: {0} imgsz: {1}'.format(cfg.AI_model_name, 480))
     win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
     
     while cap.isOpened():
         success, frame = cap.read()
 
         if success:
-            result = model(frame, stream=False, show=False, imgsz=cfg.AI_image_size, device=cfg.AI_device, verbose=False)
+            result = model(frame, stream=False, show=False, imgsz=480, device=cfg.AI_device, verbose=False, conf=0.40)
             annotated_frame = result[0].plot()
 
             cv2.putText(annotated_frame, 'TEST 1234567890', (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
             
-            cv2.imshow('Model: {0} imgsz: {1}'.format(cfg.AI_model_path, cfg.AI_image_size), annotated_frame)
+            cv2.imshow('Model: {0} imgsz: {1}'.format(cfg.AI_model_name, 480), annotated_frame)
             if cv2.waitKey(30) & 0xFF == ord("q"):
                 break
         else:
@@ -419,8 +419,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        from logic.config_watcher import Config
-        cfg = Config()
+        from logic.config_watcher import cfg
     except:
         print('File config_watcher.py not found, reinstalling...')
         Update_yolov8_aimbot()
