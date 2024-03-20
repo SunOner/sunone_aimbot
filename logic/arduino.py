@@ -90,11 +90,11 @@ class ArduinoMouse:
                 print('Arduino: Arduino IDE is open, close IDE and restart app.')
                 break
             
-        documents_path = os.path.join(os.environ['USERPROFILE'], 'Documents')
-        arduino_libraries_path = os.path.join(documents_path, 'Arduino', 'libraries')
-        USB_Host_Shield_library_path = self.find_library_directory(arduino_libraries_path, 'USB_Host_Shield')
-        hid_settings = os.path.join(USB_Host_Shield_library_path, 'settings.h')
         try:
+            documents_path = os.path.join(os.environ['USERPROFILE'], 'Documents')
+            arduino_libraries_path = os.path.join(documents_path, 'Arduino', 'libraries')
+            USB_Host_Shield_library_path = self.find_library_directory(arduino_libraries_path, 'USB_Host_Shield')
+            hid_settings = os.path.join(USB_Host_Shield_library_path, 'settings.h')
             with open(hid_settings, 'r') as file:
                 for line in file:
                     if line.startswith('#define ENABLE_UHS_DEBUGGING'):
