@@ -99,24 +99,9 @@ class Mouse_net(nn.Module):
         x = torch.relu(self.fc3(x))
         x = self.fc4(x)
         return x
-    
-class Settings:
-    def __init__(self, dpi, mouse_sensitivity, fov_x, fov_y):
-        self.dpi = dpi
-        self.mouse_sensitivity = mouse_sensitivity
-        self.fov_x = fov_x
-        self.fov_y = fov_y
 
-    def adjust_setting(self, setting_name, delta):
-        setattr(self, setting_name, getattr(self, setting_name) + delta)
-        print(f'{setting_name} adjusted to {getattr(self, setting_name)}')
-
-class MouseThread(threading.Thread):
+class MouseThread():
     def __init__(self):
-        super(MouseThread, self).__init__()
-        self.queue = queue.Queue(maxsize=1)
-        self.daemon = True
-        
         self.dpi = cfg.mouse_dpi
         self.mouse_sensitivity = cfg.mouse_sensitivity
         self.fov_x = cfg.mouse_fov_width
@@ -129,13 +114,6 @@ class MouseThread(threading.Thread):
         self.prev_y = 0
         
         self.arch = f'cuda:{cfg.AI_device}'
-        
-        self.settings = Settings(self.dpi, self.mouse_sensitivity, self.fov_x, self.fov_y)
-        self.setting_names = ['dpi', 'mouse_sensitivity', 'fov_x', 'fov_y']
-        self.current_setting_index = 0
-    
-        self.prev_LeftArrow = False
-        self.prev_RightArrow = False
         
         if cfg.AI_enable_AMD:
             self.arch = f'hip:{cfg.AI_device}'
@@ -152,20 +130,9 @@ class MouseThread(threading.Thread):
                 self.model.load_state_dict(torch.load('mouse_net.pth', map_location=self.device))
             except Exception as e:
                 print(e)
-                print('Please train mouse_net model. Or download example mouse_net.pth model from repository and place in base folder. Instruction here: https://github.com/SunOner/mouse_net')
+                print('Please train mouse_net model, or download trained mouse_net.pth model from repository and place in base folder. Instruction here: https://github.com/SunOner/mouse_net')
                 exit()
             self.model.eval()
-        self.start()
-
-    def run(self):
-        while True:
-            data = self.queue.get()
-            if cfg.mouse_arrows_settings:
-                self.handle_keyboard_input()
-            if data is None:
-                pass
-            else:
-                self.process_data(data)
 
     def process_data(self, data):
         target_x, target_y, target_w, target_h = data
@@ -198,9 +165,6 @@ class MouseThread(threading.Thread):
 
         self.prev_x = target_x
         self.prev_y = target_y
-        
-        if cfg.show_window and cfg.show_target_prediction_line:
-            visuals.draw_predicted_position(target_x, target_y)
 
         return predicted_x, predicted_y
     
@@ -218,6 +182,9 @@ class MouseThread(threading.Thread):
 
             mouse_move_y = offset_y * degrees_per_pixel_y
             move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+            
+            if cfg.show_window and cfg.show_target_prediction_line:
+                visuals.draw_predicted_position(target_x, target_y)
                 
             return move_x, move_y
         else:
@@ -316,36 +283,5 @@ class MouseThread(threading.Thread):
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
         self.center_y = self.screen_height / 2
-
-    def handle_keyboard_input(self):
-        UpArrow = win32api.GetAsyncKeyState(win32con.VK_UP) & 0x8000
-        DownArrow = win32api.GetAsyncKeyState(win32con.VK_DOWN) & 0x8000
-        LeftArrow = win32api.GetAsyncKeyState(win32con.VK_LEFT) & 0x8000
-        RightArrow = win32api.GetAsyncKeyState(win32con.VK_RIGHT) & 0x8000
-        
-        if UpArrow:
-            current_setting = self.setting_names[self.current_setting_index]
-            if current_setting == 'mouse_sensitivity':
-                self.settings.adjust_setting(current_setting, 0.1)
-            else:
-                self.settings.adjust_setting(current_setting, 1)
-        
-        if DownArrow:
-            current_setting = self.setting_names[self.current_setting_index]
-            if current_setting == 'mouse_sensitivity':
-                self.settings.adjust_setting(current_setting, -0.1)
-            else:
-                self.settings.adjust_setting(current_setting, -1)
-
-        if RightArrow and not self.prev_RightArrow:
-            self.current_setting_index = (self.current_setting_index + 1) % len(self.setting_names)
-            print(f'Selected setting: {self.setting_names[self.current_setting_index]}')
-
-        if LeftArrow and not self.prev_LeftArrow:
-            self.current_setting_index = (self.current_setting_index - 1) % len(self.setting_names)
-            print(f'Selected setting: {self.setting_names[self.current_setting_index]}')
-
-        self.prev_LeftArrow = LeftArrow
-        self.prev_RightArrow = RightArrow
                 
 mouse = MouseThread()

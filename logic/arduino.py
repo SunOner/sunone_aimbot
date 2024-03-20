@@ -89,12 +89,13 @@ class ArduinoMouse:
             if process.info['name'] == 'Arduino IDE.exe':
                 print('Arduino: Arduino IDE is open, close IDE and restart app.')
                 break
-            
+        
         try:
             documents_path = os.path.join(os.environ['USERPROFILE'], 'Documents')
             arduino_libraries_path = os.path.join(documents_path, 'Arduino', 'libraries')
             USB_Host_Shield_library_path = self.find_library_directory(arduino_libraries_path, 'USB_Host_Shield')
             hid_settings = os.path.join(USB_Host_Shield_library_path, 'settings.h')
+            
             with open(hid_settings, 'r') as file:
                 for line in file:
                     if line.startswith('#define ENABLE_UHS_DEBUGGING'):
@@ -104,5 +105,5 @@ class ArduinoMouse:
                             if value == '1':
                                 print(f'Arduino: Disable `ENABLE_UHS_DEBUGGING` setting in {hid_settings} file.')
                                 break
-        except: # TODO
-            pass
+        except Exception as e:
+            print(f'Arduino: USB_Host_Shield lib not found.\nFull message:\n{e}')

@@ -48,7 +48,6 @@ class Config():
         self.mouse_ghub = self.config_Mouse.getboolean('mouse_ghub')
         self.mouse_triggerbot = self.config_Mouse.getboolean('mouse_triggerbot')
         self.mouse_force_click = self.config_Mouse.getboolean('mouse_force_click')
-        self.mouse_arrows_settings = self.config_Mouse.getboolean('mouse_arrows_settings')
         # Arduino
         self.config_Arduino = self.config['Arduino']
         self.arduino_move = self.config_Arduino.getboolean('arduino_move')

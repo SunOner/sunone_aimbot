@@ -16,7 +16,7 @@ class Capture():
         if cfg.Bettercam_capture:
             self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id, output_idx=cfg.bettercam_gpu_id, output_color="BGR", max_buffer_len=64, region=self.Calculate_screen_offset())
             if self.bc.is_capturing == False:
-                self.bc.start(self.Calculate_screen_offset(), target_fps=cfg.bettercam_capture_fps)
+                self.bc.start(region=self.Calculate_screen_offset(), target_fps=cfg.bettercam_capture_fps)
         
         if cfg.Obs_capture:
             if cfg.Obs_camera_id == 'auto':
@@ -43,7 +43,7 @@ class Capture():
                 print('OBS Virtual Camera not found')
                 exit(0)
     
-    def reload_capture(self):
+    def restart(self):
         if cfg.Bettercam_capture and self.prev_detection_window_height != cfg.detection_window_height or cfg.Bettercam_capture and self.prev_detection_window_width != cfg.detection_window_width or cfg.Bettercam_capture and self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps:
             self.bc.stop()
             del self.bc
@@ -114,9 +114,9 @@ class Capture():
         if cfg.bettercam_capture_fps >= 120:
             print('WARNING: A large number of frames per second can affect the behavior of automatic aiming. (Shaking).')
         if cfg.detection_window_width >= 600:
-            print('WARNING: The object detector window is more than 700 pixels wide, and a large object detector window can have a bad effect on performance.')
+            print('WARNING: The object detector window is more than 600 pixels wide, and a large object detector window can have a bad effect on performance.')
         if cfg.detection_window_height >= 600:
-            print('WARNING: The object detector window is more than 700 pixels in height, a large object detector window can have a bad effect on performance.')
+            print('WARNING: The object detector window is more than 600 pixels in height, a large object detector window can have a bad effect on performance.')
         if cfg.arduino_move == False:
             print('WARNING: Using standard libraries for mouse moving such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
         if cfg.arduino_shoot == False and cfg.mouse_auto_shoot:
