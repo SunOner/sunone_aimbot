@@ -90,17 +90,19 @@ class ArduinoMouse:
                 print('Arduino: Arduino IDE is open, close IDE and restart app.')
                 break
             
-        documents_path = os.path.join(os.environ['USERPROFILE'], 'Documents')
-        arduino_libraries_path = os.path.join(documents_path, 'Arduino', 'libraries')
-        USB_Host_Shield_library_path = self.find_library_directory(arduino_libraries_path, 'USB_Host_Shield')
-        hid_settings = os.path.join(USB_Host_Shield_library_path, 'settings.h')
-        
-        with open(hid_settings, 'r') as file:
-            for line in file:
-                if line.startswith('#define ENABLE_UHS_DEBUGGING'):
-                    parts = line.split()
-                    if len(parts) == 3 and parts[1] == 'ENABLE_UHS_DEBUGGING':
-                        value = parts[2]
-                        if value == '1':
-                            print(f'Arduino: Disable `ENABLE_UHS_DEBUGGING` setting in {hid_settings} file.')
-                            break
+        try:
+            documents_path = os.path.join(os.environ['USERPROFILE'], 'Documents')
+            arduino_libraries_path = os.path.join(documents_path, 'Arduino', 'libraries')
+            USB_Host_Shield_library_path = self.find_library_directory(arduino_libraries_path, 'USB_Host_Shield')
+            hid_settings = os.path.join(USB_Host_Shield_library_path, 'settings.h')
+            with open(hid_settings, 'r') as file:
+                for line in file:
+                    if line.startswith('#define ENABLE_UHS_DEBUGGING'):
+                        parts = line.split()
+                        if len(parts) == 3 and parts[1] == 'ENABLE_UHS_DEBUGGING':
+                            value = parts[2]
+                            if value == '1':
+                                print(f'Arduino: Disable `ENABLE_UHS_DEBUGGING` setting in {hid_settings} file.')
+                                break
+        except: # TODO
+            pass
