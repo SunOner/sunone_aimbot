@@ -91,7 +91,6 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse movement. If the value is False, native win32 library is used for movement.
 - mouse_triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
 - mouse_force_click `bool`: Shooting will be performed even if the sight is not located within the object.
-- mouse_arrows_settings `bool`: Allows you to smoothly change dpi, mouse_sensitivity, fov_x, fov_y in real time using the arrows on the keyboard. (left - right select option, down - up change option)
 
 ### Arduino:
 - arduino_move `bool`: Sends a command to the arduino to move the mouse.
