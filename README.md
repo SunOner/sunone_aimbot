@@ -46,8 +46,8 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.1 or 12.4 (for trt 9.3.0)</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>8.6.1.6 or 9.3.0.post12.dev1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.30</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.4.9</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.34</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.5.0</td></tr></thead>
 </table>
 
 ## Options
@@ -86,11 +86,13 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - mouse_fov_width  `int`: The current horizontal value of the viewing angle in the game.
 - mouse_fov_height  `int`: The current vertical value of the viewing angle in the game.
 - mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
-- mouse_auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse movement. If the value is False, native win32 library is used for movement.
-- mouse_triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
-- mouse_force_click `bool`: Shooting will be performed even if the sight is not located within the object.
+
+### Shooting:
+- auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
+- triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
+- force_click `bool`: Shooting will be performed even if the sight is not located within the object.
 
 ### Arduino:
 - arduino_move `bool`: Sends a command to the arduino to move the mouse.
@@ -99,7 +101,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - arduino_baudrate `int`: Custom Arduino baudrate.
 
 ### AI:
-- AI_model_path `str`: AI model name.
+- AI_model_name `str`: AI model name.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_device `int` or `str`: Device to run on, `0`, `1`... or `cpu`.
 - AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm and pytorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
