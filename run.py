@@ -1,15 +1,11 @@
 from ultralytics import YOLO
 import torch
-import win32api
 
 from logic.config_watcher import cfg
 from logic.capture import capture
 from logic.visual import visuals
 from logic.frame_parser import frameParser
 from logic.hotkeys_watcher import hotkeys_watcher
-    
-mask_points = []
-annotated_frame = None
 
 @torch.no_grad()
 def perform_detection(model, image, clss):

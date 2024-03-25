@@ -13,13 +13,13 @@ class Config():
         self.config_Detection_window = self.config['Detection window']
         self.detection_window_width = int(self.config_Detection_window['detection_window_width'])
         self.detection_window_height = int(self.config_Detection_window['detection_window_height'])
-        # Capture Methods Bettercam
+        # Capture Method Bettercam
         self.config_Bettercam_Capture = self.config['Capture Methods']
         self.Bettercam_capture = self.config_Bettercam_Capture.getboolean('Bettercam_capture')
         self.bettercam_capture_fps = int(self.config_Bettercam_Capture['bettercam_capture_fps'])
         self.bettercam_monitor_id = int(self.config_Bettercam_Capture['bettercam_monitor_id'])
         self.bettercam_gpu_id = int(self.config_Bettercam_Capture['bettercam_gpu_id'])
-        # Capture Methods Obs
+        # Capture Method Obs
         self.config_Obs_capture = self.config['Capture Methods']
         self.Obs_capture = self.config_Obs_capture.getboolean('Obs_capture')
         self.Obs_camera_id = str(self.config_Obs_capture['Obs_camera_id'])
@@ -43,11 +43,13 @@ class Config():
         self.mouse_fov_width = int(self.config_Mouse['mouse_fov_width'])
         self.mouse_fov_height = int(self.config_Mouse['mouse_fov_height'])
         self.mouse_lock_target = self.config_Mouse.getboolean('mouse_lock_target')
-        self.mouse_auto_shoot = self.config_Mouse.getboolean('mouse_auto_shoot')
         self.mouse_auto_aim = self.config_Mouse.getboolean('mouse_auto_aim')
         self.mouse_ghub = self.config_Mouse.getboolean('mouse_ghub')
-        self.mouse_triggerbot = self.config_Mouse.getboolean('mouse_triggerbot')
-        self.mouse_force_click = self.config_Mouse.getboolean('mouse_force_click')
+        # Shooting
+        self.config_Shooting = self.config['Shooting']
+        self.auto_shoot = self.config_Shooting.getboolean('auto_shoot')
+        self.triggerbot = self.config_Shooting.getboolean('triggerbot')
+        self.force_click = self.config_Shooting.getboolean('force_click')
         # Arduino
         self.config_Arduino = self.config['Arduino']
         self.arduino_move = self.config_Arduino.getboolean('arduino_move')

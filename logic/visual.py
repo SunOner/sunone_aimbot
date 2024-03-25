@@ -23,6 +23,8 @@ class Visuals(threading.Thread):
             self.draw_speed_data = None
             self.draw_predicted_position_data = None
             
+            self.cls_model_data = {0:'player',1:'bot',2:'weapon',3:'outline',4:'dead_body',5:'hideout_target_human',6:'hideout_target_balls',7:'head',8:'smoke',9:'fire'}
+            
             self.start()
     
     def run(self):
@@ -38,8 +40,7 @@ class Visuals(threading.Thread):
             if self.draw_line_data is not None and len(self.draw_line_data):
                 cv2.line(self.image, (capture.screen_x_center, capture.screen_y_center), (int(self.draw_line_data[0]), int(self.draw_line_data[1])), (0, 255, 255), 2)
             
-            if self.draw_boxes_data is not None and len(self.draw_boxes_data):
-                class_labels = {0:'player',1:'bot',2:'weapon',3:'outline',4:'dead_body',5:'hideout_target_human',6:'hideout_target_balls',7:'head',8:'smoke',9:'fire'}
+            if self.draw_boxes_data is not None and len(self.draw_boxes_data): 
 
                 if cfg.show_boxes: 
                     for item in self.draw_boxes_data:
@@ -48,7 +49,7 @@ class Visuals(threading.Thread):
                         for xyxy, cls, conf in zip(item.xyxy, item.cls, item.conf):
                             x0, y0, x1, y1 = map(int, map(torch.Tensor.item, xyxy))
                             cv2.rectangle(self.image, (x0, y0), (x1, y1), (0, 200, 0), 2)
-                            str_cls = class_labels.get(cls.item(), '')
+                            str_cls = self.cls_model_data.get(cls.item(), '')
                             if cfg.show_labels and not cfg.show_conf:
                                 cv2.putText(self.image, str_cls, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
                             if cfg.show_conf:

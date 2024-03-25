@@ -13,6 +13,8 @@ class ArduinoMouse:
         self.serial_port.timeout = 0
         self.serial_port.write_timeout = 0
         
+        self.logical_min_max = 127
+        
         if self.cfg.arduino_port == 'auto':
             self.serial_port.port = self.__detect_port()
         else:
@@ -53,9 +55,9 @@ class ArduinoMouse:
         values = []
         sign = -1 if value < 0 else 1
 
-        while abs(value) > 127:
-            values.append(sign * 127)
-            value -= sign * 127
+        while abs(value) > self.logical_min_max:
+            values.append(sign * self.logical_min_max)
+            value -= sign * self.logical_min_max
 
         values.append(value)
 
@@ -107,3 +109,5 @@ class ArduinoMouse:
                                 break
         except Exception as e:
             print(f'Arduino: USB_Host_Shield lib not found.\nFull message:\n{e}')
+            
+arduino = ArduinoMouse()

@@ -119,7 +119,7 @@ class Capture():
             print('WARNING: The object detector window is more than 600 pixels in height, a large object detector window can have a bad effect on performance.')
         if cfg.arduino_move == False:
             print('WARNING: Using standard libraries for mouse moving such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
-        if cfg.arduino_shoot == False and cfg.mouse_auto_shoot:
+        if cfg.arduino_shoot == False and cfg.auto_shoot:
             print('WARNING: Using standard libraries for mouse shooting such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.')
         if cfg.AI_conf <= 0.15:
             print('WARNING: A small value of `AI_conf ` can lead to a large number of false positives.')

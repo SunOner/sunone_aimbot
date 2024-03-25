@@ -1,4 +1,3 @@
-from typing import List
 import torch
 
 from logic.config_watcher import cfg
@@ -21,7 +20,7 @@ class FrameParser():
     def parse(self, result):
         for frame in result:
             if len(frame.boxes):
-                target = self.sort_targets(frame, cfg)[0]
+                target = self.sort_targets(frame, cfg)
                 
                 mouse.process_data((target.x, target.y, target.w, target.h))
 
@@ -33,36 +32,30 @@ class FrameParser():
                     if cfg.show_target_prediction_line:
                         visuals.draw_predicted_position(target.x, target.y)
             else:
+                if cfg.auto_shoot or cfg.triggerbot:
+                    mouse.shoot(False) # release shooting buttons
                 pass
             
             if cfg.show_window and cfg.show_detection_speed == True:
                 visuals.draw_speed(frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
                 
-    def sort_targets(self, frame, cfg) -> List[Target]:
+    def sort_targets(self, frame, cfg) -> Target:
         boxes_array = frame.boxes.xywh.to(self.arch)
         distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([capture.screen_x_center, capture.screen_y_center], device=self.arch)) ** 2, dim=1)
         classes_tensor = frame.boxes.cls.to(self.arch)
 
         if not cfg.disable_headshot:
-            score = distances_sq + 10000 * (classes_tensor != 7).float()
-            sort_indices = torch.argsort(score).cpu().numpy()
-        else:
-            heads = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
-            other = torch.nonzero(classes_tensor != 7, as_tuple=False).squeeze(1)
-
-            if len(heads) > 0:
-                heads_distances_sq = distances_sq[heads]
-                sort_heads = torch.argsort(heads_distances_sq)
-                heads = heads[sort_heads]
+            head_indices = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
+            if len(head_indices) > 0:
+                head_distances_sq = distances_sq[head_indices]
+                nearest_head_idx = head_indices[torch.argmin(head_distances_sq)]
+                return Target(*boxes_array[nearest_head_idx, :4].cpu().numpy(), classes_tensor[nearest_head_idx].item())
             else:
-                sort_heads = torch.tensor([], dtype=torch.int64, device=self.arch)
-
-            other_distances_sq = distances_sq[other]
-            sort_indices_other = torch.argsort(other_distances_sq)
-
-            sort_indices = torch.cat((heads, other[sort_indices_other])).cpu().numpy()
-            
-        return [Target(*boxes_array[i, :4].cpu().numpy(), classes_tensor[i].item()) for i in sort_indices]
+                nearest_idx = torch.argmin(distances_sq)
+                return Target(*boxes_array[nearest_idx, :4].cpu().numpy(), classes_tensor[nearest_idx].item())
+        else:
+            nearest_idx = torch.argmin(distances_sq)
+            return Target(*boxes_array[nearest_idx, :4].cpu().numpy(), classes_tensor[nearest_idx].item())
     
     def get_arch(self):
         if cfg.AI_enable_AMD:
