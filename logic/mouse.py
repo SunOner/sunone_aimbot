@@ -10,7 +10,6 @@ import torch.nn as nn
 from logic.buttons import Buttons
 from logic.config_watcher import cfg
 from logic.visual import visuals
-# from logic.shooting_thread import shooting
 
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import arduino
