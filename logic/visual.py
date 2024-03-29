@@ -17,7 +17,8 @@ class Visuals(threading.Thread):
             self.name = 'Visuals'
             
             self.image = None
-
+            self.interpolation = cv2.INTER_NEAREST
+            
             self.draw_line_data = None
             self.draw_boxes_data = None
             self.draw_speed_data = None
@@ -76,7 +77,7 @@ class Visuals(threading.Thread):
                     width = int(cfg.detection_window_width * cfg.debug_window_scale_percent / 100)
                     dim = (width, height)
                     cv2.resizeWindow(cfg.debug_window_name, dim)
-                    resised = cv2.resize(self.image, dim, cv2.INTER_NEAREST)
+                    resised = cv2.resize(self.image, dim, self.interpolation)
                     cv2.imshow(cfg.debug_window_name, resised)
                     self.clear()
                 else:
