@@ -42,12 +42,12 @@ Before you get started, make sure you have the following prerequisites installed
 ## Tested Environment
 ### The YOLOv8 Aimbot has been tested on the following environment:
 <table>
-  <thead><tr><th>Windows</th><td>10 and 11</td></thead>
+  <thead><tr><th>Windows</th><td>10 and 11(priority)</td></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
-  <thead><tr><th>CUDA:</th><td>12.1 or 12.4 (for trt 9.3.0)</td></tr></thead>
-  <thead><tr><th>TensorRT:</th><td>8.6.1.6 or 9.3.0.post12.dev1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.34</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.5.0</td></tr></thead>
+  <thead><tr><th>CUDA:</th><td>12.1 or 12.4 (for trt 10)</td></tr></thead>
+  <thead><tr><th>TensorRT:</th><td>8.6.1.6 or 10.0</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.42</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.5.1</td></tr></thead>
 </table>
 
 ## Options
