@@ -44,10 +44,10 @@ Before you get started, make sure you have the following prerequisites installed
 <table>
   <thead><tr><th>Windows</th><td>10 and 11(priority)</td></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
-  <thead><tr><th>CUDA:</th><td>12.1 or 12.4 (for trt 10)</td></tr></thead>
-  <thead><tr><th>TensorRT:</th><td>8.6.1.6 or 10.0</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.42</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.5.1</td></tr></thead>
+  <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
+  <thead><tr><th>TensorRT:</th><td>10.0</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.1.46</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.5.2</td></tr></thead>
 </table>
 
 ## Options
@@ -102,6 +102,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 
 ### AI:
 - AI_model_name `str`: AI model name.
+- AI_model_image_size `int`: AI model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_device `int` or `str`: Device to run on, `0`, `1`... or `cpu`.
 - AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm and pytorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
