@@ -59,6 +59,7 @@ class Config():
         # AI
         self.config_AI = self.config['AI']
         self.AI_model_name = str(self.config_AI['AI_model_name'])
+        self.ai_model_image_size = int(self.config_AI['ai_model_image_size'])
         self.AI_conf = float(self.config_AI['AI_conf'])
         self.AI_device = str(self.config_AI['AI_device'])
         self.AI_enable_AMD = self.config_AI.getboolean('AI_enable_AMD')
