@@ -253,7 +253,7 @@ def Update_yolov8_aimbot():
         './media/environment_variables_path.png', './media/one.gif', './media/python.png', './media/tests/test_det.mp4',
         './docs/en/helper_en.md', './docs/en/install_guide_en.md', './docs/en/questions_en.md',
         './docs/ru/helper_ru.md', './docs/ru/install_guide_ru.md', './docs/ru/questions_ru.md',
-        './models/sunxds_0.2.9.6.pt' ]
+        './models/sunxds_0.4.1.pt' ]
 
     for temp_file in temp_aimbot_files:
         try:
@@ -277,7 +277,7 @@ def find_cuda_path():
     for key, value in os.environ.items():
         if key == 'PATH':
             for path_string in value.split(';'):
-                if r'CUDA' in path_string and r'12.1' in path_string:
+                if r'CUDA' in path_string and r'12.4' in path_string:
                     cuda_paths.append(path_string)
 
     if len(cuda_paths):
@@ -301,19 +301,19 @@ def find_tensorrt_path():
 def Install_TensorRT():
     cuda = find_cuda_path()
     if cuda is not None:
-        if not os.path.isfile('TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip') and os.path.isdir('TensorRT-8.6.1.6') == False:
-            print('TensorRT in not downloaded\nDownloading TensorRT 8.6.1.6...')
-            download_file('https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/secure/8.6.1/zip/TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip', 'TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip')
+        if not os.path.isfile('TensorRT-10.0.0.6.Windows10.win10.cuda-12.4.zip') and os.path.isdir('TensorRT-10.0.0.6') == False:
+            print('TensorRT in not downloaded\nDownloading TensorRT...')
+            download_file('https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/10.0.0/zip/TensorRT-10.0.0.6.Windows10.win10.cuda-12.4.zip', 'TensorRT-10.0.0.6.Windows10.win10.cuda-12.4.zip')
         
-        if not os.path.isdir('TensorRT-8.6.1.6'):
+        if not os.path.isdir('TensorRT-10.0.0.6'):
             print('Unpacking the TensorRT archive, please wait...')
-            with zipfile.ZipFile(r'./TensorRT-8.6.1.6.Windows10.x86_64.cuda-12.0.zip', 'r') as zip_ref:
+            with zipfile.ZipFile(r'./TensorRT-10.0.0.6.Windows10.win10.cuda-12.4.zip', 'r') as zip_ref:
                 zip_ref.extractall('./')
         
-        os.system('pip install ./TensorRT-8.6.1.6/python/tensorrt-8.6.1-cp311-none-win_amd64.whl')
+        os.system('pip install ./TTensorRT-10.0.0.6/python/tensorrt-10.0.0b6-cp311-none-win_amd64.whl')
 
         current_path = get_system_path()
-        tensorrt_lib_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'TensorRT-8.6.1.6\\lib')
+        tensorrt_lib_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'TensorRT-10.0.0.6\\lib')
 
         if tensorrt_lib_path not in current_path:
             new_path = current_path + ';' + tensorrt_lib_path
@@ -322,22 +322,20 @@ def Install_TensorRT():
         else:
             print(f'Env path already exists: {tensorrt_lib_path}')
 
-        tensorrt_lib_files = ['nvinfer.dll', 'nvinfer.lib', 'nvinfer_builder_resource.dll', 'nvinfer_dispatch.dll', 'nvinfer_dispatch.lib', 'nvinfer_lean.dll',
-                            'nvinfer_lean.lib', 'nvinfer_plugin.dll', 'nvinfer_plugin.lib', 'nvinfer_vc_plugin.dll', 'nvinfer_vc_plugin.lib',
-                            'nvonnxparser.dll', 'nvonnxparser.lib', 'nvparsers.dll', 'nvparsers.lib']
+        tensorrt_lib_files = ['nvinfer.dll', 'nvinfer.lib', 'nvinfer_builder_resource.dll', 'nvinfer_dispatch.dll', 'nvinfer_dispatch.lib', 'nvinfer_lean.dll', 'nvinfer_lean.lib', 'nvinfer_plugin.dll', 'nvinfer_plugin.lib', 'nvinfer_vc_plugin.dll', 'nvinfer_vc_plugin.lib', 'nvonnxparser.dll', 'nvonnxparser.lib']
         
         for cuda_path in cuda:
             if 'bin' in cuda_path:
                 for lib in tensorrt_lib_files:
-                    shutil.copy2('{0}\TensorRT-8.6.1.6\lib\\{1}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__))), lib), cuda_path)
+                    shutil.copy2('{0}\TensorRT-10.0.0.6\lib\\{1}'.format(os.path.join(os.path.dirname(os.path.abspath(__file__))), lib), cuda_path)
     else:
-        print('First install cuda 12.1.')
+        print('First install cuda 12.4.')
         
 def Install_cuda():
     os.system('cls')
-    print('Cuda 12.1 is being downloaded, and installation will begin after downloading.')
-    download_file('https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda_12.1.0_531.14_windows.exe', './cuda_12.1.0_531.14_windows.exe')
-    subprocess.call('{}/cuda_12.1.0_531.14_windows.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
+    print('Cuda 12.4 is being downloaded, and installation will begin after downloading.')
+    download_file('https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_551.61_windows.exe', './cuda_12.4.0_551.61_windows.exe')
+    subprocess.call('{}/cuda_12.4.0_551.61_windows.exe'.format(os.path.join(os.path.dirname(os.path.abspath(__file__)))))
     
 def Test_detections():
     cuda_support = ultralytics.utils.checks.cuda_is_available()
@@ -349,20 +347,20 @@ def Test_detections():
         
     model = YOLO('models/{}'.format(cfg.AI_model_name), task='detect')
     cap = cv2.VideoCapture('media/tests/test_det.mp4')
-    cv2.namedWindow('Model: {0} imgsz: {1}'.format(cfg.AI_model_name, 480))
-    debug_window_hwnd = win32gui.FindWindow(None, 'Model: {0} imgsz: {1}'.format(cfg.AI_model_name, 480))
+    cv2.namedWindow('Model: {0} imgsz: {1}'.format(cfg.AI_model_name, cfg.ai_model_image_size))
+    debug_window_hwnd = win32gui.FindWindow(None, 'Model: {0} imgsz: {1}'.format(cfg.AI_model_name, cfg.ai_model_image_size))
     win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
     
     while cap.isOpened():
         success, frame = cap.read()
 
         if success:
-            result = model(frame, stream=False, show=False, imgsz=480, device=cfg.AI_device, verbose=False, conf=0.40)
+            result = model(frame, stream=False, show=False, imgsz=cfg.ai_model_image_size, device=cfg.AI_device, verbose=False, conf=0.40)
             annotated_frame = result[0].plot()
 
             cv2.putText(annotated_frame, 'TEST 1234567890', (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
             
-            cv2.imshow('Model: {0} imgsz: {1}'.format(cfg.AI_model_name, 480), annotated_frame)
+            cv2.imshow('Model: {0} imgsz: {1}'.format(cfg.AI_model_name, cfg.ai_model_image_size), annotated_frame)
             if cv2.waitKey(30) & 0xFF == ord("q"):
                 break
         else:
@@ -381,10 +379,10 @@ def print_menu():
     print('Installed version: {0}, online version: {1}\n'.format(get_aimbot_current_version()[0], get_aimbot_online_version()[0]))
 
     print("1: Update/Reinstall YOLOv8_aimbot")
-    print("2: Download Cuda 12.1")
-    print("3: Install TensorRT")
+    print("2: Download Cuda 12.4")
+    print("3: Install TensorRT 10")
     print("4: Test the object detector")
-    print("5: Force reinstall Torch")
+    print("5: Force reinstall Torch (GPU)")
     print("0: Exit")
 
 def main():
