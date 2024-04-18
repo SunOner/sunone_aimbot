@@ -8,10 +8,10 @@
    - Это баг модуля onnx. Каждый раз перед экспортом модели выполняйте комманду `pip uninstall onnx`.
 5. Она работает только с Arduino?
    - Нет, Arduino нужно для того что бы обмануть античит, сделать так что-бы игра думала что вы используете физическую мышь.
-6. The model does not export, and the line appears TensorRT: export failure ❌ 0.5s: Could not find: cublas64_12.dll. Is it on your PATH?
+6. The model does not export, and the line appears TensorRT: export failure ❌ 0.5s: Could not find: cudnn64_8.dll. Is it on your PATH?
    - Скачайте [cudnn64_8.zip](https://disk.yandex.ru/d/cm1Wi7OdkLtcLQ) и распакуйте его в C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/(версия cuda)/bin
 7. Как установить новую модель, которую я скачал с boosty?
-   - Разместите ее в папке `models/`, перейдите в config.ini и измените AI_model_path = sunxds_0.3.4.pt или AI_model_path = sunxds_0.3.4.engine, если вы экспортировали модель в .engine. Так же не забудьте поменять размер модели `AI_image_size` (на данный момент размер составляет 640).
+   - Разместите ее в папке `models/`, перейдите в config.ini и измените ai_model_name = sunxds_0.4.1.pt или ai_model_name = sunxds_0.4.1.engine, если вы экспортировали модель в .engine. Так же не забудьте поменять размер модели `ai_model_image_size`.
 8. Как экспортировать модель?
    - Перейдите в раздел [export](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#export-pt-model-to-engine) на странице github.
 9. Прицел стреляет над головой, как настроить?
@@ -35,3 +35,5 @@
 	- Увеличте значение `AI_conf` в кофиге.
 16. AttributeError: 'Bettercam' object has no attribute 'is_capturing'
 	- Зайдите в "Настройки->Система->Дисплей->Графика->Классическое приложение-Обзор" и добавьте исполняемый файл python (Он должен находится тут по умолчанию "C:\Users\ваше_имя_пользователя\AppData\Local\Programs\Python\Python311\python.exe"), в параметрах укажите "энергосбережение". Это происходит из за того что на в большинстве на ноутбуках duplicator работает от интегрированного графического процесора.
+17. Наведение всё равно дегранное, как будто программа работает не в полную силу.
+	- В некоторых случаях если вы экспортировали модель в engine но в игре всё равно дерганое наведение прицела, помогает включение мнгновенного повтора.
