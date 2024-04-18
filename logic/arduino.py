@@ -13,8 +13,6 @@ class ArduinoMouse:
         self.serial_port.timeout = 0
         self.serial_port.write_timeout = 0
         
-        self.logical_min_max = 127
-        
         if self.cfg.arduino_port == 'auto':
             self.serial_port.port = self.__detect_port()
         else:
@@ -41,23 +39,28 @@ class ArduinoMouse:
     def release(self):
         self.serial_port.write(b'r')
         self.serial_port.write(b'\n')
-
+        
     def move(self, x, y):
-        x_parts = self.split_value(x)
-        y_parts = self.split_value(y)
-        for x, y in zip(x_parts, y_parts):
-            data = str('m{},{}'.format((int(x)), (int(y))))
+        if cfg.arduino_16_bit_mouse:
+            data = str('m{},{}'.format(int(x), int(y)))
             data = str.encode(data)
             self.serial_port.write(data)
+        else:
+            x_parts = self.split_value(x)
+            y_parts = self.split_value(y)
+            for x, y in zip(x_parts, y_parts):
+                data = str('m{},{}'.format((int(x)), (int(y))))
+                data = str.encode(data)
+                self.serial_port.write(data)
         self.serial_port.write(b'\n')
         
     def split_value(self, value):
         values = []
         sign = -1 if value < 0 else 1
 
-        while abs(value) > self.logical_min_max:
-            values.append(sign * self.logical_min_max)
-            value -= sign * self.logical_min_max
+        while abs(value) > 127:
+            values.append(sign * 127)
+            value -= sign * 127
 
         values.append(value)
 

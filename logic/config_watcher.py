@@ -56,6 +56,7 @@ class Config():
         self.arduino_shoot = self.config_Arduino.getboolean('arduino_shoot')
         self.arduino_port = str(self.config_Arduino['arduino_port'])
         self.arduino_baudrate = int(self.config_Arduino['arduino_baudrate'])
+        self.arduino_16_bit_mouse = self.config_Arduino.getboolean('arduino_16_bit_mouse')
         # AI
         self.config_AI = self.config['AI']
         self.AI_model_name = str(self.config_AI['AI_model_name'])

@@ -46,7 +46,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.0</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.1.46</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.5.2</td></tr></thead>
 </table>
 
@@ -99,13 +99,14 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - arduino_shoot `bool`: Sends a command to the arduino to fire with the mouse.
 - arduino_port `str`: Arduino COM port. Use `COM1` or `COM2` ... or `auto`.
 - arduino_baudrate `int`: Custom Arduino baudrate.
+- arduino_16_bit_mouse `bool`: Send 16 bit data to the arduino port to move the mouse.
 
 ### AI:
 - AI_model_name `str`: AI model name.
 - AI_model_image_size `int`: AI model image size.
 - AI_conf `float`: How many percent is AI sure that this is the right goal.
 - AI_device `int` or `str`: Device to run on, `0`, `1`... or `cpu`.
-- AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm and pytorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
+- AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm, [Zluda](https://github.com/vosen/ZLUDA) and PyTorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
 - AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
 ### Debug window:
@@ -150,10 +151,9 @@ yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half
 - Do not set high graphics settings in games.
 - Limit the browser (try not to watch YouTube while playing and working AI at the same time, for example (of course if you don't have a super duper graphics card)) and so on, which loads the video card.
 - Try to use TensorRT for acceleration. `.pt` model is good, but does not have as much speed as `.engine`.
-- If the program is running, everything is detected, but the mouse itself is not aimed at the target, then try running the program as an administrator.
 - Turn off the cv2 debug window, this saves system resources.
 - Do not increase the object search window resolution, this may affect your search speed.
-- If you have started the application and nothing happens, it may be working, close it with the F2 key and change the show_window setting to Yes in the file [config.ini](https://github.com/SunOner/yolov8_aimbot/blob/main/config.ini) to make sure that the application is working.
+- If you have started the application and nothing happens, it may be working, close it with the F2 key and change the `show_window` option to `True` in the file [config.ini](https://github.com/SunOner/yolov8_aimbot/blob/main/config.ini) to make sure that the application is working.
 
 ## Support the project
 I will post new models [here](https://boosty.to/sunone).
