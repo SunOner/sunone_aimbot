@@ -72,6 +72,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
 - hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
 - disable_headshot `bool`: Disable head targerting.
+- disable_prediction `bool`: Disable target position prediction.
 
 ### Hot keys:
 - The names of all the keys are [here](https://github.com/SunOner/yolov8_aimbot/blob/main/logic/buttons.py). Type `None` is empty button.
@@ -93,6 +94,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
 - triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
 - force_click `bool`: Shooting will be performed even if the sight is not located within the object.
+- bScope_multiplier `float`: The multiplier of the target trigger size.
 
 ### Arduino:
 - arduino_move `bool`: Sends a command to the arduino to move the mouse.

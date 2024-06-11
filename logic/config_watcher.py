@@ -29,6 +29,7 @@ class Config():
         self.body_y_offset = float(self.config_Aim['body_y_offset'])
         self.hideout_targets = self.config_Aim.getboolean('hideout_targets')
         self.disable_headshot = self.config_Aim.getboolean('disable_headshot')
+        self.disable_prediction = self.config_Aim.getboolean('disable_prediction')
         # Hotkeys
         self.config_Hotkeys_settings = self.config['Hotkeys']
         self.hotkey_targeting = str(self.config_Hotkeys_settings['hotkey_targeting'])
@@ -50,6 +51,7 @@ class Config():
         self.auto_shoot = self.config_Shooting.getboolean('auto_shoot')
         self.triggerbot = self.config_Shooting.getboolean('triggerbot')
         self.force_click = self.config_Shooting.getboolean('force_click')
+        self.bScope_multiplier = float(self.config_Shooting['bScope_multiplier'])
         # Arduino
         self.config_Arduino = self.config['Arduino']
         self.arduino_move = self.config_Arduino.getboolean('arduino_move')

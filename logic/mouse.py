@@ -1,6 +1,3 @@
-import queue
-import threading
-import time
 import torch
 import win32con, win32api
 from ctypes import *
@@ -106,6 +103,7 @@ class MouseThread():
         self.mouse_sensitivity = cfg.mouse_sensitivity
         self.fov_x = cfg.mouse_fov_width
         self.fov_y = cfg.mouse_fov_height
+        self.bScope_multiplier = cfg.bScope_multiplier
         self.screen_width = cfg.detection_window_width
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
@@ -139,10 +137,12 @@ class MouseThread():
 
     def process_data(self, data):
         target_x, target_y, target_w, target_h = data
-        # target_distance = math.sqrt((target_x - self.center_x)**2 + (target_y - self.center_y)**2) # TODO
-        self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h) if cfg.auto_shoot or cfg.triggerbot else False
+        self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h, self.bScope_multiplier) if cfg.auto_shoot or cfg.triggerbot else False
         self.bScope = True if cfg.force_click else self.bScope
-        x, y = self.predict_target_position(target_x, target_y)
+        
+        if cfg.disable_prediction == False:
+            x, y = self.predict_target_position(target_x, target_y)
+        
         x, y = self.calc_movement(x, y)
         self.move_mouse(x, y)
         self.shoot(self.bScope)
@@ -210,8 +210,11 @@ class MouseThread():
             return move[0], move[1]
         
     def move_mouse(self, x, y):
-        if x == None or y == None:
-            pass
+        if x == None:
+            x = 0
+        if y == None:
+            y = 0
+            
         if self.get_shooting_key_state() and cfg.mouse_auto_aim == False and cfg.triggerbot == False or cfg.mouse_auto_aim:
             if cfg.mouse_ghub == False and x is not None and y is not None and cfg.arduino_move == False: # Native move
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
@@ -229,65 +232,64 @@ class MouseThread():
                 if  self.button_pressed == False:
                     if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                        self.button_pressed = True
                         
                     if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
                         self.ghub.mouse_down()
-                        self.button_pressed = True
                         
                     if cfg.arduino_shoot: # arduino
                         arduino.press()
-                        self.button_pressed = True
+                    
+                    self.button_pressed = True
 
             if self.get_shooting_key_state() == False and self.button_pressed == True or bScope == False and self.button_pressed == True:
                 if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                    self.button_pressed = False
                     
                 if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
                     self.ghub.mouse_up()
-                    self.button_pressed = False
                     
                 if cfg.arduino_shoot: # arduino
                     arduino.release()
-                    self.button_pressed = False
+                
+                self.button_pressed = False
         
         # By triggerbot
         if cfg.auto_shoot and cfg.triggerbot and bScope or cfg.mouse_auto_aim and bScope:
             if self.button_pressed == False:
                 if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                    self.button_pressed = True
                     
                 if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
                     self.ghub.mouse_down()
-                    self.button_pressed = True
                     
                 if cfg.arduino_shoot: # arduino
                     arduino.press()
-                    self.button_pressed = True
+                
+                self.button_pressed = True
 
         if cfg.auto_shoot and cfg.triggerbot and bScope == False:
             if self.button_pressed == True:
                 if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                    self.button_pressed = False
                     
                 if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
                     self.ghub.mouse_up()
-                    self.button_pressed = False
                     
                 if cfg.arduino_shoot: # arduino
                     arduino.release() 
-                    self.button_pressed = False
                 
-    def check_target_in_scope(self, target_x, target_y, target_w, target_h):
-        x1 = (target_x - target_w)
-        x2 = (target_x + target_w)
-        y1 = (target_y - target_h)
-        y2 = (target_y + target_h)
+                self.button_pressed = False
+                
+    def check_target_in_scope(self, target_x, target_y, target_w, target_h, reduction_factor=1.0):
+        reduced_w = target_w * reduction_factor
+        reduced_h = target_h * reduction_factor
 
-        if (self.center_x > x1 and self.center_x < x2 and self.center_y > y1 and self.center_y < y2) :
+        x1 = target_x - reduced_w
+        x2 = target_x + reduced_w
+        y1 = target_y - reduced_h
+        y2 = target_y + reduced_h
+
+        if (self.center_x > x1 and self.center_x < x2 and self.center_y > y1 and self.center_y < y2):
             return True
         else:
             return False
@@ -297,6 +299,7 @@ class MouseThread():
         self.mouse_sensitivity = cfg.mouse_sensitivity
         self.fov_x = cfg.mouse_fov_width
         self.fov_y = cfg.mouse_fov_height
+        self.bScope_multiplier = cfg.bScope_multiplier
         self.screen_width = cfg.detection_window_width
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
