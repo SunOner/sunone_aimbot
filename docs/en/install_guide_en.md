@@ -1,37 +1,21 @@
-##  Yolov8 aimbot Install guide
-[![](https://img.youtube.com/vi/qxz_vm806j0/hqdefault.jpg)](https://youtu.be/qxz_vm806j0)
+## Yolov8 Aimbot Manual Installation Guide
+1. **(OPTIONAL FOR CLEAN INSTALLATION)** Remove all installed versions of Python and Cuda, then restart your computer.
 <br></br>
-1. (OPTIONAL FOR CLEAN INSTALL) Uninstall all versions of Python and Cuda then reboot PC.
+2. Update your Nvidia graphics driver. Cudnn should install automatically after updating the driver.
 <br></br>
-2. Update the Nvidia graphics driver. Cudnn should be installed automatically after updating the driver
-<br></br>
-3. Download and install python 3.11.6. On startup installer screen enable "Add Python 3.11.6 to PATH" option! [link](https://www.python.org/downloads/)
+3. Download and install [Python](https://www.python.org/downloads/) version 3.11.6. On the initial screen of the installer, activate the option "Add Python 3.11.6 to PATH"!
 ![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/python.png)
 <br></br>
-4. Download and export aimbot files yolov8 aimbot [link](https://github.com/SunOner/yolov8_aimbot)
+4. Download and extract the [Yolov8 aimbot](https://github.com/SunOner/yolov8_aimbot) files.
 ![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/aimbot.png)
 <br></br>
-5. Download and install Cuda 12.1 the reboot PC [link](https://developer.nvidia.com/cuda-12-1-0-download-archive)
+5. Download and install Cuda version 12.4, then restart your computer [download](https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_551.61_windows.exe).
 ![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/cuda.png)
 <br></br>
-6. Open cmd and type `python -m pip install --upgrade pip`, then type `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`
+6. Open the command prompt and enter `python -m pip install --upgrade pip`, then `pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu124`.
 <br></br>
-7. Download [TensorRT](https://disk.yandex.ru/d/mgiPzH8fCL83qw) and unpack the files in yolov8_aimbot-main folder.
+7. Next, in the command prompt, enter `cd C:/path_where_you_extracted/yolov8_aimbot-main/`, then `pip install -r requirements.txt`.
 <br></br>
-8. Open cmd and type `cd C:/your_export_path/yolov8_aimbot-main/TensorRT-8.6.1.6/python` then type `pip install tensorrt-8.6.1-cp311-none-win_amd64.whl`
+8. Try running the aimbot. Enter `python run.py`. If the aimbot works, export the .pt model to .engine.
 <br></br>
-9. Hit WIN + R and type `sysdm.cpl`.
-- Click on advanced then on environment variables...
-![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/environment_variables.png)
-- Double click on `path`
-![](https://github.com/SunOner/yolov8_aimbot/blob/main/media/environment_variables_path.png)
-- Press `new` and type `C:/your_export_path/yolov8_aimbot-main/TensorRT-8.6.1.6/lib`
-- (OPTIONAL) Reboot PC.
-<br></br>
-10. Copy all files from `C:/your_export_path/yolov8_aimbot-main/TensorRT-8.6.1.6/lib` and paste in `C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.1/bin`
-<br></br>
-11. Open cmd and type `cd C:/your_export_path/yolov8_aimbot-main/` then type `pip install -r requirements.txt`
-<br></br>
-12. Try run aimbot. `python run.py`. If aimbot works, export .pt model to .engine.
-<br></br>
-13. Type `yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half=True`
+9. Enter `yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half=True`. The export may take more than 10 minutes (depending on your PC components). After exporting, don't forget to change the model in `config.ini` to `sunxds_0.4.1.engine`.
