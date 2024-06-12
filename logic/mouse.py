@@ -103,6 +103,7 @@ class MouseThread():
         self.mouse_sensitivity = cfg.mouse_sensitivity
         self.fov_x = cfg.mouse_fov_width
         self.fov_y = cfg.mouse_fov_height
+        self.disable_prediction = cfg.disable_prediction
         self.bScope_multiplier = cfg.bScope_multiplier
         self.screen_width = cfg.detection_window_width
         self.screen_height = cfg.detection_window_height
@@ -140,11 +141,11 @@ class MouseThread():
         self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h, self.bScope_multiplier) if cfg.auto_shoot or cfg.triggerbot else False
         self.bScope = True if cfg.force_click else self.bScope
         
-        if cfg.disable_prediction == False:
-            x, y = self.predict_target_position(target_x, target_y)
+        if self.disable_prediction == False:
+            target_x, target_y = self.predict_target_position(target_x, target_y)
         
-        x, y = self.calc_movement(x, y)
-        self.move_mouse(x, y)
+        target_x, target_y = self.calc_movement(target_x, target_y)
+        self.move_mouse(target_x, target_y)
         self.shoot(self.bScope)
 
     def get_shooting_key_state(self):
@@ -299,6 +300,7 @@ class MouseThread():
         self.mouse_sensitivity = cfg.mouse_sensitivity
         self.fov_x = cfg.mouse_fov_width
         self.fov_y = cfg.mouse_fov_height
+        self.disable_prediction = cfg.disable_prediction
         self.bScope_multiplier = cfg.bScope_multiplier
         self.screen_width = cfg.detection_window_width
         self.screen_height = cfg.detection_window_height
