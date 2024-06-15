@@ -131,7 +131,7 @@ class Capture():
             exit(0)
         # WARNINGS
         if '.pt' in cfg.AI_model_name:
-            print('WARNING: Export the model to `.engine` for better performance!')
+            print('WARNING: Export the model to `.engine` for better performance!\nHOW TO EXPORT TO ENGINE: https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#export-pt-model-to-engine')
         if cfg.mouse_ghub == False and cfg.arduino_move == False and cfg.arduino_shoot == False:
             print('WARNING: win32api is detected in some games.')
         if cfg.mouse_ghub and cfg.arduino_move == False and cfg.arduino_shoot == False:

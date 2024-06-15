@@ -29,32 +29,26 @@ class ArduinoMouse:
             exit()
                     
     def click(self):
-        self.serial_port.write(b'c')
-        self.serial_port.write(b'\n')
+        self._send_command('c')
 
     def press(self):
-        self.serial_port.write(b'p')
-        self.serial_port.write(b'\n')
+        self._send_command('p')
 
     def release(self):
-        self.serial_port.write(b'r')
-        self.serial_port.write(b'\n')
+        self._send_command('r')
         
     def move(self, x, y):
-        if cfg.arduino_16_bit_mouse:
-            data = str('m{},{}'.format(int(x), int(y)))
-            data = str.encode(data)
+        if self.cfg.arduino_16_bit_mouse:
+            data = f'm{x},{y}\n'.encode()
             self.serial_port.write(data)
         else:
-            x_parts = self.split_value(x)
-            y_parts = self.split_value(y)
-            for x, y in zip(x_parts, y_parts):
-                data = str('m{},{}'.format((int(x)), (int(y))))
-                data = str.encode(data)
+            x_parts = self._split_value(x)
+            y_parts = self._split_value(y)
+            for x_part, y_part in zip(x_parts, y_parts):
+                data = f'm{x_part},{y_part}\n'.encode()
                 self.serial_port.write(data)
-        self.serial_port.write(b'\n')
         
-    def split_value(self, value):
+    def _split_value(self, value):
         values = []
         sign = -1 if value < 0 else 1
 
@@ -67,20 +61,22 @@ class ArduinoMouse:
         return values
     
     def close(self):
-        self.serial_port.close()
+        if self.serial_port.is_open:
+            self.serial_port.close()
 
     def __del__(self):
         self.close()
 
     def __detect_port(self):
         ports = serial.tools.list_ports.comports()
-        arduino_port = None
-
         for port in ports:
-            if "Arduino" in port[1]:
-                arduino_port = port[0]
+            if "Arduino" in port.description:
+                return port.device
+        return None
 
-        return arduino_port
+    def _send_command(self, command):
+        """Helper method to send a command to the Arduino."""
+        self.serial_port.write(f'{command}\n'.encode())
     
     def find_library_directory(self, base_path, library_name_start):
         for root, dirs, files in os.walk(base_path):

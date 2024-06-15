@@ -46,7 +46,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.0.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.28</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2.32</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.5.3</td></tr></thead>
 </table>
 
@@ -120,6 +120,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - show_conf `bool`: Displays object confidence threshold for detection.
 - show_target_line `bool`: Shows the mouse finishing line.
 - show_target_prediction_line `bool`: Show mouse prediction line.
+- show_bScope_box  `bool`: Show the trigger box for auto shooting.
 - debug_window_always_on_top `bool`: The debug window will always be on top of other windows.
 - spawn_window_pos_x `int`: When the debugging window starts, it takes the x position.
 - spawn_window_pos_y `int`: When the debugging window starts, it takes the y position.

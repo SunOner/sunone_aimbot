@@ -41,7 +41,10 @@ class FrameParser():
                 
     def sort_targets(self, frame, cfg) -> Target:
         boxes_array = frame.boxes.xywh.to(self.arch)
-        distances_sq = torch.sum((boxes_array[:, :2] - torch.tensor([capture.screen_x_center, capture.screen_y_center], device=self.arch)) ** 2, dim=1)
+        center = torch.tensor([capture.screen_x_center, capture.screen_y_center], device=self.arch)
+        
+        distances_sq = torch.sum((boxes_array[:, :2] - center) ** 2, dim=1)
+        
         classes_tensor = frame.boxes.cls.to(self.arch)
 
         if not cfg.disable_headshot:
@@ -50,12 +53,9 @@ class FrameParser():
                 head_distances_sq = distances_sq[head_indices]
                 nearest_head_idx = head_indices[torch.argmin(head_distances_sq)]
                 return Target(*boxes_array[nearest_head_idx, :4].cpu().numpy(), classes_tensor[nearest_head_idx].item())
-            else:
-                nearest_idx = torch.argmin(distances_sq)
-                return Target(*boxes_array[nearest_idx, :4].cpu().numpy(), classes_tensor[nearest_idx].item())
-        else:
-            nearest_idx = torch.argmin(distances_sq)
-            return Target(*boxes_array[nearest_idx, :4].cpu().numpy(), classes_tensor[nearest_idx].item())
+        
+        nearest_idx = torch.argmin(distances_sq)
+        return Target(*boxes_array[nearest_idx, :4].cpu().numpy(), classes_tensor[nearest_idx].item())
     
     def get_arch(self):
         if cfg.AI_enable_AMD:

@@ -3,6 +3,7 @@ import win32con, win32api
 from ctypes import *
 from os import path
 import torch.nn as nn
+import time
 
 from logic.buttons import Buttons
 from logic.config_watcher import cfg
@@ -109,8 +110,10 @@ class MouseThread():
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
         self.center_y = self.screen_height / 2
+
         self.prev_x = 0
         self.prev_y = 0
+        self.prev_time = None
         
         self.bScope = False
         self.button_pressed = False
@@ -138,12 +141,20 @@ class MouseThread():
 
     def process_data(self, data):
         target_x, target_y, target_w, target_h = data
+        
+        if cfg.show_window and cfg.show_target_line:
+            visuals.draw_target_line(target_x, target_y)
+        
         self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h, self.bScope_multiplier) if cfg.auto_shoot or cfg.triggerbot else False
         self.bScope = True if cfg.force_click else self.bScope
-        
-        if self.disable_prediction == False:
-            target_x, target_y = self.predict_target_position(target_x, target_y)
-        
+
+        if not self.disable_prediction:
+            current_time = time.time()
+            target_x, target_y = self.predict_target_position(target_x, target_y, current_time)
+            
+            if cfg.show_window and cfg.show_target_prediction_line:
+                visuals.draw_predicted_position(target_x, target_y)
+
         target_x, target_y = self.calc_movement(target_x, target_y)
         self.move_mouse(target_x, target_y)
         self.shoot(self.bScope)
@@ -160,15 +171,24 @@ class MouseThread():
                     return True
         return False
 
-    def predict_target_position(self, target_x, target_y):
-        velocity_x = target_x - self.prev_x
-        velocity_y = target_y - self.prev_y
-        
-        predicted_x = target_x + velocity_x
-        predicted_y = target_y + velocity_y
+    def predict_target_position(self, target_x, target_y, current_time):
+        if self.prev_time is None:
+            self.prev_time = current_time
+            self.prev_x = target_x
+            self.prev_y = target_y
+            return target_x, target_y
+
+        delta_time = current_time - self.prev_time
+
+        velocity_x = (target_x - self.prev_x) / delta_time
+        velocity_y = (target_y - self.prev_y) / delta_time
+
+        predicted_x = target_x + velocity_x * delta_time
+        predicted_y = target_y + velocity_y * delta_time
 
         self.prev_x = target_x
         self.prev_y = target_y
+        self.prev_time = current_time
 
         return predicted_x, predicted_y
     
@@ -186,9 +206,6 @@ class MouseThread():
 
             mouse_move_y = offset_y * degrees_per_pixel_y
             move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
-            
-            if cfg.show_window and cfg.show_target_prediction_line:
-                visuals.draw_predicted_position(target_x, target_y)
                 
             return move_x, move_y
         else:
@@ -281,19 +298,25 @@ class MouseThread():
                 
                 self.button_pressed = False
                 
-    def check_target_in_scope(self, target_x, target_y, target_w, target_h, reduction_factor=1.0):
-        reduced_w = target_w * reduction_factor
-        reduced_h = target_h * reduction_factor
+    def check_target_in_scope(self, target_x, target_y, target_w, target_h, reduction_factor):
+        reduced_w = target_w * reduction_factor / 2
+        reduced_h = target_h * reduction_factor / 2
 
         x1 = target_x - reduced_w
         x2 = target_x + reduced_w
         y1 = target_y - reduced_h
         y2 = target_y + reduced_h
 
+        bScope = None
         if (self.center_x > x1 and self.center_x < x2 and self.center_y > y1 and self.center_y < y2):
-            return True
+            bScope = True
         else:
-            return False
+            bScope = False
+            
+        if cfg.show_window and cfg.show_bScope_box:
+            visuals.draw_bScope(x1, x2, y1, y2, bScope)
+        
+        return bScope
 
     def Update_settings(self):
         self.dpi = cfg.mouse_dpi

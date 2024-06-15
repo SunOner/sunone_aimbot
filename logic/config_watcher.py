@@ -77,6 +77,7 @@ class Config():
         self.show_conf = self.config_Debug_window.getboolean('show_conf')
         self.show_target_line = self.config_Debug_window.getboolean('show_target_line')
         self.show_target_prediction_line = self.config_Debug_window.getboolean('show_target_prediction_line')
+        self.show_bScope_box = self.config_Debug_window.getboolean('show_bScope_box')
         self.debug_window_always_on_top = self.config_Debug_window.getboolean('debug_window_always_on_top')
         self.spawn_window_pos_x = int(self.config_Debug_window['spawn_window_pos_x'])
         self.spawn_window_pos_y = int(self.config_Debug_window['spawn_window_pos_y'])

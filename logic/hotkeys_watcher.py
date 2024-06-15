@@ -10,11 +10,11 @@ from logic.capture import capture
 from logic.mouse import mouse
 from logic.visual import visuals
         
-class HotkeysWather(threading.Thread):
+class HotkeysWatсher(threading.Thread):
     def __init__(self):
-        super(HotkeysWather, self).__init__()
+        super(HotkeysWatсher, self).__init__()
         self.daemon = True
-        self.name = 'HotkeysWather'
+        self.name = 'HotkeysWatсher'
         
         self.app_pause = 0
         self.clss = self.active_classes()
@@ -60,4 +60,4 @@ class HotkeysWather(threading.Thread):
         
         return clss
     
-hotkeys_watcher = HotkeysWather()
+hotkeys_watcher = HotkeysWatсher()
