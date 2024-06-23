@@ -118,7 +118,7 @@ def get_aimbot_current_version():
         return 0, 0
 
 def get_aimbot_online_version():
-    content = requests.get('https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/version').content.decode('utf-8').split('\n')
+    content = requests.get('https://raw.githubusercontent.com/SunOner/sunone_aimbot/main/version').content.decode('utf-8').split('\n')
     if content == ['404: Not Found']:
         print('Something wrong with https://raw.githubusercontent.com.\nSunOner repository is still alive?')
         return 0, 0
@@ -143,7 +143,7 @@ def delete_files_in_folder(folder):
         except Exception as e:
             print(f'Failed to delete {file_path}. Reason: {e}')
 
-def update_yolov8_aimbot():
+def update_sunone_aimbot():
     print('Deleting old files...')
     try:
         delete_files_in_folder('./logic')
@@ -188,7 +188,7 @@ def update_yolov8_aimbot():
         pass
     
     print("Downloading repo. Please wait...")
-    download_file('https://github.com/SunOner/yolov8_aimbot/archive/refs/heads/main.zip', 'main.zip')
+    download_file('https://github.com/SunOner/sunone_aimbot/archive/refs/heads/main.zip', 'main.zip')
     print('Unpacking...')
     with zipfile.ZipFile(r'./main.zip', 'r') as zip_ref:
         zip_ref.extractall('./')
@@ -213,15 +213,15 @@ def update_yolov8_aimbot():
 
     for temp_file in temp_aimbot_files:
         try:
-            if temp_file == './yolov8_aimbot-main/config.ini' and not replace_config:
+            if temp_file == './sunone_aimbot-main/config.ini' and not replace_config:
                 continue
-            shutil.move(f'yolov8_aimbot-main/{temp_file}', temp_file)
+            shutil.move(f'sunone_aimbot-main/{temp_file}', temp_file)
         except:
             pass
 
     try:
-        delete_files_in_folder('./yolov8_aimbot-main')
-        os.rmdir('./yolov8_aimbot-main')
+        delete_files_in_folder('./sunone_aimbot-main')
+        os.rmdir('./sunone_aimbot-main')
     except:
         pass
 
@@ -285,7 +285,7 @@ def force_reinstall_torch():
 def print_menu():
     os.system('cls')
     print(f'Installed version: {get_aimbot_current_version()[0]}, online version: {get_aimbot_online_version()[0]}\n')
-    print("1: Update/Reinstall YOLOv8_aimbot")
+    print("1: Update/Reinstall Sunone Aimbot")
     print("2: Download Cuda 12.4")
     print("3: Install TensorRT 10.0.1")
     print("4: Test the object detector")
@@ -299,7 +299,7 @@ def main():
             choice = input("Select an option: ")
 
             if choice == "1":
-                update_yolov8_aimbot()
+                update_sunone_aimbot()
             elif choice == "2":
                 install_cuda()
             elif choice == "3":
@@ -321,7 +321,7 @@ if __name__ == "__main__":
         from logic.config_watcher import cfg
     except:
         print('File config_watcher.py not found, reinstalling...')
-        update_yolov8_aimbot()
+        update_sunone_aimbot()
     upgrade_pip()
     upgrade_ultralytics()
     main()
