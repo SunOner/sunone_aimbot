@@ -46,8 +46,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.0.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.32</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.5.4</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2.40</td></tr></thead>
+  <thead><tr><th>GitHub AI Model:</th><td>0.4.1 (YoloV8)</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.5.5 (YoloV10)</td></tr></thead>
 </table>
 
 ## Options
@@ -111,6 +112,15 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm, [Zluda](https://github.com/vosen/ZLUDA) and PyTorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
 - AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
 
+### Overlay:
+- show_overlay `bool`: Enables the overlay. It is not recommended for gameplay, only for debugging.
+- overlay_show_borders `bool`: Displaying the borders of the overlay.
+- overlay_show_boxes `bool`: Display of boxes.
+- overlay_show_target_line `bool`: Displaying the line to the target.
+- overlay_show_target_prediction_line `bool`: Displaying the predictive line to the target.
+- overlay_show_labels `bool`: Displaying label names.
+- overlay_show_conf `bool`: Displaying the label names as well as the confidence level.
+
 ### Debug window:
 - show_window `bool`: Shows the OpenCV2 window for visual feedback.
 - show_detection_speed `bool`: Displays speed information inside the debug window.
@@ -121,6 +131,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - show_target_line `bool`: Shows the mouse finishing line.
 - show_target_prediction_line `bool`: Show mouse prediction line.
 - show_bScope_box  `bool`: Show the trigger box for auto shooting.
+- show_history_points `bool`: Show history points.
 - debug_window_always_on_top `bool`: The debug window will always be on top of other windows.
 - spawn_window_pos_x `int`: When the debugging window starts, it takes the x position.
 - spawn_window_pos_y `int`: When the debugging window starts, it takes the y position.

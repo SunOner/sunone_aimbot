@@ -50,14 +50,13 @@ class HotkeysWatсher(threading.Thread):
         return cfg_reload_prev_state
 
     def active_classes(self) -> List[int]:
-        clss = [0, 1]
+        clss = [0.0, 1.0]
         
         if cfg.hideout_targets:
-            clss.extend([5, 6])
+            clss.extend([5.0, 6.0])
 
         if not cfg.disable_headshot:
-            clss.append(7)
-        
-        return clss
+            clss.append(7.0)
+        self.clss = clss
     
 hotkeys_watcher = HotkeysWatсher()

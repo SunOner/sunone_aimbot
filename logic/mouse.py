@@ -141,23 +141,29 @@ class MouseThread():
 
     def process_data(self, data):
         target_x, target_y, target_w, target_h = data
-        
-        if cfg.show_window and cfg.show_target_line:
+        # draw simple line
+        if cfg.show_window and cfg.show_target_line or cfg.show_overlay and cfg.show_target_line:
             visuals.draw_target_line(target_x, target_y)
         
+        # bScope
         self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h, self.bScope_multiplier) if cfg.auto_shoot or cfg.triggerbot else False
         self.bScope = True if cfg.force_click else self.bScope
 
+        # prediction
         if not self.disable_prediction:
             current_time = time.time()
             target_x, target_y = self.predict_target_position(target_x, target_y, current_time)
             
-            if cfg.show_window and cfg.show_target_prediction_line:
+            if cfg.show_window and cfg.show_target_prediction_line or cfg.show_overlay and cfg.show_target_prediction_line:
                 visuals.draw_predicted_position(target_x, target_y)
 
         target_x, target_y = self.calc_movement(target_x, target_y)
-        self.move_mouse(target_x, target_y)
+        # history points
+        if cfg.show_window and cfg.show_history_points or cfg.show_overlay and cfg.show_history_points:
+            visuals.draw_history_point_add_point(target_x, target_y)
+            
         self.shoot(self.bScope)
+        self.move_mouse(target_x, target_y)
 
     def get_shooting_key_state(self):
         for key_name in cfg.hotkey_targeting_list:

@@ -67,6 +67,15 @@ class Config():
         self.AI_device = str(self.config_AI['AI_device'])
         self.AI_enable_AMD = self.config_AI.getboolean('AI_enable_AMD')
         self.AI_mouse_net = self.config_AI.getboolean('AI_mouse_net')
+        # Overlay
+        self.config_overlay = self.config['overlay']
+        self.show_overlay = self.config_overlay.getboolean('show_overlay')
+        self.overlay_show_borders = self.config_overlay.getboolean('overlay_show_borders')
+        self.overlay_show_boxes = self.config_overlay.getboolean('overlay_show_boxes')
+        self.overlay_show_target_line = self.config_overlay.getboolean('overlay_show_target_line')
+        self.overlay_show_target_prediction_line = self.config_overlay.getboolean('overlay_show_target_prediction_line')
+        self.overlay_show_labels = self.config_overlay.getboolean('overlay_show_labels')
+        self.overlay_show_conf = self.config_overlay.getboolean('overlay_show_conf')
         # Debug window
         self.config_Debug_window = self.config['Debug window']
         self.show_window = self.config_Debug_window.getboolean('show_window')
@@ -78,6 +87,7 @@ class Config():
         self.show_target_line = self.config_Debug_window.getboolean('show_target_line')
         self.show_target_prediction_line = self.config_Debug_window.getboolean('show_target_prediction_line')
         self.show_bScope_box = self.config_Debug_window.getboolean('show_bScope_box')
+        self.show_history_points = self.config_Debug_window.getboolean('show_history_points')
         self.debug_window_always_on_top = self.config_Debug_window.getboolean('debug_window_always_on_top')
         self.spawn_window_pos_x = int(self.config_Debug_window['spawn_window_pos_x'])
         self.spawn_window_pos_y = int(self.config_Debug_window['spawn_window_pos_y'])

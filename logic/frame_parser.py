@@ -1,5 +1,6 @@
 import torch
 
+from logic.hotkeys_watcher import hotkeys_watcher
 from logic.config_watcher import cfg
 from logic.capture import capture
 from logic.visual import visuals
@@ -20,16 +21,22 @@ class FrameParser():
     def parse(self, result):
         for frame in result:
             if len(frame.boxes):
-                target = self.sort_targets(frame, cfg)
+                target = self.sort_targets(frame)
                 
-                mouse.process_data((target.x, target.y, target.w, target.h))
-
-                if cfg.show_window:
-                    if cfg.show_boxes:
+                if target != None:
+                    if hotkeys_watcher.clss == None:
+                        hotkeys_watcher.active_classes()
+                    if target.cls in hotkeys_watcher.clss:
+                        mouse.process_data((target.x, target.y, target.w, target.h))
+                else:
+                    continue
+                
+                if cfg.show_window or cfg.show_overlay:
+                    if cfg.show_boxes or cfg.overlay_show_boxex:
                         visuals.draw_helpers(frame.boxes)
-                    if cfg.show_target_line:
+                    if cfg.show_target_line or cfg.overlay_show_target_line:
                         visuals.draw_target_line(target.x, target.y)
-                    if cfg.show_target_prediction_line:
+                    if cfg.show_target_prediction_line or cfg.overlay_show_target_prediction_line:
                         visuals.draw_predicted_position(target.x, target.y)
             else:
                 if cfg.auto_shoot or cfg.triggerbot:
@@ -39,13 +46,16 @@ class FrameParser():
             if cfg.show_window and cfg.show_detection_speed == True:
                 visuals.draw_speed(frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
                 
-    def sort_targets(self, frame, cfg) -> Target:
+    def sort_targets(self, frame) -> Target:
         boxes_array = frame.boxes.xywh.to(self.arch)
         center = torch.tensor([capture.screen_x_center, capture.screen_y_center], device=self.arch)
         
         distances_sq = torch.sum((boxes_array[:, :2] - center) ** 2, dim=1)
         
         classes_tensor = frame.boxes.cls.to(self.arch)
+        
+        if len(classes_tensor) == 0:
+            return None
 
         if not cfg.disable_headshot:
             head_indices = torch.nonzero(classes_tensor == 7, as_tuple=False).squeeze(1)
