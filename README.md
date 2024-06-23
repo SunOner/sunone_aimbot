@@ -1,46 +1,46 @@
 <div align="center">
 
-# YOLOv8 Aimbot
-[![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/yolov8_aimbot)
-[![License MIT](https://badgen.net/github/license/SunOner/yolov8_aimbot)](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)
-[![Github stars](https://img.shields.io/github/stars/SunOner/yolov8_aimbot?color=ffb500)](https://github.com/SunOner/yolov8_aimbot)
+# Sunone Aimbot
+[![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/sunone_aimbot)
+[![License MIT](https://badgen.net/github/license/SunOner/sunone_aimbot)](https://github.com/SunOner/sunone_aimbot/blob/main/LICENSE)
+[![Github stars](https://img.shields.io/github/stars/SunOner/sunone_aimbot?color=ffb500)](https://github.com/SunOner/sunone_aimbot)
 [![Discord server](https://badgen.net/discord/online-members/sunone)](https://discord.gg/sunone)
   <p>
-    <a href="https://github.com/SunOner/yolov8_aimbot/releases" target="_blank">
-      <img width="75%" src="https://raw.githubusercontent.com/SunOner/yolov8_aimbot/main/media/one.gif"></a>
+    <a href="https://github.com/SunOner/sunone_aimbot/releases" target="_blank">
+      <img width="75%" src="https://raw.githubusercontent.com/SunOner/sunone_aimbot/main/media/one.gif"></a>
   </p>
 </div>
 
 ## Overview
-YOLOv8 Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 model, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 25,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO and CS2.
+Sunone Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 and YOLOv10 models, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 30,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO, Fortnite, The Finals, CS2 and more.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
 
 > [!NOTE] 
-> This application only works on Nvidia graphics cards. AMD support is testing. See [AI_enable_AMD](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#ai) option.
+> This application only works on Nvidia graphics cards. AMD support is testing. See [AI_enable_AMD](https://github.com/SunOner/sunone_aimbot?tab=readme-ov-file#ai) option.
 > The recommended graphics card for starting and more productive and stable operation starts with the rtx 20 series.
 
 ## Requirements
-Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in [Tested Environment](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#tested-environment) block, this may cause errors in launching the aimbot.
+Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in [Tested Environment](https://github.com/SunOner/sunone_aimbot?tab=readme-ov-file#tested-environment) block, this may cause errors in launching the aimbot.
 
 - Information in English:
-  - [Auto-Install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/helper_en.md)
-  - [Self install guide](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/install_guide_en.md)
-  - [Questions and answers](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/en/questions_en.md)
+  - [Auto-Install guide](https://github.com/SunOner/sunone_aimbot/blob/main/docs/en/helper_en.md)
+  - [Self install guide](https://github.com/SunOner/sunone_aimbot/blob/main/docs/en/install_guide_en.md)
+  - [Questions and answers](https://github.com/SunOner/sunone_aimbot/blob/main/docs/en/questions_en.md)
   - [Arduino setup](https://github.com/SunOner/HID_Arduino)
   - [Discord server](https://discord.gg/sunone)
 <br></br>
 - Информация на Русском языке:
-  - [Инструкция по автоматической установке](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/helper_ru.md)
-  - [Инструкция по установке в ручную](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/install_guide_ru.md)
-  - [Вопросы и ответы](https://github.com/SunOner/yolov8_aimbot/blob/main/docs/ru/questions_ru.md)
+  - [Инструкция по автоматической установке](https://github.com/SunOner/sunone_aimbot/blob/main/docs/ru/helper_ru.md)
+  - [Инструкция по установке в ручную](https://github.com/SunOner/sunone_aimbot/blob/main/docs/ru/install_guide_ru.md)
+  - [Вопросы и ответы](https://github.com/SunOner/sunone_aimbot/blob/main/docs/ru/questions_ru.md)
   - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
   - [Discord сервер](https://discord.gg/sunone)
 <br></br>
 - To launch the aimbot after all installations, type `py run.py` or `py launcher.py` to open gui settings.
 
 ## Tested Environment
-### The YOLOv8 Aimbot has been tested on the following environment:
+### The Sunone Aimbot has been tested on the following environment:
 <table>
   <thead><tr><th>Windows</th><td>10 and 11(priority)</td></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
@@ -52,7 +52,7 @@ Before you get started, make sure you have the following prerequisites installed
 </table>
 
 ## Options
-The behavior of the aim bot can be configured via the [`config.ini`](https://github.com/SunOner/yolov8_aimbot/blob/main/config.ini) file. Here are the available options:
+The behavior of the aimbot can be configured via the [`config.ini`](https://github.com/SunOner/sunone_aimbot/blob/main/config.ini) file. Here are the available options:
 
 ### Object Search window resolution:
 - detection_window_width `int`: Horizontal resolution of the object search window.
@@ -76,7 +76,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 - disable_prediction `bool`: Disable target position prediction.
 
 ### Hot keys:
-- The names of all the keys are [here](https://github.com/SunOner/yolov8_aimbot/blob/main/logic/buttons.py). Type `None` is empty button.
+- The names of all the keys are [here](https://github.com/SunOner/sunone_aimbot/blob/main/logic/buttons.py). Type `None` is empty button.
 - hotkey_targeting `str`: Aiming at the target. Supports multi keys, for example `hotkey_targeting = RightMouseButton,X2MouseButton`
 - hotkey_exit `str`: Exit.
 - hotkey_pause `str`: Pause AIM.
@@ -147,7 +147,7 @@ The behavior of the aim bot can be configured via the [`config.ini`](https://git
 1. All commands are executed in the console window:
 2. First, go to the aimbot directory using the command:
 ```cmd
-cd C:\Users\your_username\downloads\yolov8_aimbot-main
+cd C:\Users\your_username\downloads\sunone_aimbot-main
 ```
 3. Then export the model from the .pt format in .engine format.
 ```cmd
@@ -167,10 +167,10 @@ yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half
 - Try to use TensorRT for acceleration. `.pt` model is good, but does not have as much speed as `.engine`.
 - Turn off the cv2 debug window, this saves system resources.
 - Do not increase the object search window resolution, this may affect your search speed.
-- If you have started the application and nothing happens, it may be working, close it with the F2 key and change the `show_window` option to `True` in the file [config.ini](https://github.com/SunOner/yolov8_aimbot/blob/main/config.ini) to make sure that the application is working.
+- If you have started the application and nothing happens, it may be working, close it with the F2 key and change the `show_window` option to `True` in the file [config.ini](https://github.com/SunOner/sunone_aimbot/blob/main/config.ini) to make sure that the application is working.
 
 ## Support the project
 I will post new models [here](https://boosty.to/sunone).
 
 ## License
-This project is licensed under the MIT License. See **[LICENSE](https://github.com/SunOner/yolov8_aimbot/blob/main/LICENSE)** for details
+This project is licensed under the MIT License. See **[LICENSE](https://github.com/SunOner/sunone_aimbot/blob/main/LICENSE)** for details
