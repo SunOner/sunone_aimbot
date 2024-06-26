@@ -40,7 +40,7 @@ class Visuals(threading.Thread):
                 7:'head',
                 8:'smoke',
                 9:'fire',
-                10:'third_persion'
+                10:'third_person'
                 }
             
             self.start()
