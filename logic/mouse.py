@@ -135,12 +135,13 @@ class MouseThread():
                 self.model.load_state_dict(torch.load('mouse_net.pth', map_location=self.device))
             except Exception as e:
                 print(e)
-                print('Please train mouse_net model, or download trained mouse_net.pth model from repository and place in base folder. Instruction here: https://github.com/SunOner/mouse_net')
+                print('Please train mouse_net model, or download latest trained mouse_net.pth model from repository and place in base folder. Instruction here: https://github.com/SunOner/mouse_net')
                 exit()
             self.model.eval()
 
     def process_data(self, data):
         target_x, target_y, target_w, target_h = data
+        
         # draw simple line
         if cfg.show_window and cfg.show_target_line or cfg.show_overlay and cfg.show_target_line:
             visuals.draw_target_line(target_x, target_y)

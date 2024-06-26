@@ -39,7 +39,8 @@ class Visuals(threading.Thread):
                 6:'hideout_target_balls',
                 7:'head',
                 8:'smoke',
-                9:'fire'
+                9:'fire',
+                10:'third_persion'
                 }
             
             self.start()

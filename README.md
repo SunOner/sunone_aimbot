@@ -46,9 +46,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.0.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.40</td></tr></thead>
-  <thead><tr><th>GitHub AI Model:</th><td>0.4.1 (YoloV8)</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.5.5 (YoloV10)</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2.42</td></tr></thead>
+  <thead><tr><th>GitHub AI Model:</th><td>0.4.1 (YOLOv8)</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.5.6 (YOLOv10)</td></tr></thead>
 </table>
 
 ## Options
