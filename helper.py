@@ -317,3 +317,6 @@ if st.button("Install TensorRT"):
     
 if st.button("Test detections"):
     test_detections()
+
+if st.button("Run Aimbot"):
+    os.system("python run.py")
