@@ -8,6 +8,6 @@ asyncio
 onnxruntime
 onnxruntime-gpu
 pyserial
-tqdm
 requests
 opencv-python
+packaging
