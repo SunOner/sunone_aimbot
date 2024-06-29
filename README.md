@@ -160,6 +160,8 @@ yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half
   - `workspace=8`: GPU max video memory.
   - `verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
 
+4. Each model has its own image size with which it was trained, export only with the image size with which it was published.
+
 ## Notes / Recommendations
 - Limit the maximum value of frames per second in the game in which you will use it. And also do not set the screen resolution to high. Do not overload the graphics card.
 - Do not set high graphics settings in games.
