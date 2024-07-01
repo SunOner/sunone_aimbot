@@ -5,10 +5,9 @@
 2. Restart your computer (optional).
 3. Download the repository and extract it, for example, to your desktop.
 ![](https://github.com/SunOner/sunone_aimbot/blob/main/media/aimbot.png)
-4. Open CMD. (Press the WIN key and immediately type CMD, the "Command Prompt" application will appear).
-5. Navigate to the folder you extracted and run `run_helper.bat`.
-6. The script will first check the installed components necessary for the update.
-7. Next, you will see buttons in the menu. First, download and install CUDA, then TensorRT.
-8. Without exiting the program, you can check functionality using the `Test detections` button.
-9. Everything should be ready.
-10. All issues and errors can be found on the official [Discord server](https://discord.gg/sunone).
+4. Navigate to the folder you extracted and run `run_helper.bat`.
+5. The script will first check the installed components necessary for the update.
+6. Next, you will see buttons in the menu. First, download and install CUDA, then TensorRT.
+7. Without exiting the program, you can check functionality using the `Test detections` button.
+8. Everything should be ready.
+9. All issues and errors can be found on the official [Discord server](https://discord.gg/sunone).
