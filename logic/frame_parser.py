@@ -5,6 +5,7 @@ from logic.config_watcher import cfg
 from logic.capture import capture
 from logic.visual import visuals
 from logic.mouse import mouse
+from logic.shooting import shooting
 
 class Target():
     def __init__(self, x, y, w, h, cls):
@@ -40,8 +41,7 @@ class FrameParser():
                         visuals.draw_predicted_position(target.x, target.y)
             else:
                 if cfg.auto_shoot or cfg.triggerbot:
-                    mouse.shoot(False) # release shooting buttons
-                pass
+                    shooting.shoot(False, False) # release shooting buttons
             
             if cfg.show_window and cfg.show_detection_speed == True:
                 visuals.draw_speed(frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])

@@ -1,87 +1,16 @@
 import torch
 import win32con, win32api
-from ctypes import *
-from os import path
 import torch.nn as nn
 import time
+import numpy as np
 
-from logic.buttons import Buttons
 from logic.config_watcher import cfg
 from logic.visual import visuals
+from logic.shooting import shooting
+from logic.buttons import Buttons
 
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import arduino
-
-class GhubMouse:
-    def __init__(self):
-        self.basedir = path.dirname(path.abspath(__file__))
-        self.dlldir = path.join(self.basedir, 'ghub_mouse.dll')
-        self.gm = CDLL(self.dlldir)
-        self.gmok = self.gm.mouse_open()
-
-    @staticmethod
-    def _ghub_SendInput(*inputs):
-        nInputs = len(inputs)
-        LPINPUT = INPUT * nInputs
-        pInputs = LPINPUT(*inputs)
-        cbSize = c_int(sizeof(INPUT))
-        return windll.user32.SendInput(nInputs, pInputs, cbSize)
-
-    @staticmethod
-    def _ghub_Input(structure):
-        return INPUT(0, _INPUTunion(mi=structure))
-
-    @staticmethod
-    def _ghub_MouseInput(flags, x, y, data):
-        return MOUSEINPUT(x, y, data, flags, 0, None)
-
-    @staticmethod
-    def _ghub_Mouse(flags, x=0, y=0, data=0):
-        return GhubMouse._ghub_Input(GhubMouse._ghub_MouseInput(flags, x, y, data))
-
-    def mouse_xy(self, x, y):
-        if self.gmok:
-            return self.gm.moveR(x, y)
-        return self._ghub_SendInput(self._ghub_Mouse(0x0001, x, y))
-
-    def mouse_down(self, key=1):
-        if self.gmok:
-            return self.gm.press(key)
-        if key == 1:
-            return self._ghub_SendInput(self._ghub_Mouse(0x0002))
-        elif key == 2:
-            return self._ghub_SendInput(self._ghub_Mouse(0x0008))
-
-    def mouse_up(self, key=1):
-        if self.gmok:
-            return self.gm.release()
-        if key == 1:
-            return self._ghub_SendInput(self._ghub_Mouse(0x0004))
-        elif key == 2:
-            return self._ghub_SendInput(self._ghub_Mouse(0x0010))
-
-    def mouse_close(self):
-        if self.gmok:
-            return self.gm.mouse_close()
-
-LONG = c_long
-DWORD = c_ulong
-ULONG_PTR = POINTER(DWORD)
-            
-class MOUSEINPUT(Structure):
-    _fields_ = (('dx', LONG),
-                ('dy', LONG),
-                ('mouseData', DWORD),
-                ('dwFlags', DWORD),
-                ('time', DWORD),
-                ('dwExtraInfo', ULONG_PTR))
-
-class _INPUTunion(Union):
-    _fields_ = (('mi', MOUSEINPUT),)
-
-class INPUT(Structure):
-    _fields_ = (('type', DWORD),
-                ('union', _INPUTunion))
 
 class Mouse_net(nn.Module):
     def __init__(self, arch):
@@ -116,9 +45,16 @@ class MouseThread():
         self.prev_time = None
         
         self.bScope = False
-        self.button_pressed = False
         
         self.arch = f'cuda:{cfg.AI_device}'
+        
+        self.smoothing_factor = 0.5
+        self.acceleration_factor = 1.2
+        self.deceleration_factor = 1.8
+        self.dead_zone = 2
+
+        self.last_move_x = 0
+        self.last_move_y = 0
         
         if cfg.AI_enable_AMD:
             self.arch = f'hip:{cfg.AI_device}'
@@ -126,7 +62,8 @@ class MouseThread():
             self.arch = 'cpu'
         
         if cfg.mouse_ghub:
-            self.ghub = GhubMouse()
+            from logic.ghub import gHub
+            self.ghub = gHub
             
         if cfg.AI_mouse_net:
             self.device = torch.device(f'{self.arch}')
@@ -158,25 +95,15 @@ class MouseThread():
             if cfg.show_window and cfg.show_target_prediction_line or cfg.show_overlay and cfg.show_target_prediction_line:
                 visuals.draw_predicted_position(target_x, target_y)
 
-        target_x, target_y = self.calc_movement(target_x, target_y)
+        move_x, move_y = self.calc_movement(target_x, target_y)
+        smoothed_x, smoothed_y = self.smooth_movement(move_x, move_y)
+        
         # history points
         if cfg.show_window and cfg.show_history_points or cfg.show_overlay and cfg.show_history_points:
             visuals.draw_history_point_add_point(target_x, target_y)
-            
-        self.shoot(self.bScope)
-        self.move_mouse(target_x, target_y)
-
-    def get_shooting_key_state(self):
-        for key_name in cfg.hotkey_targeting_list:
-            key_code = Buttons.KEY_CODES.get(key_name.strip())
-            if key_code is not None:
-                if cfg.mouse_lock_target:
-                    state = win32api.GetKeyState(key_code)
-                else:
-                    state = win32api.GetAsyncKeyState(key_code)
-                if state < 0 or state == 1:
-                    return True
-        return False
+        
+        shooting.queue.put((self.bScope, self.get_shooting_key_state()))
+        self.move_mouse(smoothed_x, smoothed_y)
 
     def predict_target_position(self, target_x, target_y, current_time):
         if self.prev_time is None:
@@ -200,7 +127,7 @@ class MouseThread():
         return predicted_x, predicted_y
     
     def calc_movement(self, target_x, target_y):
-        if cfg.AI_mouse_net == False:
+        if not cfg.AI_mouse_net:
             offset_x = target_x - self.center_x
             offset_y = target_y - self.center_y
 
@@ -208,11 +135,25 @@ class MouseThread():
             degrees_per_pixel_y = self.fov_y / self.screen_height
             
             mouse_move_x = offset_x * degrees_per_pixel_x
+            mouse_move_y = offset_y * degrees_per_pixel_y
 
             move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity))
-
-            mouse_move_y = offset_y * degrees_per_pixel_y
             move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+            
+            distance = np.sqrt(move_x**2 + move_y**2)
+            if distance > self.dead_zone:
+                if distance > 100:
+                    factor = self.acceleration_factor
+                elif distance < 20:
+                    factor = self.deceleration_factor
+                else:
+                    factor = 1
+
+                move_x *= factor
+                move_y *= factor
+            else:
+                move_x = 0
+                move_y = 0
                 
             return move_x, move_y
         else:
@@ -233,13 +174,26 @@ class MouseThread():
                 move = self.model(input_tensor).cpu().numpy()
             
             return move[0], move[1]
+    
+    def smooth_movement(self, move_x, move_y):
+        smoothed_x = self.smoothing_factor * move_x + (1 - self.smoothing_factor) * self.last_move_x
+        smoothed_y = self.smoothing_factor * move_y + (1 - self.smoothing_factor) * self.last_move_y
         
+        self.last_move_x = smoothed_x
+        self.last_move_y = smoothed_y
+        
+        return smoothed_x, smoothed_y
+
+
     def move_mouse(self, x, y):
         if x == None:
             x = 0
         if y == None:
             y = 0
-            
+        
+        x = int(x)
+        y = int(y)
+        
         if self.get_shooting_key_state() and cfg.mouse_auto_aim == False and cfg.triggerbot == False or cfg.mouse_auto_aim:
             if cfg.mouse_ghub == False and x is not None and y is not None and cfg.arduino_move == False: # Native move
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
@@ -249,62 +203,19 @@ class MouseThread():
 
             if cfg.arduino_move and x is not None and y is not None: # Arduino     
                 arduino.move(int(x), int(y))
-
-    def shoot(self, bScope):
-        # By GetAsyncKeyState
-        if cfg.auto_shoot == True and cfg.triggerbot == False:
-            if self.get_shooting_key_state() and bScope or cfg.mouse_auto_aim and bScope:
-                if  self.button_pressed == False:
-                    if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
-                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                        
-                    if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
-                        self.ghub.mouse_down()
-                        
-                    if cfg.arduino_shoot: # arduino
-                        arduino.press()
-                    
-                    self.button_pressed = True
-
-            if self.get_shooting_key_state() == False and self.button_pressed == True or bScope == False and self.button_pressed == True:
-                if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                    
-                if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
-                    self.ghub.mouse_up()
-                    
-                if cfg.arduino_shoot: # arduino
-                    arduino.release()
-                
-                self.button_pressed = False
-        
-        # By triggerbot
-        if cfg.auto_shoot and cfg.triggerbot and bScope or cfg.mouse_auto_aim and bScope:
-            if self.button_pressed == False:
-                if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                    
-                if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
-                    self.ghub.mouse_down()
-                    
-                if cfg.arduino_shoot: # arduino
-                    arduino.press()
-                
-                self.button_pressed = True
-
-        if cfg.auto_shoot and cfg.triggerbot and bScope == False:
-            if self.button_pressed == True:
-                if cfg.mouse_ghub == False and cfg.arduino_shoot == False: # native
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                    
-                if cfg.mouse_ghub and cfg.arduino_shoot == False: #ghub
-                    self.ghub.mouse_up()
-                    
-                if cfg.arduino_shoot: # arduino
-                    arduino.release() 
-                
-                self.button_pressed = False
-                
+    
+    def get_shooting_key_state(self):
+        for key_name in cfg.hotkey_targeting_list:
+            key_code = Buttons.KEY_CODES.get(key_name.strip())
+            if key_code is not None:
+                if cfg.mouse_lock_target:
+                    state = win32api.GetKeyState(key_code)
+                else:
+                    state = win32api.GetAsyncKeyState(key_code)
+                if state < 0 or state == 1:
+                    return True
+        return False
+      
     def check_target_in_scope(self, target_x, target_y, target_w, target_h, reduction_factor):
         reduced_w = target_w * reduction_factor / 2
         reduced_h = target_h * reduction_factor / 2

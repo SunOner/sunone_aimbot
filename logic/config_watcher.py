@@ -30,6 +30,7 @@ class Config():
         self.hideout_targets = self.config_Aim.getboolean('hideout_targets')
         self.disable_headshot = self.config_Aim.getboolean('disable_headshot')
         self.disable_prediction = self.config_Aim.getboolean('disable_prediction')
+        self.third_person = self.config_Aim.getboolean('third_person')
         # Hotkeys
         self.config_Hotkeys_settings = self.config['Hotkeys']
         self.hotkey_targeting = str(self.config_Hotkeys_settings['hotkey_targeting'])

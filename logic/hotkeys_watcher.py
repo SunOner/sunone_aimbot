@@ -9,7 +9,8 @@ from logic.buttons import Buttons
 from logic.capture import capture
 from logic.mouse import mouse
 from logic.visual import visuals
-        
+from logic.shooting import shooting
+
 class HotkeysWatсher(threading.Thread):
     def __init__(self):
         super(HotkeysWatсher, self).__init__()
@@ -57,6 +58,10 @@ class HotkeysWatсher(threading.Thread):
 
         if not cfg.disable_headshot:
             clss.append(7.0)
+            
+        if cfg.third_person:
+            clss.append(10.0)
+        
         self.clss = clss
     
 hotkeys_watcher = HotkeysWatсher()
