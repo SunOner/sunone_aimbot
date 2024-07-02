@@ -25,7 +25,7 @@ class Mouse_net(nn.Module):
         x = torch.relu(self.fc3(x))
         x = self.fc4(x)
         return x
-
+        
 class MouseThread():
     def __init__(self):
         self.dpi = cfg.mouse_dpi
@@ -146,7 +146,6 @@ class MouseThread():
                         target_y]
             
             input_tensor = torch.tensor(input_data, dtype=torch.float32).to(self.device)
-        
             with torch.no_grad():
                 move = self.model(input_tensor).cpu().numpy()
             
