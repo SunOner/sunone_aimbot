@@ -33,7 +33,7 @@ class FrameParser():
                     continue
                 
                 if cfg.show_window or cfg.show_overlay:
-                    if cfg.show_boxes or cfg.overlay_show_boxex:
+                    if cfg.show_boxes or cfg.overlay_show_boxes:
                         visuals.draw_helpers(frame.boxes)
                     if cfg.show_target_line or cfg.overlay_show_target_line:
                         visuals.draw_target_line(target.x, target.y)
