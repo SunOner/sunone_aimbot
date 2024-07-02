@@ -2,7 +2,6 @@ import torch
 import win32con, win32api
 import torch.nn as nn
 import time
-import numpy as np
 
 from logic.config_watcher import cfg
 from logic.visual import visuals
@@ -48,14 +47,6 @@ class MouseThread():
         
         self.arch = f'cuda:{cfg.AI_device}'
         
-        self.smoothing_factor = 0.5
-        self.acceleration_factor = 1.2
-        self.deceleration_factor = 1.8
-        self.dead_zone = 2
-
-        self.last_move_x = 0
-        self.last_move_y = 0
-        
         if cfg.AI_enable_AMD:
             self.arch = f'hip:{cfg.AI_device}'
         if 'cpu' in cfg.AI_device:
@@ -95,15 +86,15 @@ class MouseThread():
             if cfg.show_window and cfg.show_target_prediction_line or cfg.show_overlay and cfg.show_target_prediction_line:
                 visuals.draw_predicted_position(target_x, target_y)
 
-        move_x, move_y = self.calc_movement(target_x, target_y)
-        smoothed_x, smoothed_y = self.smooth_movement(move_x, move_y)
-        
+        target_x, target_y = self.calc_movement(target_x, target_y)
+
         # history points
         if cfg.show_window and cfg.show_history_points or cfg.show_overlay and cfg.show_history_points:
             visuals.draw_history_point_add_point(target_x, target_y)
         
         shooting.queue.put((self.bScope, self.get_shooting_key_state()))
-        self.move_mouse(smoothed_x, smoothed_y)
+
+        self.move_mouse(target_x, target_y)
 
     def predict_target_position(self, target_x, target_y, current_time):
         if self.prev_time is None:
@@ -127,7 +118,7 @@ class MouseThread():
         return predicted_x, predicted_y
     
     def calc_movement(self, target_x, target_y):
-        if not cfg.AI_mouse_net:
+        if cfg.AI_mouse_net == False:
             offset_x = target_x - self.center_x
             offset_y = target_y - self.center_y
 
@@ -135,25 +126,11 @@ class MouseThread():
             degrees_per_pixel_y = self.fov_y / self.screen_height
             
             mouse_move_x = offset_x * degrees_per_pixel_x
-            mouse_move_y = offset_y * degrees_per_pixel_y
 
             move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity))
-            move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
-            
-            distance = np.sqrt(move_x**2 + move_y**2)
-            if distance > self.dead_zone:
-                if distance > 100:
-                    factor = self.acceleration_factor
-                elif distance < 20:
-                    factor = self.deceleration_factor
-                else:
-                    factor = 1
 
-                move_x *= factor
-                move_y *= factor
-            else:
-                move_x = 0
-                move_y = 0
+            mouse_move_y = offset_y * degrees_per_pixel_y
+            move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
                 
             return move_x, move_y
         else:
@@ -174,26 +151,13 @@ class MouseThread():
                 move = self.model(input_tensor).cpu().numpy()
             
             return move[0], move[1]
-    
-    def smooth_movement(self, move_x, move_y):
-        smoothed_x = self.smoothing_factor * move_x + (1 - self.smoothing_factor) * self.last_move_x
-        smoothed_y = self.smoothing_factor * move_y + (1 - self.smoothing_factor) * self.last_move_y
         
-        self.last_move_x = smoothed_x
-        self.last_move_y = smoothed_y
-        
-        return smoothed_x, smoothed_y
-
-
     def move_mouse(self, x, y):
         if x == None:
             x = 0
         if y == None:
             y = 0
-        
-        x = int(x)
-        y = int(y)
-        
+            
         if self.get_shooting_key_state() and cfg.mouse_auto_aim == False and cfg.triggerbot == False or cfg.mouse_auto_aim:
             if cfg.mouse_ghub == False and x is not None and y is not None and cfg.arduino_move == False: # Native move
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
