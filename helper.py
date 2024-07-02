@@ -273,13 +273,20 @@ with HELPER:
                 os.makedirs(dir)
 
         temp_aimbot_files = [
-            './.gitattributes', './.gitignore', './config.ini', './helper.py', 'run_helper.bat', './LICENSE', './README.md', './run.py', './requirements.txt', './version', 'window_names.txt', 
-            './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll', './logic/buttons.py', './logic/overlay.py', './logic/mouse.py', './logic/visual.py', './logic/frame_parser.py', './logic/hotkeys_watcher.py',
+            # main
+            './.gitattributes', './.gitignore', './config.ini', './helper.py', 'run_helper.bat', './LICENSE', './README.md', './run.py', './requirements.txt', './version', 'window_names.txt',
+             # logic
+            './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll',
+            './logic/buttons.py', './logic/overlay.py', './logic/mouse.py', './logic/visual.py', './logic/frame_parser.py', './logic/hotkeys_watcher.py',
+            './logic/shooting.py',
+            # media
             './media/aimbot.png', './media/cmd_admin_en.png', './media/cmd_admin_ru.png', './media/cmd_cd_path.png',
             './media/copy_explorer_path.png', './media/python_add_to_path.png', './media/cuda.png', './media/environment_variables.png',
             './media/environment_variables_path.png', './media/one.gif', './media/python.png', './media/tests/test_det.mp4',
+            # docs
             './docs/en/helper_en.md', './docs/en/install_guide_en.md', './docs/en/questions_en.md',
             './docs/ru/helper_ru.md', './docs/ru/install_guide_ru.md', './docs/ru/questions_ru.md',
+            # models
             './models/sunxds_0.4.1.pt'
         ]
 
