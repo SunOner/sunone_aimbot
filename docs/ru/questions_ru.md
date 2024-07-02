@@ -1,5 +1,5 @@
 1. Все команды выполняются из командной строки, когда вы находитесь в директории программы.
-   - После запуска командной строки выполните команду `cd где_вы_распаковали_бота`, например, 'cd C:\Users\amongus\downloads\yolov8_aimbot'
+   - После запуска командной строки выполните команду `cd где_вы_распаковали_бота`, например, 'cd C:\Users\amongus\downloads\sunone_aimbot-main'
 2. Как запустить программу?
    - `python run.py` или `py run.py`
 3. Как изменить настройки?
@@ -13,14 +13,14 @@
 7. Как установить новую модель, которую я скачал с boosty?
    - Разместите ее в папке `models/`, перейдите в config.ini и измените ai_model_name = sunxds_0.4.1.pt или ai_model_name = sunxds_0.4.1.engine, если вы экспортировали модель в .engine. Так же не забудьте поменять размер модели `ai_model_image_size`.
 8. Как экспортировать модель?
-   - Перейдите в раздел [export](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#export-pt-model-to-engine) на странице github.
+   - Перейдите в раздел [export](https://github.com/SunOner/sunone_aimbot?tab=readme-ov-file#export-pt-model-to-engine) на странице github.
 9. Прицел стреляет над головой, как настроить?
     - Измените параметр `body_y_offset`. Чем ниже значение, тем ниже прицеливание.
 10. Autoshot не работает в некоторых играх.
     - Некоторые игры имеют защиту от программных кликов мыши. Используйте [Arduino](https://github.com/SunOner/HID_Arduino).
-11. Ошибки сообщаются и исправляются [здесь](https://github.com/SunOner/yolov8_aimbot/issues?q=is%3Aissue)
+11. Ошибки сообщаются и исправляются [здесь](https://github.com/SunOner/sunone_aimbot/issues?q=is%3Aissue)
 12. У меня есть предложение по улучшению!
-    - [Создайте тему здесь](https://github.com/SunOner/yolov8_aimbot/discussions).
+    - [Создайте тему здесь](https://github.com/SunOner/sunone_aimbot/discussions).
 13. Долго наводится аимбот. Как то рывками. / WARNING NMS time limit exceeded
 	- Не перегружайте видеокарту!
 	- Не ставьте высокие настройки игры.

@@ -1,5 +1,5 @@
 1. All commands are executed from the command line when you are in the program's directory.
-   - After launching the command line, execute the command `cd path_to_bot_unpacking`, for example, `cd C:\Users\amongus\downloads\yolov8_aimbot`
+   - After launching the command line, execute the command `cd path_to_bot_unpacking`, for example, `cd C:\Users\amongus\downloads\sunone_aimbot-main`
 2. How to run the program?
    - `python run.py` or `py run.py`
 3. How to change settings?
@@ -13,14 +13,14 @@
 7. How to install a new model that I downloaded from boosty?
    - Place it in the `models/` folder, go to config.ini and change ai_model_name = sunxds_0.4.1.pt or ai_model_name = sunxds_0.4.1.engine, if you exported the model to .engine. Also, don't forget to change the model size `ai_model_image_size`.
 8. How to export a model?
-   - Go to the [export](https://github.com/SunOner/yolov8_aimbot?tab=readme-ov-file#export-pt-model-to-engine) section on the github page.
+   - Go to the [export](https://github.com/SunOner/sunone_aimbot?tab=readme-ov-file#export-pt-model-to-engine) section on the github page.
 9. The sight shoots above the head, how to adjust?
     - Change the `body_y_offset` parameter. The lower the value, the lower the aim.
 10. Autoshot does not work in some games.
     - Some games have protection against programmed mouse clicks. Use [Arduino](https://github.com/SunOner/HID_Arduino).
-11. Errors are reported and fixed [here](https://github.com/SunOner/yolov8_aimbot/issues?q=is%3Aissue)
+11. Errors are reported and fixed [here](https://github.com/SunOner/sunone_aimbot/issues?q=is%3Aissue)
 12. I have a suggestion for improvement!
-    - [Create a topic here](https://github.com/SunOner/yolov8_aimbot/discussions)
+    - [Create a topic here](https://github.com/SunOner/sunone_aimbot/discussions)
 13. The aimbot takes a long time to aim. It's kind of jerky. / WARNING NMS time limit exceeded
 	- Do not overload the graphics card!
 	- Do not set high game settings.
