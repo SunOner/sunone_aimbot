@@ -27,7 +27,7 @@ class Capture(threading.Thread):
         self.prev_detection_window_height = cfg.detection_window_height
         self.prev_bettercam_capture_fps = cfg.bettercam_capture_fps
         
-        self.frame_queue = queue.Queue(maxsize=5)
+        self.frame_queue = queue.Queue(maxsize=1)
         self.running = True
         
         if cfg.Bettercam_capture:
