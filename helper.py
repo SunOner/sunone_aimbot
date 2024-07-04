@@ -589,7 +589,7 @@ with TRAIN:
     # model selection
     pretrained_models = ["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov10n.pt", "yolov10s.pt", "yolov10m.pt"]
     
-    user_trained_models = st.toggle(label="Use user pretrained models", value=False)
+    user_trained_models = st.checkbox(label="Use user pretrained models", value=False)
     if user_trained_models:
         last_pt_files = []
         root_folder = r'runs\detect'
@@ -600,12 +600,11 @@ with TRAIN:
                     last_pt_files.append(os.path.join(root, file))
                     
         selected_model_path = st.selectbox(label="Select model", options=last_pt_files)
-        resume = st.toggle(label="Resume training", value=False)
+        resume = st.checkbox(label="Resume training", value=False)
     else:
         selected_model_path = st.selectbox(label="Select model", options=pretrained_models)
     
-    if resume == False:
-        
+    if not resume:
         # data yaml
         data_yaml = st.text_input(label="Path to the dataset configuration file", value="logic/game.yaml")
         
@@ -614,37 +613,36 @@ with TRAIN:
         
         # image size
         img_size = st.number_input(label="Image size", value=640, format="%u", min_value=120, max_value=1280, step=10)
-
-        # device
-        input_devices = ["cpu", "0", "1", "2", "3", "4", "5"]
-        train_device = st.selectbox(label="Specifies the computational device for training",
-                                    options=input_devices,
-                                    index=1,
-                                    help="cpu - Train on processor, 0-5 GPU ID for training.")
-        if train_device != "cpu":
-            train_device = int(train_device)
         
         # cache
-        use_cache = st.toggle(label="Enables caching of dataset images in memory",
-                            value=False)
+        use_cache = st.checkbox(label="Enables caching of dataset images in memory", value=False)
         
-        # batch size
-        batch_size_options = ["auto", "4", "8", "16", "32", "64", "128", "256"]
-        batch_size = st.selectbox(label="Batch size",
-                                options=batch_size_options,
-                                index=0)
-        if batch_size == "auto":
-            batch_size = "-1"
-        batch_size = int(batch_size)
-        
-        augment = st.toggle(label="Use augmentation", value=True)
+        augment = st.checkbox(label="Use augmentation", value=True)
         
         if augment: #TODO Add more settings
             augment_degrees = st.number_input(label="Degrees", format="%u", value=5, min_value=-180, max_value=180, step=5)
             augment_flipud = st.number_input(label="Flipud", format="%f", value=0.2, min_value=0.0, max_value=1.0, step=0.1)
     
+    # device
+    input_devices = ["cpu", "0", "1", "2", "3", "4", "5"]
+    train_device = st.selectbox(label="Specifies the computational device for training",
+                                options=input_devices,
+                                index=1,
+                                help="cpu - Train on processor, 0-5 GPU ID for training.")
+    if train_device != "cpu":
+        train_device = int(train_device)
+    
+    # batch size
+    batch_size_options = ["auto", "4", "8", "16", "32", "64", "128", "256"]
+    batch_size = st.selectbox(label="Batch size",
+                            options=batch_size_options,
+                            index=0)
+    if batch_size == "auto":
+        batch_size = "-1"
+    batch_size = int(batch_size)
+        
     # WANDB
-    wandb = st.toggle(label="Force disable WANDB logger", value=True)
+    wandb = st.checkbox(label="Force disable WANDB logger", value=True)
     if wandb:
         os.environ['WANDB_DISABLED'] = 'true'
     else:
@@ -655,23 +653,30 @@ with TRAIN:
         with st.spinner("Train in process, check terminal window."):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as temp_script:
                 # for multiprocessing "if __name__ == '__main__':" required
-                temp_script.write(f"""
+                script_content = f"""
 if __name__ == '__main__':
     from ultralytics import YOLO
-    yolo_model = YOLO('{selected_model_path}')
+    yolo_model = YOLO(r'{selected_model_path}')
     yolo_model.train(
-        data='{data_yaml}',
-        epochs={epochs},
-        imgsz={img_size},
-        device={train_device},
-        cache={use_cache},
-        batch={batch_size},
-        augment={augment},
-        degrees={augment_degrees},
-        flipud={augment_flipud},
-        resume={resume}
-    )
-                """.encode('utf-8'))
+                    device={train_device},
+                    batch={batch_size},
+                    resume={resume}
+                """
+                
+                if not resume:
+                    script_content += f""",
+                    data='{data_yaml}',
+                    epochs={epochs},
+                    imgsz={img_size},
+                    cache={use_cache},
+                    augment={augment},
+                    degrees={augment_degrees},
+                    flipud={augment_flipud}
+                    """
+                
+                script_content += "\n    )"
+                
+                temp_script.write(script_content.encode('utf-8'))
                 temp_script_path = temp_script.name
             
             if os.name == 'nt':
