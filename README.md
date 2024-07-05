@@ -12,7 +12,7 @@
 </div>
 
 ## Overview
-Sunone Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 and YOLOv10 models, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 30,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield 2042, CS:GO, Fortnite, The Finals, CS2 and more.
+Sunone Aimbot is an AI-powered aim bot for first-person shooter games. It leverages the YOLOv8 and YOLOv10 models, PyTorch, and various other tools to automatically target and aim at enemies within the game. The AI model in repository has been trained on more than 30,000 images from popular first-person shooter games like Warface, Destiny 2, Battlefield (all series), Fortnite, The Finals, CS2 and more.
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
 
@@ -46,9 +46,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.0.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.48</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2.49</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>0.4.1 (YOLOv8)</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.5.7 (YOLOv10)</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.5.8 (YOLOv10)</td></tr></thead>
 </table>
 
 ## Options
