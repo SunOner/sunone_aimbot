@@ -80,25 +80,48 @@ def get_aimbot_online_version():
 
 def upgrade_pip():
     try:
-        result = subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True, text=True, check=True)
-        current_version = result.stdout.split(' ')[1]
+        result = subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True, text=True, check=True, timeout=10)
+        current_version_match = re.search(r'pip (\d+\.\d+\.\d+)', result.stdout)
+        if not current_version_match:
+            print("Unable to determine current pip version")
+            return None
+        current_version = current_version_match.group(1)
         
-        result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "--dry-run"], capture_output=True, text=True, check=True)
-        latest_version = None
-        for line in result.stdout.splitlines():
-            if "Collecting pip" in line:
-                latest_version = line.split(' ')[-1].strip('()')
-                break
+        result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "--dry-run"], capture_output=True, text=True, check=True, timeout=30)
         
-        if latest_version and version.parse(current_version) < version.parse(latest_version):
-            subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], check=True)
-            return current_version
+        new_version_match = re.search(r'pip-(\d+\.\d+\.\d+)', result.stdout)
+        
+        if new_version_match:
+            latest_version = new_version_match.group(1)
+            if version.parse(current_version) < version.parse(latest_version):
+                print(f"Upgrading pip from {current_version} to {latest_version}")
+                subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], check=True, timeout=60)
+                
+                result = subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True, text=True, check=True, timeout=10)
+                updated_version_match = re.search(r'pip (\d+\.\d+\.\d+)', result.stdout)
+                if updated_version_match:
+                    updated_version = updated_version_match.group(1)
+                    print(f"Pip updated to version {updated_version}")
+                    return updated_version
+                else:
+                    print("Unable to determine updated pip version")
+                    return current_version
+            else:
+                print(f"Pip is already up-to-date: {current_version}")
+                return current_version
         else:
+            print(f"No update available. Current version: {current_version}")
             return current_version
+    
+    except subprocess.TimeoutExpired:
+        print("Pip upgrade process timed out")
+        return current_version
     except subprocess.CalledProcessError as e:
         print(f'pip: An error occurred: {e}')
+        return current_version
     except Exception as e:
         print(f'pip: An unexpected error occurred: {e}')
+        return current_version
             
 def upgrade_ultralytics():
     ultralytics_current_version = ultralytics.__version__
@@ -115,19 +138,24 @@ def upgrade_ultralytics():
         return ultralytics_current_version
         
 if 'ultralytics_version' not in st.session_state:
-    st.session_state.ultralytics_version = upgrade_ultralytics()
+    with st.spinner('Checking for ultralytics updates...'):
+        st.session_state.ultralytics_version = upgrade_ultralytics()
 
 if 'pip_version' not in st.session_state:
-    st.session_state.pip_version = upgrade_pip()
+    with st.spinner('Checking for pip updates...'):
+        st.session_state.pip_version = upgrade_pip()
 
 if 'aimbot_versions' not in st.session_state:
-    st.session_state.aimbot_versions = get_aimbot_offline_version(), get_aimbot_online_version()
+    with st.spinner('Checking Aimbot versions...'):
+        st.session_state.aimbot_versions = get_aimbot_offline_version(), get_aimbot_online_version()
 
 if 'cuda' not in st.session_state:
-    st.session_state.cuda = find_cuda_path()
+    with st.spinner('Searching CUDA...'):
+        st.session_state.cuda = find_cuda_path()
 
 if 'python_version' not in st.session_state:
-    st.session_state.python_version = sys.version_info
+    with st.spinner('Checking Python version...'):
+        st.session_state.python_version = sys.version_info
 
 HELPER, EXPORT, CONFIG, TRAIN = st.tabs(["HELPER", "EXPORT", "CONFIG", "TRAIN"])
 
