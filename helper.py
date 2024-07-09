@@ -101,16 +101,12 @@ def upgrade_pip():
                 updated_version_match = re.search(r'pip (\d+\.\d+\.\d+)', result.stdout)
                 if updated_version_match:
                     updated_version = updated_version_match.group(1)
-                    print(f"Pip updated to version {updated_version}")
                     return updated_version
                 else:
-                    print("Unable to determine updated pip version")
                     return current_version
             else:
-                print(f"Pip is already up-to-date: {current_version}")
                 return current_version
         else:
-            print(f"No update available. Current version: {current_version}")
             return current_version
     
     except subprocess.TimeoutExpired:
@@ -535,7 +531,8 @@ with CONFIG:
         for file in files:
             if file.endswith(".pt") or file.endswith(".engine"):
                 models.append(file)
-    AI_model_name = st.selectbox(label="AI model", options=models, index=models.index(config.get('AI', 'AI_model_name')))
+    
+    AI_model_name = st.selectbox(label="AI model", options=models)
     
     imgsz = [320, 480, 640]
     AI_model_image_size = st.selectbox(label="AI model image size", options=imgsz, index=imgsz.index(config.getint('AI', 'AI_model_image_size')))
