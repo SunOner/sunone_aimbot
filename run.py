@@ -43,10 +43,11 @@ def init():
         if cfg.show_window or cfg.show_overlay:
             visuals.queue.put(image)
         
-        result = perform_detection(model, image)
-        
-        if hotkeys_watcher.app_pause == 0:
-            frameParser.parse(result)
+        if image is not None:
+            result = perform_detection(model, image)
+
+            if hotkeys_watcher.app_pause == 0:
+                frameParser.parse(result)
 
 if __name__ == "__main__":
     init()

@@ -11,6 +11,9 @@ class Overlay:
         self.queue = queue.Queue()
         self.thread = None
         self.square_id = None
+        
+        # Skip frames so that the figures do not interfere with the detector ¯\_(ツ)_/¯
+        self.frame_skip_counter = 0
 
     def run(self, width, height):
         if cfg.show_overlay:
@@ -58,18 +61,20 @@ class Overlay:
             self.root.mainloop()
 
     def process_queue(self):
-        if not self.queue.empty():
-            for item in self.canvas.find_all():
-                if item != self.square_id:
-                    self.canvas.delete(item)
-            while not self.queue.empty():
-                command, args = self.queue.get()
-                command(*args)
-        else:
-            for item in self.canvas.find_all():
-                if item != self.square_id:
-                    self.canvas.delete(item)
-        self.root.after(20, self.process_queue)
+        self.frame_skip_counter += 1
+        if self.frame_skip_counter % 3 == 0:
+            if not self.queue.empty():
+                for item in self.canvas.find_all():
+                    if item != self.square_id:
+                        self.canvas.delete(item)
+                while not self.queue.empty():
+                    command, args = self.queue.get()
+                    command(*args)
+            else:
+                for item in self.canvas.find_all():
+                    if item != self.square_id:
+                        self.canvas.delete(item)
+        self.root.after(2, self.process_queue)
 
     def draw_square(self, x1, y1, x2, y2, color='black', size=1):
         self.queue.put((self._draw_square, (x1, y1, x2, y2, color, size)))

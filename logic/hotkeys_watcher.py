@@ -42,7 +42,7 @@ class HotkeysWatсher(threading.Thread):
             if app_reload_cfg in (1, 0):
                 cfg.Read(verbose=True)
                 capture.restart()
-                mouse.Update_settings()
+                mouse.update_settings()
                 self.clss = self.active_classes()
                 if cfg.show_window == False:
                     cv2.destroyAllWindows()

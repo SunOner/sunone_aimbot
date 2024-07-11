@@ -77,7 +77,6 @@ class Capture(threading.Thread):
         try:
             return self.frame_queue.get(timeout=1)
         except queue.Empty:
-            print("No frame available")
             return None
     
     def restart(self):

@@ -30,19 +30,20 @@ class Visuals(threading.Thread):
             self.draw_bScope_data = None
             self.draw_history_point_data = []
             self.cls_model_data = {
-                0:'player',
-                1:'bot',
-                2:'weapon',
-                3:'outline',
-                4:'dead_body',
-                5:'hideout_target_human',
-                6:'hideout_target_balls',
-                7:'head',
-                8:'smoke',
-                9:'fire',
-                10:'third_person'
-                }
+                0: 'player',
+                1: 'bot',
+                2: 'weapon',
+                3: 'outline',
+                4: 'dead_body',
+                5: 'hideout_target_human',
+                6: 'hideout_target_balls',
+                7: 'head',
+                8: 'smoke',
+                9: 'fire',
+                10: 'third_person'
+            }
             
+            self.disabled_line_classes = [2, 3, 4, 8, 9, 10]
             self.start()
     
     def run(self):
@@ -58,7 +59,7 @@ class Visuals(threading.Thread):
                 break
             
             # simple line
-            if self.draw_line_data is not None and len(self.draw_line_data):
+            if self.draw_line_data:
                 if cfg.show_window and cfg.show_target_line:
                     cv2.line(self.image, (capture.screen_x_center, capture.screen_y_center), (int(self.draw_line_data[0]), int(self.draw_line_data[1])), (0, 255, 255), 2)
                 
@@ -66,9 +67,9 @@ class Visuals(threading.Thread):
                     overlay.draw_line(capture.screen_x_center, capture.screen_y_center, int(self.draw_line_data[0]), int(self.draw_line_data[1]), 'green', 2)
 
             # boxes
-            if self.draw_boxes_data is not None and len(self.draw_boxes_data): 
+            if self.draw_boxes_data: 
                 for item in self.draw_boxes_data:
-                    if item is not None:
+                    if item:
                         for xyxy, cls, conf in zip(item.xyxy, item.cls, item.conf):
                             x0, y0, x1, y1 = map(int, map(torch.Tensor.item, xyxy))
                             
@@ -98,8 +99,9 @@ class Visuals(threading.Thread):
                             # overlay conf
                             if cfg.show_overlay and cfg.overlay_show_conf:
                                 overlay.draw_text(x0 + 45, y0 + 7, conf_text)
+            
             # speed
-            if self.draw_speed_data is not None and len(self.draw_speed_data):
+            if self.draw_speed_data:
                 if cfg.show_window:
                     cv2.putText(self.image, 'preprocess: {:.2f}'.format(self.draw_speed_data[0]), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
                     cv2.putText(self.image, 'inference: {:.2f}'.format(self.draw_speed_data[1]), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
@@ -108,13 +110,13 @@ class Visuals(threading.Thread):
             # fps
             if cfg.show_window_fps:
                 new_frame_time = time.time()
-                fps = 1/(new_frame_time-prev_frame_time)
+                fps = 1 / (new_frame_time - prev_frame_time)
                 prev_frame_time = new_frame_time
                 if cfg.show_window:
                     cv2.putText(self.image, f'FPS: {str(int(fps))}', (10, 80) if cfg.show_detection_speed else (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
 
             # bScope
-            if self.draw_bScope_data is not None and len(self.draw_bScope_data):
+            if self.draw_bScope_data:
                 b_x1, b_x2, b_y1, b_y2, bScope = self.draw_bScope_data
                 
                 if bScope:
@@ -128,7 +130,7 @@ class Visuals(threading.Thread):
                     cv2.rectangle(self.image, (int(b_x1), int(b_y1)), (int(b_x2), int(b_y2)), (200, 0, 0), 2)
 
             # prediction line
-            if self.draw_predicted_position_data is not None and len(self.draw_predicted_position_data):
+            if self.draw_predicted_position_data:
                 if cfg.show_window and cfg.show_target_prediction_line:
                     cv2.line(self.image, (capture.screen_x_center, capture.screen_y_center), (int(self.draw_predicted_position_data[0]), int(self.draw_predicted_position_data[1])), (255, 0, 255), 2)
                 
@@ -136,7 +138,7 @@ class Visuals(threading.Thread):
                     overlay.draw_line(capture.screen_x_center, capture.screen_y_center, int(self.draw_predicted_position_data[0]), int(self.draw_predicted_position_data[1]), 'green', 2)  
             
             # history points
-            if self.draw_history_point_data is not None and len(self.draw_history_point_data):
+            if self.draw_history_point_data:
                 if len(self.draw_history_point_data) >= 30:
                     self.draw_history_point_data.pop(0)
                 for x, y in self.draw_history_point_data:
@@ -153,16 +155,12 @@ class Visuals(threading.Thread):
                         cv2.resizeWindow(cfg.debug_window_name, dim)
                         resised = cv2.resize(self.image, dim, self.interpolation)
                         cv2.imshow(cfg.debug_window_name, resised)
-                        self.clear()
                     else:
                         cv2.imshow(cfg.debug_window_name, self.image)
-                        self.clear()
-                except: exit(0)
+                except:
+                    exit(0)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
-                
-            if cfg.show_overlay:
-                self.clear()
                 
     def spawn_debug_window(self):
         cv2.namedWindow(cfg.debug_window_name)
@@ -177,13 +175,15 @@ class Visuals(threading.Thread):
                 debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
                 win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, x, y, cfg.detection_window_width, cfg.detection_window_height, 0)
             except Exception as e:
-                print(f'Error with on top window, skipping this option `debug_window_always_on_top`:{e}')
+                print(f'Error with on top window, skipping this option `debug_window_always_on_top`: {e}')
                 
-    def draw_target_line(self, target_x, target_y):
-        self.draw_line_data = (target_x, target_y)
+    def draw_target_line(self, target_x, target_y, target_cls):
+        if target_cls not in self.disabled_line_classes:
+            self.draw_line_data = (target_x, target_y)
 
-    def draw_predicted_position(self, target_x, target_y):
-        self.draw_predicted_position_data = (target_x, target_y)
+    def draw_predicted_position(self, target_x, target_y, target_cls):
+        if target_cls not in self.disabled_line_classes:
+            self.draw_predicted_position_data = (target_x, target_y)
         
     def draw_speed(self, speed_preprocess, speed_inference, speed_postprocess):
         self.draw_speed_data = (speed_preprocess, speed_inference, speed_postprocess)
