@@ -26,6 +26,7 @@ try:
     import onnxruntime
     import torch
     from packaging import version
+    import numpy as np
 except ModuleNotFoundError:
     os.system("pip install -r requirements.txt")
     os.system("streamlit run helper.py")
@@ -44,8 +45,7 @@ def delete_files_in_folder(folder):
                     os.unlink(file_path)
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
-            except Exception as e:
-                print(f"Failed to delete {file_path}. Reason: {e}")
+            except: pass
                 
 def find_cuda_path():
     cuda_paths = [path for key, value in os.environ.items() if key == "PATH" for path in value.split(";") if "CUDA" in path and "12.4" in path]
@@ -64,7 +64,7 @@ def get_aimbot_offline_version():
                     config = value
             return app, config
         except FileNotFoundError:
-            print('The version file was not found, we will consider it an old version of the program.')
+            st.info("The version file was not found, we will consider it an old version of the program.")
             return 0, 0
 
 def get_aimbot_online_version():
@@ -94,7 +94,7 @@ def upgrade_pip():
         if new_version_match:
             latest_version = new_version_match.group(1)
             if version.parse(current_version) < version.parse(latest_version):
-                print(f"Upgrading pip from {current_version} to {latest_version}")
+                st.info(f"Upgrading pip from {current_version} to {latest_version}")
                 subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], check=True, timeout=60)
                 
                 result = subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True, text=True, check=True, timeout=10)
@@ -110,13 +110,13 @@ def upgrade_pip():
             return current_version
     
     except subprocess.TimeoutExpired:
-        print("Pip upgrade process timed out")
+        st.error("Pip upgrade process timed out")
         return current_version
     except subprocess.CalledProcessError as e:
-        print(f'pip: An error occurred: {e}')
+        st.error(f'pip: An error occurred: {e}')
         return current_version
     except Exception as e:
-        print(f'pip: An unexpected error occurred: {e}')
+        st.error(f'pip: An unexpected error occurred: {e}')
         return current_version
             
 def upgrade_ultralytics():
@@ -150,14 +150,18 @@ if 'cuda' not in st.session_state:
         st.session_state.cuda = find_cuda_path()
 
 if 'python_version' not in st.session_state:
-    with st.spinner('Checking Python version...'):
+    with st.spinner("Checking Python version..."):
         st.session_state.python_version = sys.version_info
 
-HELPER, EXPORT, CONFIG, TRAIN = st.tabs(["HELPER", "EXPORT", "CONFIG", "TRAIN"])
+if 'torch_gpu' not in st.session_state:
+    with st.spinner("Checking Torch GPU support..."):
+        st.session_state.torch_gpu_support = torch.cuda.is_available()
+        
+HELPER, EXPORT, CONFIG, TRAIN, TESTS = st.tabs(["HELPER", "EXPORT", "CONFIG", "TRAIN", "TESTS"])
 
 with HELPER:
     st.title("Helper")
-    # Tools
+
     def download_file(url, filename):
         response = requests.get(url, stream=True)
         total_size_in_bytes = int(response.headers.get("content-length", 0))
@@ -193,50 +197,16 @@ with HELPER:
     aimbot_versions_text.text(f"Installed/Github aimbot versions: {st.session_state.aimbot_versions[0][0]}/{st.session_state.aimbot_versions[1][0]}")
 
     if st.session_state.cuda is not None:
-        try:
-            cuda_active = st.toggle(f"CUDA 12.4 FOUND {st.session_state.cuda[0]}", disabled=True, value=True)
-        except IndexError:
-            cuda_active = st.toggle(f"CUDA 12.4 FOUND", disabled=True, value=True)
+        cuda_active = st.toggle(f"CUDA 12.4 FOUND", disabled=True, value=True, key="cuda_active_toggle")
     else:
-        cuda_active = st.toggle("CUDA 12.4 NOT FOUND", disabled=True, value=False)
+        cuda_active = st.toggle("CUDA 12.4 NOT FOUND", disabled=True, value=False, key="cuda_active_toggle")
 
     if st.session_state.python_version.major == 3 and st.session_state.python_version.minor == 11 and st.session_state.python_version.micro == 6:
-        needed_python = st.toggle(f"Running from Python 3.11.6", disabled=True, value=True)
+        needed_python = st.toggle(f"Running from Python 3.11.6", disabled=True, value=True, key="needed_python_toggle")
     else:
-        needed_python = st.toggle(f"Running not from Python 3.11.6", disabled=True, value=False)
+        needed_python = st.toggle(f"Running not from Python 3.11.6", disabled=True, value=False, key="needed_python_toggle")
 
-    def test_detections():
-        import ultralytics
-        from ultralytics import YOLO
-        import cv2
-        import win32gui, win32con
-        cuda_support = ultralytics.utils.checks.cuda_is_available()
-        if cuda_support:
-            print("Cuda support True")
-        else:
-            print("Cuda is not supported\nTrying to reinstall torch with GPU support...")
-            
-        model = YOLO(f'models/{cfg.AI_model_name}', task='detect')
-        cap = cv2.VideoCapture('media/tests/test_det.mp4')
-        window_name = f"Model: {cfg.AI_model_name} imgsz: {cfg.ai_model_image_size}"
-        cv2.namedWindow(window_name)
-        debug_window_hwnd = win32gui.FindWindow(None, window_name)
-        win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
-        
-        while cap.isOpened():
-            success, frame = cap.read()
-            if success:
-                result = model(frame, stream=False, show=False, imgsz=cfg.ai_model_image_size, device=cfg.AI_device, verbose=False, conf=0.40)
-                annotated_frame = result[0].plot()
-                cv2.putText(annotated_frame, "TEST 1234567890", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
-                cv2.imshow(window_name, annotated_frame)
-                if cv2.waitKey(30) & 0xFF == ord("q"):
-                    break
-            else:
-                break
-
-        cap.release()
-        cv2.destroyAllWindows()
+    torch_gpu_support = st.toggle("Torch with GPU", value=st.session_state.torch_gpu_support, disabled=True, key="torch_gpu_support_toggle")
 
     def reinstall_aimbot():
         log_text = st.empty()
@@ -336,46 +306,49 @@ with HELPER:
         reinstall_aimbot()
 
     # Buttons
-    if st.button("Update/Install Sunone Aimbot"):
-        reinstall_aimbot()
+    if st.button("Update/Install Sunone Aimbot", key="reinstall_aimbot_button"):
+        st.text("Are you sure?")
+        if st.button("Yes", key="reinstall_aimbot_button_yes"):
+            reinstall_aimbot()
+        if st.button("No", key="reinstall_aimbot_button_no"):
+            pass
         
-    if st.button("Download CUDA 12.4"):
+    if st.button("Download CUDA 12.4", key="Download_cuda_button"):
         install_cuda()
 
-    if st.button("Install Torch"):
+    if st.button("Install Torch", key="install_torch_button"):
         if not find_cuda_path():
-            st.write("Please, download and install CUDA first.")
+            st.error("Please, download and install CUDA first.")
         else:
             with st.spinner("Installing Torch"):
                 os.system("pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu124")
             
-    if st.button("Install TensorRT"):
+    if st.button("Install TensorRT", key="install_tensorrt_button"):
         if find_cuda_path():
             with st.spinner("Installing TensorRT"):
                 os.system("pip install tensorrt")
         else:
-            st.write("Please, download and install CUDA first.")
-        
-    if st.button("Test detections"):
-        test_detections()
+            st.error("Please, download and install CUDA first.")
 
-    if st.button("Run Aimbot"):
+    if st.button("Run Aimbot", key="run_aimbot_button"):
         os.system("python run.py")
 
 with EXPORT:
     st.title("Model exporter")
+    
     models = []
     for root, dirs, files in os.walk("./models"):
         for file in files:
             if file.endswith(".pt"):
                 models.append(file)
                 
-    selected_model = st.selectbox("**Select model to export.**", models)
+    selected_model = st.selectbox("**Select model to export.**", models, key="export_selected_model_selectbox")
     
-    image_size = st.radio("**Select model size**",(320, 480, 640), help="The size of the model image must be correct.")
+    image_size = st.radio("**Select model size**",(320, 480, 640), help="The size of the model image must be correct.", key="export_image_size_radio")
     
-    if st.button("Export model"):
+    if st.button("Export model", key="export_export_model_button"):
         yolo_model = YOLO(f"./models/{selected_model}")
+        
         with st.spinner(f"Model {selected_model} exporting..."):
             yolo_model.export(format="engine", imgsz=image_size, half=True, device=0)
             st.success("Model exported!", icon="✅")
@@ -447,14 +420,18 @@ with CONFIG:
 
     # Aim
     st.header("Aim")
-    body_y_offset = st.slider(label="Body Y offset", min_value=0.01, max_value=0.99, value=config.getfloat('Aim', 'body_y_offset'))
+    body_y_offset = st.slider(label="Body Y offset", min_value=-0.99, max_value=0.99, value=config.getfloat('Aim', 'body_y_offset'))
     hideout_targets = st.checkbox("Hideout targets", value=config.getboolean('Aim', 'hideout_targets'))
     disable_headshot = st.checkbox("Disable headshot", value=config.getboolean('Aim', 'disable_headshot'))
     disable_prediction = st.checkbox("Disable prediction", value=config.getboolean('Aim', 'disable_prediction'))
+    prediction_interval = st.number_input("Prediction interval", value=config.getfloat('Aim', 'prediction_interval'), format="%.1f", min_value=0.1, max_value=5.0, step=0.1)
+    third_person = st.checkbox("Third person mode", value=config.getboolean('Aim', 'third_person'))
     config.set('Aim', 'body_y_offset', str(body_y_offset))
     config.set('Aim', 'hideout_targets', str(hideout_targets))
     config.set('Aim', 'disable_headshot', str(disable_headshot))
     config.set('Aim', 'disable_prediction', str(disable_prediction))
+    config.set('Aim', 'prediction_interval', str(prediction_interval))
+    config.set('Aim', 'third_person', str(third_person))
 
     # Hotkeys
     st.header("Hotkeys")
@@ -624,10 +601,10 @@ with TRAIN:
                 if file == 'last.pt':
                     last_pt_files.append(os.path.join(root, file))
                     
-        selected_model_path = st.selectbox(label="Select model", options=last_pt_files)
+        selected_model_path = st.selectbox(label="Select model", options=last_pt_files, key="TRAIN_ai_model")
         resume = st.checkbox(label="Resume training", value=False)
     else:
-        selected_model_path = st.selectbox(label="Select model", options=pretrained_models)
+        selected_model_path = st.selectbox(label="Select model", options=pretrained_models, index=4, key="TRAIN_ai_model")
     
     if not resume:
         # data yaml
@@ -646,7 +623,7 @@ with TRAIN:
         
         if augment: #TODO Add more settings
             augment_degrees = st.number_input(label="Degrees", format="%u", value=5, min_value=-180, max_value=180, step=5)
-            augment_flipud = st.number_input(label="Flipud", format="%f", value=0.2, min_value=0.0, max_value=1.0, step=0.1)
+            augment_flipud = st.number_input(label="Flipud", format="%.1f", value=0.2, min_value=0.0, max_value=1.0, step=0.1)
     
     # device
     input_devices = ["cpu", "0", "1", "2", "3", "4", "5"]
@@ -710,3 +687,129 @@ if __name__ == '__main__':
                 os.system(f'xterm -e python {temp_script_path}')
 
             st.success("Training started in a new terminal window.")
+    
+    with TESTS:
+        def test_detections(input_model, source_method="Default", video_source=None, TOPMOST=True, model_image_size = None, input_device = 0, input_delay = 30, resize_factor = 100, ai_conf = 0.20):
+            if input_model is None:
+                return ("error", "Model not selected")
+            
+            # CUDA GPU RETURN
+            cuda_support = st.session_state.torch_gpu_support
+            if not cuda_support:
+                return ("error", "Cuda is not supported")
+            
+            # Apply video source
+            if source_method == "Default":
+                video_source = "media/tests/test_det.mp4"
+            elif source_method == "Input file":
+                video_source = video_source.getvalue()
+                
+                with open("uploaded_video.mp4", "wb") as f:
+                    f.write(video_source)
+                    
+                video_source = "uploaded_video.mp4"
+            
+            cap = cv2.VideoCapture(video_source)
+            
+            if not cap.isOpened():
+                st.error("Error: Could not open video.")
+                return
+            
+            window_name = "Detections test"
+            cv2.namedWindow(window_name)
+            
+            if TOPMOST:
+                debug_window_hwnd = win32gui.FindWindow(None, window_name)
+                win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)
+            
+            model = YOLO(f'models/{input_model}', task='detect')
+            
+            while cap.isOpened():
+                success, frame = cap.read()
+                if success:
+                    result = model(frame, stream=False, show=False, imgsz=model_image_size, device=input_device, verbose=False, conf=ai_conf)
+                    
+                    annotated_frame = result[0].plot()
+                    
+                    cv2.putText(annotated_frame, "When life gives you lemons, don't make lemonade.", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+                    
+                    frame_height, frame_width = frame.shape[:2]
+                    height = int(frame_height * resize_factor / 100)
+                    width = int(frame_width * resize_factor / 100)
+                    dim = (width, height)
+                    cv2.resizeWindow(window_name, dim)
+                    resised = cv2.resize(annotated_frame, dim, cv2.INTER_NEAREST)
+                    cv2.imshow(window_name, resised)
+                    if cv2.waitKey(input_delay) & 0xFF == ord("q"):
+                        break
+                else:
+                    break
+
+            cap.release()
+            cv2.destroyAllWindows()
+            
+            if source_method == "Input file":
+                try:
+                    os.remove("./uploaded_video.mp4")
+                except: pass
+                
+            del model
+
+        st.title("Tests")
+
+        models = []
+        for root, dirs, files in os.walk("./models"):
+            for file in files:
+                if file.endswith(".pt") or file.endswith(".engine"):
+                    models.append(file)
+
+        # SELECT MODEL
+        ai_model = st.selectbox(label="AI Model", options=models, key="TESTS_ai_model_selectbox", help="Put model to './models' path.")
+
+        # SELECT MODEL IMAGE SIZE
+        model_image_sizes = [320, 480, 640]
+        model_size = st.selectbox(label="AI Model image size", options=model_image_sizes, key="TESTS_model_size_selectbox", index=2)
+        
+        # VIDEO SOURCE
+        methods = ["Default", "Input file"]
+        video_source_method = st.selectbox(label="Select video input method", options=methods, index=0, key="TESTS_video_source_method_selectbox")
+
+        # TOPMOST
+        TOPMOST = st.toggle(label="Test window on top", value=True)
+        
+        # DEVICE
+        test_devices = ["cpu", "0", "1", "2", "3", "4", "5"]
+        device = st.selectbox(label="Device", options=test_devices, index=1)
+        if device != "cpu":
+            device = int(device)
+        
+        # DELAY
+        cv2_delay = st.number_input(label="CV2 frame wait delay", min_value=1, max_value=120, step=1, format="%u", value=30, key="TESTS_cv2_delay_number_input")
+        
+        # RESIZE
+        cv2_resize = st.number_input(label="Resize test window", min_value=10, max_value=100, value=80, step=1, format="%u", key="ESTS_cv2_resize_number_input")
+        
+        # DETECTION CONF
+        ai_conf = st.number_input(label="Minimum confidence threshold", min_value=0.01, max_value=0.99, step=0.01, format="%.2f", value=0.20)
+        
+        input_video = None
+        if video_source_method == "Input file":
+            video_source_input_file = st.file_uploader(label="Import video file", accept_multiple_files=False, type=(["mp4"]), key="TESTS_input_file_video_source_input_file")
+            input_video = video_source_input_file
+
+        if st.button(label="Test detections", key="TESTS_text_detections_button"):
+            if video_source_method in methods:
+                if input_video == None and video_source_method == "Input file":
+                    st.error("Video source not found.")
+                else:
+                    test_detections(input_model=ai_model,
+                                    source_method=video_source_method,
+                                    video_source=input_video,
+                                    model_image_size=model_size,
+                                    TOPMOST=TOPMOST,
+                                    input_delay=cv2_delay,
+                                    input_device=device,
+                                    resize_factor=cv2_resize,
+                                    ai_conf=ai_conf)
+            else:
+                st.error("Select correct video input method.")
