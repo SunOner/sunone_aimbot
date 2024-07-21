@@ -72,10 +72,10 @@ class MouseThread:
 
     def process_data(self, data):
         target_x, target_y, target_w, target_h, target_cls = data
-        
         # draw simple line
-        if (cfg.show_window and cfg.show_target_line) or (cfg.show_overlay and cfg.show_target_line):
-            visuals.draw_target_line(target_x, target_y, target_cls)
+        if cfg.AI_mouse_net == False:
+            if (cfg.show_window and cfg.show_target_line) or (cfg.show_overlay and cfg.show_target_line):
+                visuals.draw_target_line(target_x, target_y, target_cls)
         
         # bScope
         self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h, self.bScope_multiplier) if cfg.auto_shoot or cfg.triggerbot else False
@@ -85,11 +85,11 @@ class MouseThread:
         if not self.disable_prediction:
             current_time = time.time()
             target_x, target_y = self.predict_target_position(target_x, target_y, current_time)
-            
-            if (cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line):
-                visuals.draw_predicted_position(target_x, target_y, target_cls)
+            if cfg.AI_mouse_net == False:
+                if (cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line):
+                    visuals.draw_predicted_position(target_x, target_y, target_cls)
 
-        target_x, target_y = self.calc_movement(target_x, target_y)
+        target_x, target_y = self.calc_movement(target_x, target_y, target_cls)
 
         # history points
         if (cfg.show_window and cfg.show_history_points) or (cfg.show_overlay and cfg.show_history_points):
@@ -112,7 +112,7 @@ class MouseThread:
 
         velocity_x = (target_x - self.prev_x) / delta_time
         velocity_y = (target_y - self.prev_y) / delta_time
-
+        
         acceleration_x = (velocity_x - self.prev_velocity_x) / delta_time
         acceleration_y = (velocity_y - self.prev_velocity_y) / delta_time
 
@@ -129,7 +129,7 @@ class MouseThread:
 
         return predicted_x, predicted_y
     
-    def calc_movement(self, target_x, target_y):
+    def calc_movement(self, target_x, target_y, target_cls):
         if not cfg.AI_mouse_net:
             offset_x = target_x - self.center_x
             offset_y = target_y - self.center_y
@@ -161,7 +161,10 @@ class MouseThread:
             input_tensor = torch.tensor(input_data, dtype=torch.float32).to(self.device)
             with torch.no_grad():
                 move = self.model(input_tensor).cpu().numpy()
-            
+                
+            if (cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line):
+                    visuals.draw_predicted_position(move[0] + self.center_x, move[1] + self.center_y, target_cls)
+                    
             return move[0], move[1]
         
     def move_mouse(self, x, y):
@@ -169,16 +172,17 @@ class MouseThread:
             x = 0
         if y is None:
             y = 0
-            
-        if (self.get_shooting_key_state() and not cfg.mouse_auto_aim and not cfg.triggerbot) or cfg.mouse_auto_aim:
-            if not cfg.mouse_ghub and x is not None and y is not None and not cfg.arduino_move:  # Native move
-                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
-                
-            if cfg.mouse_ghub and x is not None and y is not None and not cfg.arduino_move:  # ghub move
-                self.ghub.mouse_xy(int(x), int(y))
+        
+        if x != 0 and y != 0:
+            if (self.get_shooting_key_state() and not cfg.mouse_auto_aim and not cfg.triggerbot) or cfg.mouse_auto_aim:
+                if not cfg.mouse_ghub and x is not None and y is not None and not cfg.arduino_move:  # Native move
+                    win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
+                    
+                if cfg.mouse_ghub and x is not None and y is not None and not cfg.arduino_move:  # ghub move
+                    self.ghub.mouse_xy(int(x), int(y))
 
-            if cfg.arduino_move and x is not None and y is not None:  # Arduino     
-                arduino.move(int(x), int(y))
+                if cfg.arduino_move and x is not None and y is not None:  # Arduino     
+                    arduino.move(int(x), int(y))
     
     def get_shooting_key_state(self):
         for key_name in cfg.hotkey_targeting_list:

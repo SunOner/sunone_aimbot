@@ -7,8 +7,14 @@ class Config():
         self.window_name = self.get_random_window_name()
         self.Read(verbose=False)
     
-    def Read(self, verbose=False, ):
-        self.config.read('./config.ini')
+    def Read(self, verbose=False):
+        try:
+            with open("config.ini", "r", encoding="utf-8",) as f:
+                self.config.read_file(f)
+        except FileNotFoundError:
+            print("Config file not found!")
+            quit()
+            
         # Detection window
         self.config_Detection_window = self.config['Detection window']
         self.detection_window_width = int(self.config_Detection_window['detection_window_width'])
@@ -101,7 +107,7 @@ class Config():
             
     def get_random_window_name(self):
         try:
-            with open('window_names.txt', 'r') as file:
+            with open('window_names.txt', 'r', encoding="utf-8") as file:
                 window_names = file.read().splitlines()
             return random.choice(window_names) if window_names else 'Calculator'
         except FileNotFoundError:

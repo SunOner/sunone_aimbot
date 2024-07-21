@@ -43,7 +43,7 @@ class FrameParser:
             if cfg.show_window and cfg.show_detection_speed:
                 visuals.draw_speed(frame.speed['preprocess'], frame.speed['inference'], frame.speed['postprocess'])
                 
-    def sort_targets(self, frame) -> Target:
+    def sort_targets(self, frame):
         boxes_array = frame.boxes.xywh.to(self.arch)
         center = torch.tensor([capture.screen_x_center, capture.screen_y_center], device=self.arch)
         

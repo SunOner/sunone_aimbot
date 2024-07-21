@@ -272,7 +272,7 @@ with HELPER:
              # logic
             './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll',
             './logic/buttons.py', './logic/overlay.py', './logic/mouse.py', './logic/visual.py', './logic/frame_parser.py', './logic/hotkeys_watcher.py',
-            './logic/shooting.py',
+            './logic/shooting.py', './logic/checks.py',
             # media
             './media/aimbot.png', './media/cuda.png', './media/one.gif', './media/python.png', './media/tests/test_det.mp4',
             # docs

@@ -6,6 +6,7 @@ from logic.capture import capture
 from logic.visual import visuals
 from logic.frame_parser import frameParser
 from logic.hotkeys_watcher import hotkeys_watcher
+from logic.checks import run_checks
 
 @torch.inference_mode()
 def perform_detection(model, image):
@@ -29,8 +30,10 @@ def perform_detection(model, image):
         show_conf=False,
         save=False,
         show=False)
-
-def init():    
+        
+def init():
+    run_checks()
+    
     try:
         model = YOLO(f'models/{cfg.AI_model_name}', task='detect')
     except Exception as e:

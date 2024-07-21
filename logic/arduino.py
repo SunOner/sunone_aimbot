@@ -75,7 +75,6 @@ class ArduinoMouse:
         return None
 
     def _send_command(self, command):
-        """Helper method to send a command to the Arduino."""
         self.serial_port.write(f'{command}\n'.encode())
     
     def find_library_directory(self, base_path, library_name_start):
