@@ -27,6 +27,7 @@ try:
     import torch
     from packaging import version
     import numpy as np
+    import scipy
 except ModuleNotFoundError:
     os.system("pip install -r requirements.txt")
     os.system("streamlit run helper.py")
@@ -453,6 +454,11 @@ with CONFIG:
     mouse_sensitivity = st.number_input("Mouse sensitivity", min_value=0.1, value=config.getfloat('Mouse', 'mouse_sensitivity'))
     mouse_fov_width = st.number_input("Mouse FOV width", value=config.getint('Mouse', 'mouse_fov_width'))
     mouse_fov_height = st.number_input("Mouse FOV height", value=config.getint('Mouse', 'mouse_fov_height'))
+    mouse_clamp_movement = st.checkbox("Mouse clamp movement", value=config.getboolean('Mouse', 'mouse_clamp_movement'))
+    mouse_max_movement_x = st.number_input("Mouse max movement_x", value=config.getfloat('Mouse', 'mouse_max_movement_x'))
+    mouse_max_movement_y = st.number_input("Mouse max movement_y", value=config.getfloat('Mouse', 'mouse_max_movement_y'))
+    mouse_on_target_slow_x = st.number_input("Mouse on target slow X", value=config.getfloat('Mouse', 'mouse_on_target_slow_x'))
+    mouse_on_target_slow_y = st.number_input("Mouse on target slow Y", value=config.getfloat('Mouse', 'mouse_on_target_slow_y'))
     mouse_lock_target = st.checkbox("Mouse lock target", value=config.getboolean('Mouse', 'mouse_lock_target'))
     mouse_auto_aim = st.checkbox("Mouse auto aim", value=config.getboolean('Mouse', 'mouse_auto_aim'))
     mouse_ghub = st.checkbox("Mouse GHUB", value=config.getboolean('Mouse', 'mouse_ghub'))
@@ -460,6 +466,11 @@ with CONFIG:
     config.set('Mouse', 'mouse_sensitivity', str(mouse_sensitivity))
     config.set('Mouse', 'mouse_fov_width', str(mouse_fov_width))
     config.set('Mouse', 'mouse_fov_height', str(mouse_fov_height))
+    config.set('Mouse', 'mouse_clamp_movement', str(mouse_clamp_movement))
+    config.set('Mouse', 'mouse_max_movement_x', str(mouse_max_movement_x))
+    config.set('Mouse', 'mouse_max_movement_y', str(mouse_max_movement_y))
+    config.set('Mouse', 'mouse_on_target_slow_x', str(mouse_on_target_slow_x))
+    config.set('Mouse', 'mouse_on_target_slow_y', str(mouse_on_target_slow_y))
     config.set('Mouse', 'mouse_lock_target', str(mouse_lock_target))
     config.set('Mouse', 'mouse_auto_aim', str(mouse_auto_aim))
     config.set('Mouse', 'mouse_ghub', str(mouse_ghub))

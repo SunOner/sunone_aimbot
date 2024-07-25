@@ -1,6 +1,5 @@
 <div align="center">
-#Development
-  
+
 # Sunone Aimbot
 [![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/sunone_aimbot)
 [![License MIT](https://badgen.net/github/license/SunOner/sunone_aimbot)](https://github.com/SunOner/sunone_aimbot/blob/main/LICENSE)
@@ -47,7 +46,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.0.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.61</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2.64</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>0.4.1 (YOLOv8)</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.6.0 (YOLOv10)</td></tr></thead>
 </table>
@@ -90,6 +89,11 @@ The behavior of the aimbot can be configured via the [`config.ini`](https://gith
 - mouse_sensitivity  `float`: Aim sensitivity.
 - mouse_fov_width  `int`: The current horizontal value of the viewing angle in the game.
 - mouse_fov_height  `int`: The current vertical value of the viewing angle in the game.
+- mouse_clamp_movment `bool` True: Activate feature to limit the distance per movement by the bot according to your settings. False: no limitations per movement by the bot are applied.
+- mouse_max_movement_x `float`: While clamping is true this setting applies how far the mouse can move left and right per movement by the bot.
+- mouse_max_movement_y `float`: While clamping is true this setting applies how far the mouse can move up and down per movement by the bot.
+- mouse_on_target_slow_x `float` Maximum movment speed left and right while in the inner 20% of detection window. 10.0 is 100% (full speed) 5.1 is 51% of your speed (adjust to your needs)
+- mouse_on_target_slow_y `float` Maximum movment speed while in the inner 20% of detection window. 10.0 is 100% (full speed) 0.5 is 5% of your speed (adjust to your needs 10.0 to 0.1)
 - mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
 - mouse_auto_aim `bool`: Automatic targeting.
 - mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse movement. If the value is False, native win32 library is used for movement.

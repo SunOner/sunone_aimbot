@@ -7,8 +7,14 @@ class Config():
         self.window_name = self.get_random_window_name()
         self.Read(verbose=False)
     
-    def Read(self, verbose=False, ):
-        self.config.read('./config.ini')
+    def Read(self, verbose=False):
+        try:
+            with open("config.ini", "r", encoding="utf-8",) as f:
+                self.config.read_file(f)
+        except FileNotFoundError:
+            print("Config file not found!")
+            quit()
+            
         # Detection window
         self.config_Detection_window = self.config['Detection window']
         self.detection_window_width = int(self.config_Detection_window['detection_window_width'])
@@ -32,7 +38,6 @@ class Config():
         self.disable_prediction = self.config_Aim.getboolean('disable_prediction')
         self.prediction_interval = float(self.config_Aim['prediction_interval'])
         self.third_person = self.config_Aim.getboolean('third_person')
-        self.center_threshold = int(self.config_Aim['center_threshold'])
         # Hotkeys
         self.config_Hotkeys_settings = self.config['Hotkeys']
         self.hotkey_targeting = str(self.config_Hotkeys_settings['hotkey_targeting'])
@@ -46,13 +51,11 @@ class Config():
         self.mouse_sensitivity = float(self.config_Mouse['mouse_sensitivity'])
         self.mouse_fov_width = int(self.config_Mouse['mouse_fov_width'])
         self.mouse_fov_height = int(self.config_Mouse['mouse_fov_height'])
-        self.mouse_sensitivity_x = float(self.config_Mouse['mouse_x_sensitivity'])
-        self.mouse_sensitivity_y = float(self.config_Mouse['mouse_y_sensitivity'])
-        self.max_y_movement = float(self.config_Mouse['mouse_y_max_movement'])
-        self.max_x_movement = float(self.config_Mouse['mouse_x_max_movement'])
-        self.non_AI_vertical_offset = int(self.config_Mouse['mouse_vertical_offset'])
-        self.non_AI_horizontal_offset = int(self.config_Mouse['mouse_horizontal_offset'])
-        self.smoothing_factor = float(self.config_Mouse['mouse_smoothing_factor'])
+        self.mouse_clamp_movement = self.config_Mouse.getboolean('mouse_clamp_movement')
+        self.mouse_on_target_slow_x = float(self.config_Mouse['mouse_on_target_slow_x'])
+        self.mouse_on_target_slow_y = float(self.config_Mouse['mouse_on_target_slow_y'])
+        self.mouse_max_movement_x = float(self.config_Mouse['mouse_max_movement_x'])
+        self.mouse_max_movement_y = float(self.config_Mouse['mouse_max_movement_y'])
         self.mouse_lock_target = self.config_Mouse.getboolean('mouse_lock_target')
         self.mouse_auto_aim = self.config_Mouse.getboolean('mouse_auto_aim')
         self.mouse_ghub = self.config_Mouse.getboolean('mouse_ghub')
@@ -77,8 +80,6 @@ class Config():
         self.AI_device = str(self.config_AI['AI_device'])
         self.AI_enable_AMD = self.config_AI.getboolean('AI_enable_AMD')
         self.AI_mouse_net = self.config_AI.getboolean('AI_mouse_net')
-        self.Mouse_net_vertical_offset = int(self.config_AI['Mouse_net_vertical_offset'])
-        self.Mouse_net_horizontal_offset = int(self.config_AI['Mouse_net_horizontal_offset'])
         # Overlay
         self.config_overlay = self.config['overlay']
         self.show_overlay = self.config_overlay.getboolean('show_overlay')
@@ -111,7 +112,7 @@ class Config():
             
     def get_random_window_name(self):
         try:
-            with open('window_names.txt', 'r') as file:
+            with open('window_names.txt', 'r', encoding="utf-8") as file:
                 window_names = file.read().splitlines()
             return random.choice(window_names) if window_names else 'Calculator'
         except FileNotFoundError:
