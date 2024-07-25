@@ -11,3 +11,4 @@ pyserial
 requests
 opencv-python
 packaging
+scipy
