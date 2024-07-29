@@ -2,6 +2,7 @@ import torch
 import win32con, win32api
 import torch.nn as nn
 import time
+import math
 
 from logic.config_watcher import cfg
 from logic.visual import visuals
@@ -43,6 +44,9 @@ class MouseThread:
         self.prev_x = 0
         self.prev_y = 0
         self.prev_time = None
+        self.max_distance = math.sqrt(self.screen_width**2 + self.screen_height**2) / 2
+        self.min_speed_multiplier = cfg.mouse_min_speed_multiplier
+        self.max_speed_multiplier = cfg.mouse_max_speed_multiplier
         
         self.bScope = False
         
@@ -129,19 +133,29 @@ class MouseThread:
 
         return predicted_x, predicted_y
     
+    def calculate_speed_multiplier(self, distance):
+        normalized_distance = min(distance / self.max_distance, 1)
+        speed_multiplier = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
+        
+        return speed_multiplier
+    
     def calc_movement(self, target_x, target_y, target_cls):
         if not cfg.AI_mouse_net:
             offset_x = target_x - self.center_x
             offset_y = target_y - self.center_y
 
+            distance = math.sqrt(offset_x**2 + offset_y**2)
+            
+            speed_multiplier = self.calculate_speed_multiplier(distance)
+
             degrees_per_pixel_x = self.fov_x / self.screen_width
             degrees_per_pixel_y = self.fov_y / self.screen_height
             
             mouse_move_x = offset_x * degrees_per_pixel_x
-            move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+            move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
 
             mouse_move_y = offset_y * degrees_per_pixel_y
-            move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity))
+            move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
                 
             return move_x, move_y
         else:

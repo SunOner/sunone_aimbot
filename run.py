@@ -12,13 +12,13 @@ from logic.checks import run_checks
 def perform_detection(model, image):
     return model.predict(
         source=image,
-        cfg='logic/game.yaml',
+        cfg="logic/game.yaml",
         imgsz=cfg.ai_model_image_size,
         stream=True,
         conf=cfg.AI_conf,
         iou=0.5,
         device=cfg.AI_device,
-        half=False if 'cpu' in cfg.AI_device else True,
+        half=False if "cpu" in cfg.AI_device else True,
         max_det=20,
         agnostic_nms=False,
         augment=False,
@@ -35,9 +35,9 @@ def init():
     run_checks()
     
     try:
-        model = YOLO(f'models/{cfg.AI_model_name}', task='detect')
+        model = YOLO(f"models/{cfg.AI_model_name}", task="detect")
     except Exception as e:
-        print('An error occurred when loading the AI model:\n', e)
+        print("An error occurred when loading the AI model:\n", e)
         quit(0)
     
     while True:

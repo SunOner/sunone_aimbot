@@ -35,7 +35,10 @@ except ModuleNotFoundError:
 def install_cuda():
         st.write("Cuda 12.4 is being downloaded, and installation will begin after downloading.")
         download_file("https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_551.61_windows.exe", "./cuda_12.4.0_551.61_windows.exe")
-        subprocess.call(f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), "cuda_12.4.0_551.61_windows.exe")}')
+        try:
+            subprocess.call(f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), "cuda_12.4.0_551.61_windows.exe")}')
+        except OSError:
+            st.error("The Cuda file has been downloaded but cannot be executed because administrator permission is required, please install cuda manually, the file (cuda_12.4.0_551.61_windows.exe) is available in the project folder.")
         
 def delete_files_in_folder(folder):
         for filename in os.listdir(folder):
@@ -85,6 +88,7 @@ def upgrade_pip():
         if not current_version_match:
             print("Unable to determine current pip version")
             return None
+        
         current_version = current_version_match.group(1)
         
         result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "--dry-run"], capture_output=True, text=True, check=True, timeout=30)
@@ -391,41 +395,41 @@ with CONFIG:
     config = load_config()
 
     # Detection window
-    st.header("Detection window")
-    detection_window_width = st.number_input("Detection window width", value=config.getint('Detection window', 'detection_window_width'))
-    detection_window_height = st.number_input("Detection window height", value=config.getint('Detection window', 'detection_window_height'))
+    st.subheader("Detection window", divider=True)
+    detection_window_width = st.number_input("Detection window width", value=config.getint('Detection window', 'detection_window_width'), key="config_detection_window_width")
+    detection_window_height = st.number_input("Detection window height", value=config.getint('Detection window', 'detection_window_height'), key="config_detection_window_height")
     config.set('Detection window', 'detection_window_width', str(detection_window_width))
     config.set('Detection window', 'detection_window_height', str(detection_window_height))
 
     # Capture Methods
-    st.header("Capture Methods")
-    selected_capture_method = st.radio(label="Capture Method", options=["Bettercam capture", "OBS"])
+    st.subheader("Capture Methods", divider=True)
+    selected_capture_method = st.radio(label="Capture Method", options=["Bettercam capture", "OBS"], key="config_selected_capture_method")
     
     if selected_capture_method == "Bettercam capture":        
-        bettercam_capture_fps = st.number_input("Bettercam capture FPS", value=config.getint('Capture Methods', 'bettercam_capture_fps'))
-        bettercam_monitor_id = st.number_input("Bettercam monitor ID", value=config.getint('Capture Methods', 'bettercam_monitor_id'))
-        bettercam_gpu_id = st.number_input("Bettercam GPU ID", value=config.getint('Capture Methods', 'bettercam_gpu_id'))
+        bettercam_capture_fps = st.number_input("Bettercam capture FPS", value=config.getint('Capture Methods', 'bettercam_capture_fps'), key="config_bettercam_capture_fps")
+        bettercam_monitor_id = st.number_input("Bettercam monitor ID", value=config.getint('Capture Methods', 'bettercam_monitor_id'), key="config_bettercam_monitor_id")
+        bettercam_gpu_id = st.number_input("Bettercam GPU ID", value=config.getint('Capture Methods', 'bettercam_gpu_id'), key="config_bettercam_gpu_id")
         config.set('Capture Methods', 'Bettercam_capture', "True")
         config.set('Capture Methods', 'Obs_capture', "False")
         config.set('Capture Methods', 'bettercam_capture_fps', str(bettercam_capture_fps))
         config.set('Capture Methods', 'bettercam_monitor_id', str(bettercam_monitor_id))
         config.set('Capture Methods', 'bettercam_gpu_id', str(bettercam_gpu_id))
     else:
-        obs_camera_id = st.selectbox(label="Obs camera ID", options=["auto", "0","1","2","3","4","5","6","7","8","9","10"], index=0)
-        obs_capture_fps = st.number_input("Obs capture FPS", value=config.getint('Capture Methods', 'Obs_capture_fps'))
+        obs_camera_id = st.selectbox(label="Obs camera ID", options=["auto", "0","1","2","3","4","5","6","7","8","9","10"], index=0, key="config_obs_camera_id")
+        obs_capture_fps = st.number_input("Obs capture FPS", value=config.getint('Capture Methods', 'Obs_capture_fps'), key="config_obs_capture_fps")
         config.set('Capture Methods', 'Bettercam_capture', "False")
         config.set('Capture Methods', 'Obs_capture', "True")
         config.set('Capture Methods', 'Obs_camera_id', obs_camera_id)
         config.set('Capture Methods', 'Obs_capture_fps', str(obs_capture_fps))
 
     # Aim
-    st.header("Aim")
-    body_y_offset = st.slider(label="Body Y offset", min_value=-0.99, max_value=0.99, value=config.getfloat('Aim', 'body_y_offset'))
-    hideout_targets = st.checkbox("Hideout targets", value=config.getboolean('Aim', 'hideout_targets'))
-    disable_headshot = st.checkbox("Disable headshot", value=config.getboolean('Aim', 'disable_headshot'))
-    disable_prediction = st.checkbox("Disable prediction", value=config.getboolean('Aim', 'disable_prediction'))
-    prediction_interval = st.number_input("Prediction interval", value=config.getfloat('Aim', 'prediction_interval'), format="%.1f", min_value=0.1, max_value=5.0, step=0.1)
-    third_person = st.checkbox("Third person mode", value=config.getboolean('Aim', 'third_person'))
+    st.subheader("Aim", divider=True)
+    body_y_offset = st.slider(label="Body Y offset", min_value=-0.99, max_value=0.99, value=config.getfloat('Aim', 'body_y_offset'), key="config_body_y_offset")
+    hideout_targets = st.checkbox("Hideout targets", value=config.getboolean('Aim', 'hideout_targets'), key="config_hideout_targets")
+    disable_headshot = st.checkbox("Disable headshot", value=config.getboolean('Aim', 'disable_headshot'), key="config_disable_headshot")
+    disable_prediction = st.checkbox("Disable prediction", value=config.getboolean('Aim', 'disable_prediction'), key="config_disable_prediction")
+    prediction_interval = st.number_input("Prediction interval", value=config.getfloat('Aim', 'prediction_interval'), format="%.1f", min_value=0.1, max_value=5.0, step=0.1, key="config_prediction_interval")
+    third_person = st.checkbox("Third person mode", value=config.getboolean('Aim', 'third_person'), key="config_third_person")
     config.set('Aim', 'body_y_offset', str(body_y_offset))
     config.set('Aim', 'hideout_targets', str(hideout_targets))
     config.set('Aim', 'disable_headshot', str(disable_headshot))
@@ -434,28 +438,28 @@ with CONFIG:
     config.set('Aim', 'third_person', str(third_person))
 
     # Hotkeys
-    st.header("Hotkeys")
+    st.subheader("Hotkeys", divider=True)
     hotkey_options = []
     for i in logic.buttons.Buttons.KEY_CODES:
         hotkey_options.append(i)
-    hotkey_targeting = st.selectbox(label="Hotkey targeting", options=hotkey_options, index=hotkey_options.index(config.get('Hotkeys', 'hotkey_targeting')))
-    hotkey_exit = st.selectbox(label="Hotkey exit", options=hotkey_options, index=hotkey_options.index(config.get('Hotkeys', 'hotkey_exit')))
-    hotkey_pause = st.selectbox(label="Hotkey pause",options=hotkey_options,  index=hotkey_options.index(config.get('Hotkeys', 'hotkey_pause')))
-    hotkey_reload_config = st.selectbox(label="Hotkey reload config",options=hotkey_options,  index=hotkey_options.index(config.get('Hotkeys', 'hotkey_reload_config')))
+    hotkey_targeting = st.selectbox(label="Hotkey targeting", options=hotkey_options, index=hotkey_options.index(config.get('Hotkeys', 'hotkey_targeting')), key="config_hotkey_targeting")
+    hotkey_exit = st.selectbox(label="Hotkey exit", options=hotkey_options, index=hotkey_options.index(config.get('Hotkeys', 'hotkey_exit')), key="config_hotkey_exit")
+    hotkey_pause = st.selectbox(label="Hotkey pause",options=hotkey_options,  index=hotkey_options.index(config.get('Hotkeys', 'hotkey_pause')), key="config_hotkey_pause")
+    hotkey_reload_config = st.selectbox(label="Hotkey reload config",options=hotkey_options,  index=hotkey_options.index(config.get('Hotkeys', 'hotkey_reload_config')), key="config_hotkey_reload_config")
     config.set('Hotkeys', 'hotkey_targeting', hotkey_targeting)
     config.set('Hotkeys', 'hotkey_exit', hotkey_exit)
     config.set('Hotkeys', 'hotkey_pause', hotkey_pause)
     config.set('Hotkeys', 'hotkey_reload_config', hotkey_reload_config)
 
     # Mouse
-    st.header("Mouse")
-    mouse_dpi = st.number_input("Mouse DPI", min_value=100, step=100, value=config.getint('Mouse', 'mouse_dpi'))
-    mouse_sensitivity = st.number_input("Mouse sensitivity", min_value=0.1, value=config.getfloat('Mouse', 'mouse_sensitivity'))
-    mouse_fov_width = st.number_input("Mouse FOV width", value=config.getint('Mouse', 'mouse_fov_width'))
-    mouse_fov_height = st.number_input("Mouse FOV height", value=config.getint('Mouse', 'mouse_fov_height'))
-    mouse_lock_target = st.checkbox("Mouse lock target", value=config.getboolean('Mouse', 'mouse_lock_target'))
-    mouse_auto_aim = st.checkbox("Mouse auto aim", value=config.getboolean('Mouse', 'mouse_auto_aim'))
-    mouse_ghub = st.checkbox("Mouse GHUB", value=config.getboolean('Mouse', 'mouse_ghub'))
+    st.subheader("Mouse", divider=True)
+    mouse_dpi = st.number_input("Mouse DPI", min_value=100, step=100, value=config.getint('Mouse', 'mouse_dpi'), key="config_mouse_dpi")
+    mouse_sensitivity = st.number_input("Mouse sensitivity", min_value=0.1, value=config.getfloat('Mouse', 'mouse_sensitivity'), key="config_mouse_sensitivity")
+    mouse_fov_width = st.number_input("Mouse FOV width", value=config.getint('Mouse', 'mouse_fov_width'), key="config_mouse_fov_width")
+    mouse_fov_height = st.number_input("Mouse FOV height", value=config.getint('Mouse', 'mouse_fov_height'), key="config_mouse_fov_height")
+    mouse_lock_target = st.checkbox("Mouse lock target", value=config.getboolean('Mouse', 'mouse_lock_target'), key="config_mouse_lock_target")
+    mouse_auto_aim = st.checkbox("Mouse auto aim", value=config.getboolean('Mouse', 'mouse_auto_aim'), key="config_mouse_auto_aim")
+    mouse_ghub = st.checkbox("Mouse GHUB", value=config.getboolean('Mouse', 'mouse_ghub'), key="config_mouse_ghub")
     config.set('Mouse', 'mouse_dpi', str(mouse_dpi))
     config.set('Mouse', 'mouse_sensitivity', str(mouse_sensitivity))
     config.set('Mouse', 'mouse_fov_width', str(mouse_fov_width))
@@ -465,22 +469,22 @@ with CONFIG:
     config.set('Mouse', 'mouse_ghub', str(mouse_ghub))
 
     # Shooting
-    st.header("Shooting")
-    auto_shoot = st.checkbox("Auto shoot", value=config.getboolean('Shooting', 'auto_shoot'))
-    triggerbot = st.checkbox("Triggerbot", value=config.getboolean('Shooting', 'triggerbot'))
-    force_click = st.checkbox("Force click", value=config.getboolean('Shooting', 'force_click'))
-    bScope_multiplier = st.number_input("bScope multiplier", step=.10, value=config.getfloat('Shooting', 'bScope_multiplier'))
+    st.subheader("Shooting", divider=True)
+    auto_shoot = st.checkbox("Auto shoot", value=config.getboolean('Shooting', 'auto_shoot'), key="config_auto_shoot")
+    triggerbot = st.checkbox("Triggerbot", value=config.getboolean('Shooting', 'triggerbot'), key="config_triggerbot")
+    force_click = st.checkbox("Force click", value=config.getboolean('Shooting', 'force_click'), key="config_force_click")
+    bScope_multiplier = st.number_input("bScope multiplier", step=.10, value=config.getfloat('Shooting', 'bScope_multiplier'), key="config_bScope_multiplier")
     config.set('Shooting', 'auto_shoot', str(auto_shoot))
     config.set('Shooting', 'triggerbot', str(triggerbot))
     config.set('Shooting', 'force_click', str(force_click))
     config.set('Shooting', 'bScope_multiplier', str(bScope_multiplier))
 
     # Arduino
-    st.header("Arduino")
-    arduino_move = st.checkbox("Arduino move", value=config.getboolean('Arduino', 'arduino_move'))
-    arduino_shoot = st.checkbox("Arduino shoot", value=config.getboolean('Arduino', 'arduino_shoot'))
+    st.subheader("Arduino", divider=True)
+    arduino_move = st.checkbox("Arduino move", value=config.getboolean('Arduino', 'arduino_move'), key="config_arduino_move")
+    arduino_shoot = st.checkbox("Arduino shoot", value=config.getboolean('Arduino', 'arduino_shoot'), key="config_arduino_shoot")
     if arduino_move or arduino_shoot:
-        arduino_port = st.text_input("Arduino port", value=config.get('Arduino', 'arduino_port'))
+        arduino_port = st.text_input("Arduino port", value=config.get('Arduino', 'arduino_port'), key="config_arduino_port")
         
         baudrates = [2400,
                      4800,
@@ -491,9 +495,9 @@ with CONFIG:
                      57600,
                      74880,
                      115200]
-        arduino_baudrate = st.selectbox(label="Arduino baudrate", options=baudrates, index=baudrates.index(config.getint('Arduino', 'arduino_baudrate')))
+        arduino_baudrate = st.selectbox(label="Arduino baudrate", options=baudrates, index=baudrates.index(config.getint('Arduino', 'arduino_baudrate')), key="config_arduino_baudrate")
         
-        arduino_16_bit_mouse = st.checkbox("Arduino 16 bit mouse", value=config.getboolean('Arduino', 'arduino_16_bit_mouse'))
+        arduino_16_bit_mouse = st.checkbox("Arduino 16 bit mouse", value=config.getboolean('Arduino', 'arduino_16_bit_mouse'), key="config_arduino_16_bit_mouse")
         config.set('Arduino', 'arduino_move', str(arduino_move))
         config.set('Arduino', 'arduino_shoot', str(arduino_shoot))
         config.set('Arduino', 'arduino_port', arduino_port)
@@ -501,7 +505,7 @@ with CONFIG:
         config.set('Arduino', 'arduino_16_bit_mouse', str(arduino_16_bit_mouse))
 
     # AI
-    st.header("AI")
+    st.subheader("AI", divider=True)
     
     models = []
     for root, dirs, files in os.walk("./models"):
@@ -509,17 +513,17 @@ with CONFIG:
             if file.endswith(".pt") or file.endswith(".engine"):
                 models.append(file)
     
-    AI_model_name = st.selectbox(label="AI model", options=models)
+    AI_model_name = st.selectbox(label="AI model", options=models, key="config_AI_model_name")
     
     imgsz = [320, 480, 640]
-    AI_model_image_size = st.selectbox(label="AI model image size", options=imgsz, index=imgsz.index(config.getint('AI', 'AI_model_image_size')))
+    AI_model_image_size = st.selectbox(label="AI model image size", options=imgsz, index=imgsz.index(config.getint('AI', 'AI_model_image_size')), key="config_AI_model_image_size")
     
-    AI_conf = st.slider("AI confidence", min_value=0.01, max_value=0.99, value=config.getfloat('AI', 'AI_conf'))
+    AI_conf = st.slider("AI confidence", min_value=0.01, max_value=0.99, value=config.getfloat('AI', 'AI_conf'), key="config_AI_conf")
     
     devices = ["cpu", "0", "1", "2", "3", "4", "5"]
-    AI_device = st.selectbox(label="AI device", options=devices, index=devices.index(config.get('AI', 'AI_device')))
-    AI_enable_AMD = st.checkbox("AI enable AMD", value=config.getboolean('AI', 'AI_enable_AMD'))
-    AI_mouse_net = st.checkbox("AI mouse net", value=config.getboolean('AI', 'AI_mouse_net'))
+    AI_device = st.selectbox(label="AI device", options=devices, index=devices.index(config.get('AI', 'AI_device')), key="config_AI_device")
+    AI_enable_AMD = st.checkbox("AI enable AMD", value=config.getboolean('AI', 'AI_enable_AMD'), key="config_AI_enable_AMD")
+    AI_mouse_net = st.checkbox("AI mouse net", value=config.getboolean('AI', 'AI_mouse_net'), key="config_AI_mouse_net")
     config.set('AI', 'AI_model_name', AI_model_name)
     config.set('AI', 'AI_model_image_size', str(AI_model_image_size))
     config.set('AI', 'AI_conf', str(AI_conf))
@@ -528,15 +532,15 @@ with CONFIG:
     config.set('AI', 'AI_mouse_net', str(AI_mouse_net))
 
     # Overlay
-    st.header("Overlay")
-    show_overlay = st.toggle("Show overlay", value=config.getboolean('overlay', 'show_overlay'))
+    st.subheader("Overlay", divider=True)
+    show_overlay = st.toggle("Show overlay", value=config.getboolean('overlay', 'show_overlay'), key="config_show_overlay")
     if show_overlay:
-        overlay_show_borders = st.checkbox("Overlay show borders", value=config.getboolean('overlay', 'overlay_show_borders'))
-        overlay_show_boxes = st.checkbox("Overlay show boxes", value=config.getboolean('overlay', 'overlay_show_boxes'))
-        overlay_show_target_line = st.checkbox("Overlay show target line", value=config.getboolean('overlay', 'overlay_show_target_line'))
-        overlay_show_target_prediction_line = st.checkbox("Overlay show target prediction line", value=config.getboolean('overlay', 'overlay_show_target_prediction_line'))
-        overlay_show_labels = st.checkbox("Overlay show labels", value=config.getboolean('overlay', 'overlay_show_labels'))
-        overlay_show_conf = st.checkbox("Overlay show confidence", value=config.getboolean('overlay', 'overlay_show_conf'))
+        overlay_show_borders = st.checkbox("Overlay show borders", value=config.getboolean('overlay', 'overlay_show_borders'), key="config_overlay_show_borders")
+        overlay_show_boxes = st.checkbox("Overlay show boxes", value=config.getboolean('overlay', 'overlay_show_boxes'), key="config_overlay_show_boxes")
+        overlay_show_target_line = st.checkbox("Overlay show target line", value=config.getboolean('overlay', 'overlay_show_target_line'), key="config_overlay_show_target_line")
+        overlay_show_target_prediction_line = st.checkbox("Overlay show target prediction line", value=config.getboolean('overlay', 'overlay_show_target_prediction_line'), key="config_overlay_show_target_prediction_line")
+        overlay_show_labels = st.checkbox("Overlay show labels", value=config.getboolean('overlay', 'overlay_show_labels'), key="config_overlay_show_labels")
+        overlay_show_conf = st.checkbox("Overlay show confidence", value=config.getboolean('overlay', 'overlay_show_conf'), key="config_overlay_show_conf")
         config.set('overlay', 'show_overlay', "True")
         config.set('overlay', 'overlay_show_borders', str(overlay_show_borders))
         config.set('overlay', 'overlay_show_boxes', str(overlay_show_boxes))
@@ -548,22 +552,22 @@ with CONFIG:
         config.set('overlay', 'show_overlay', "False")
 
     # Debug window
-    st.header("Debug window")
-    show_window = st.toggle("Show debug window", value=config.getboolean('Debug window', 'show_window'))
+    st.subheader("Debug window", divider=True)
+    show_window = st.toggle("Show debug window", value=config.getboolean('Debug window', 'show_window'), key="config_show_window")
     if show_window:
-        show_detection_speed = st.checkbox("Show detection speed", value=config.getboolean('Debug window', 'show_detection_speed'))
-        show_window_fps = st.checkbox("Show window FPS", value=config.getboolean('Debug window', 'show_window_fps'))
-        show_boxes = st.checkbox("Show boxes", value=config.getboolean('Debug window', 'show_boxes'))
-        show_labels = st.checkbox("Show labels", value=config.getboolean('Debug window', 'show_labels'))
-        show_conf = st.checkbox("Show confidence", value=config.getboolean('Debug window', 'show_conf'))
-        show_target_line = st.checkbox("Show target line", value=config.getboolean('Debug window', 'show_target_line'))
-        show_target_prediction_line = st.checkbox("Show target prediction line", value=config.getboolean('Debug window', 'show_target_prediction_line'))
-        show_bScope_box = st.checkbox("Show bScope box", value=config.getboolean('Debug window', 'show_bScope_box'))
-        show_history_points = st.checkbox("Show history points", value=config.getboolean('Debug window', 'show_history_points'))
-        debug_window_always_on_top = st.checkbox("Debug window always on top", value=config.getboolean('Debug window', 'debug_window_always_on_top'))
-        spawn_window_pos_x = st.number_input("Spawn window position X", value=config.getint('Debug window', 'spawn_window_pos_x'))
-        spawn_window_pos_y = st.number_input("Spawn window position Y", value=config.getint('Debug window', 'spawn_window_pos_y'))
-        debug_window_scale_percent = st.number_input("Debug window scale percent:", value=config.getint('Debug window', 'debug_window_scale_percent'))
+        show_detection_speed = st.checkbox(label="Show detection speed", value=config.getboolean('Debug window', 'show_detection_speed'), key="config_show_detection_speed")
+        show_window_fps = st.checkbox(label="Show window FPS", value=config.getboolean('Debug window', 'show_window_fps'), key="config_show_window_fps")
+        show_boxes = st.checkbox(label="Show boxes", value=config.getboolean('Debug window', 'show_boxes'), key="config_show_boxes")
+        show_labels = st.checkbox(label="Show labels", value=config.getboolean('Debug window', 'show_labels'), key="config_show_labels")
+        show_conf = st.checkbox(label="Show confidence", value=config.getboolean('Debug window', 'show_conf'), key="config_show_conf")
+        show_target_line = st.checkbox(label="Show target line", value=config.getboolean('Debug window', 'show_target_line'), key="config_show_target_line")
+        show_target_prediction_line = st.checkbox(label="Show target prediction line", value=config.getboolean('Debug window', 'show_target_prediction_line'), key="config_show_target_prediction_line")
+        show_bScope_box = st.checkbox(label="Show bScope box", value=config.getboolean('Debug window', 'show_bScope_box'), key="config_show_bScope_box")
+        show_history_points = st.checkbox(label="Show history points", value=config.getboolean('Debug window', 'show_history_points'), key="config_show_history_points")
+        debug_window_always_on_top = st.checkbox(label="Debug window always on top", value=config.getboolean('Debug window', 'debug_window_always_on_top'), key="config_debug_window_always_on_top")
+        spawn_window_pos_x = st.number_input(label="Spawn window position X", value=config.getint('Debug window', 'spawn_window_pos_x'), key="config_spawn_window_pos_x")
+        spawn_window_pos_y = st.number_input(label="Spawn window position Y", value=config.getint('Debug window', 'spawn_window_pos_y'), key="config_spawn_window_pos_y")
+        debug_window_scale_percent = st.number_input(label="Debug window scale percent:", value=config.getint('Debug window', 'debug_window_scale_percent'), key="config_debug_window_scale_percent")
         config.set('Debug window', 'show_window', "True")
         config.set('Debug window', 'show_detection_speed', str(show_detection_speed))
         config.set('Debug window', 'show_window_fps', str(show_window_fps))
@@ -581,7 +585,7 @@ with CONFIG:
     else:
         config.set('Debug window', 'show_window', "False")
 
-    if st.button('Save Config'):
+    if st.button('Save Config', key="config_save_button"):
         save_config(config)
 
 with TRAIN:
@@ -591,7 +595,7 @@ with TRAIN:
     # model selection
     pretrained_models = ["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov10n.pt", "yolov10s.pt", "yolov10m.pt"]
     
-    user_trained_models = st.checkbox(label="Use user pretrained models", value=False)
+    user_trained_models = st.checkbox(label="Use user pretrained models", value=False, key="TRAIN_user_trained_models")
     if user_trained_models:
         last_pt_files = []
         root_folder = r'runs\detect'
@@ -602,35 +606,36 @@ with TRAIN:
                     last_pt_files.append(os.path.join(root, file))
                     
         selected_model_path = st.selectbox(label="Select model", options=last_pt_files, key="TRAIN_ai_model")
-        resume = st.checkbox(label="Resume training", value=False)
+        resume = st.checkbox(label="Resume training", value=False, key="TRAIN_resume")
     else:
         selected_model_path = st.selectbox(label="Select model", options=pretrained_models, index=4, key="TRAIN_ai_model")
     
     if not resume:
         # data yaml
-        data_yaml = st.text_input(label="Path to the dataset configuration file", value="logic/game.yaml")
+        data_yaml = st.text_input(label="Path to the dataset configuration file", value="logic/game.yaml", key="TRAIN_data_yaml")
         
         # epochs
-        epochs = st.number_input(label="Epochs", value=80, format="%u", min_value=10, step=10)
+        epochs = st.number_input(label="Epochs", value=80, format="%u", min_value=10, step=10, key="TRAIN_epochs")
         
         # image size
-        img_size = st.number_input(label="Image size", value=640, format="%u", min_value=120, max_value=1280, step=10)
+        img_size = st.number_input(label="Image size", value=640, format="%u", min_value=120, max_value=1280, step=10, key="TRAIN_img_size")
         
         # cache
-        use_cache = st.checkbox(label="Enables caching of dataset images in memory", value=False)
+        use_cache = st.checkbox(label="Enables caching of dataset images in memory", value=False, key="TRAIN_use_cache")
         
         augment = st.checkbox(label="Use augmentation", value=True)
         
         if augment: #TODO Add more settings
-            augment_degrees = st.number_input(label="Degrees", format="%u", value=5, min_value=-180, max_value=180, step=5)
-            augment_flipud = st.number_input(label="Flipud", format="%.1f", value=0.2, min_value=0.0, max_value=1.0, step=0.1)
+            augment_degrees = st.number_input(label="Degrees", format="%u", value=5, min_value=-180, max_value=180, step=5, key="TRAIN_augment_degrees")
+            augment_flipud = st.number_input(label="Flipud", format="%.1f", value=0.2, min_value=0.0, max_value=1.0, step=0.1, key="TRAIN_augment_flipud")
     
     # device
     input_devices = ["cpu", "0", "1", "2", "3", "4", "5"]
     train_device = st.selectbox(label="Specifies the computational device for training",
                                 options=input_devices,
                                 index=1,
-                                help="cpu - Train on processor, 0-5 GPU ID for training.")
+                                help="cpu - Train on processor, 0-5 GPU ID for training.",
+                                key="TRAIN_train_device")
     if train_device != "cpu":
         train_device = int(train_device)
     
@@ -638,20 +643,21 @@ with TRAIN:
     batch_size_options = ["auto", "4", "8", "16", "32", "64", "128", "256"]
     batch_size = st.selectbox(label="Batch size",
                             options=batch_size_options,
-                            index=0)
+                            index=0,
+                            key="TRAIN_batch_size")
     if batch_size == "auto":
         batch_size = "-1"
     batch_size = int(batch_size)
         
     # WANDB
-    wandb = st.checkbox(label="Force disable WANDB logger", value=True)
+    wandb = st.checkbox(label="Force disable WANDB logger", value=True, key="TRAIN_wandb")
     if wandb:
         os.environ['WANDB_DISABLED'] = 'true'
     else:
         os.environ['WANDB_DISABLED'] = 'false'
     
     # START TRAIN
-    if st.button(label="Start"):
+    if st.button(label="Start", key="TRAIN_start_train_button"):
         with st.spinner("Train in process, check terminal window."):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as temp_script:
                 # for multiprocessing "if __name__ == '__main__':" required
@@ -775,11 +781,11 @@ if __name__ == '__main__':
         video_source_method = st.selectbox(label="Select video input method", options=methods, index=0, key="TESTS_video_source_method_selectbox")
 
         # TOPMOST
-        TOPMOST = st.toggle(label="Test window on top", value=True)
+        TOPMOST = st.toggle(label="Test window on top", value=True, key="tests_topmost")
         
         # DEVICE
         test_devices = ["cpu", "0", "1", "2", "3", "4", "5"]
-        device = st.selectbox(label="Device", options=test_devices, index=1)
+        device = st.selectbox(label="Device", options=test_devices, index=1, key="tests_test_devices")
         if device != "cpu":
             device = int(device)
         
@@ -790,7 +796,7 @@ if __name__ == '__main__':
         cv2_resize = st.number_input(label="Resize test window", min_value=10, max_value=100, value=80, step=1, format="%u", key="ESTS_cv2_resize_number_input")
         
         # DETECTION CONF
-        ai_conf = st.number_input(label="Minimum confidence threshold", min_value=0.01, max_value=0.99, step=0.01, format="%.2f", value=0.20)
+        ai_conf = st.number_input(label="Minimum confidence threshold", min_value=0.01, max_value=0.99, step=0.01, format="%.2f", value=0.20, key="tests_ai_conf")
         
         input_video = None
         if video_source_method == "Input file":
