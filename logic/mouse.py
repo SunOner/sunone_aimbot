@@ -3,7 +3,8 @@ import win32con, win32api
 import torch.nn as nn
 import time
 import math
-
+import os
+from logic.rzctl import RZCONTROL
 from logic.config_watcher import cfg
 from logic.visual import visuals
 from logic.shooting import shooting
@@ -55,6 +56,15 @@ class MouseThread:
         if cfg.mouse_ghub:
             from logic.ghub import gHub
             self.ghub = gHub
+
+        if cfg.mouse_rzr:
+            dll_name = "rzctl.dll" 
+            script_directory = os.path.dirname(os.path.abspath(__file__))
+            dll_path = os.path.join(script_directory, dll_name)
+            self.rzr = RZCONTROL(dll_path)
+            if not self.rzr.init():
+                print("Failed to initialize rzctl")
+
             
         if cfg.AI_mouse_net:
             self.device = torch.device(self.arch)
@@ -189,14 +199,18 @@ class MouseThread:
         
         if x != 0 and y != 0:
             if (self.get_shooting_key_state() and not cfg.mouse_auto_aim and not cfg.triggerbot) or cfg.mouse_auto_aim:
-                if not cfg.mouse_ghub and x is not None and y is not None and not cfg.arduino_move:  # Native move
+
+                if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr and x is not None and y is not None:  # Native move
                     win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
-                    
-                if cfg.mouse_ghub and x is not None and y is not None and not cfg.arduino_move:  # ghub move
+
+                if cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr and x is not None and y is not None:  # ghub move
                     self.ghub.mouse_xy(int(x), int(y))
 
-                if cfg.arduino_move and x is not None and y is not None:  # Arduino     
+                if cfg.arduino_move and not cfg.mouse_rzr and x is not None and y is not None:  # Arduino move
                     arduino.move(int(x), int(y))
+
+                if cfg.mouse_rzr and x is not None and y is not None:  # Razer move
+                    self.rzr.mouse_move(int(x), int(y), True)  
     
     def get_shooting_key_state(self):
         for key_name in cfg.hotkey_targeting_list:
