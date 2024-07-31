@@ -46,9 +46,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.0.1</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.61</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2.70</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>0.4.1 (YOLOv8)</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.6.0 (YOLOv10)</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.6.1 (YOLOv10)</td></tr></thead>
 </table>
 
 ## Options
@@ -89,9 +89,12 @@ The behavior of the aimbot can be configured via the [`config.ini`](https://gith
 - mouse_sensitivity  `float`: Aim sensitivity.
 - mouse_fov_width  `int`: The current horizontal value of the viewing angle in the game.
 - mouse_fov_height  `int`: The current vertical value of the viewing angle in the game.
+- mouse_min_speed_multiplier `float`: Minimum mouse movement speed multiplier.
+- mouse_max_speed_multiplier `float`: Maximum mouse movement speed multiplier.
 - mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
 - mouse_auto_aim `bool`: Automatic targeting.
-- mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse movement. If the value is False, native win32 library is used for movement.
+- mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse input. Install [this](https://disk.yandex.ru/d/LagJI9dR-kM9cQ) version.
+- mouse_rzr `bool`: For Razer mouses. Install [synapse 3](https://www.razer.com/synapse-3).
 
 ### Shooting:
 - auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
