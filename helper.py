@@ -32,6 +32,51 @@ except ModuleNotFoundError:
     os.system("streamlit run helper.py")
     quit()
 
+import os
+import requests
+import streamlit as st
+import time
+
+def download_file(url, filename):
+    if os.path.exists(filename):
+        existing_file_size = os.path.getsize(filename)
+    else:
+        existing_file_size = 0
+
+    headers = {"Range": f"bytes={existing_file_size}-"}
+    response = requests.get(url, headers=headers, stream=True)
+    total_size_in_bytes = int(response.headers.get("content-length", 0)) + existing_file_size
+    progress_bar = st.progress(0)
+    downloaded_size = existing_file_size
+    start_time = time.time()
+
+    speed_text = st.empty()
+
+    mode = 'ab' if existing_file_size > 0 else 'wb'
+    with open(filename, mode) as file:
+        last_update_time = start_time
+        last_update_size = downloaded_size
+        for data in response.iter_content(8192):
+            downloaded_size += len(data)
+            file.write(data)
+            if total_size_in_bytes > 0:
+                progress_bar.progress(downloaded_size / total_size_in_bytes)
+
+            current_time = time.time()
+
+            if current_time - last_update_time >= 1:
+                interval_time = current_time - last_update_time
+                interval_size = downloaded_size - last_update_size
+                speed = interval_size / interval_time if interval_time > 0 else 0
+                speed_text.text(f"Speed: {speed / 1024:.2f} KB/s")
+                last_update_time = current_time
+                last_update_size = downloaded_size
+
+    if total_size_in_bytes != 0 and downloaded_size != total_size_in_bytes:
+        st.error("Error with downloading file.")
+    else:
+        st.success("File downloaded successfully.")
+            
 def install_cuda():
         st.write("Cuda 12.4 is being downloaded, and installation will begin after downloading.")
         download_file("https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_551.61_windows.exe", "./cuda_12.4.0_551.61_windows.exe")
@@ -162,39 +207,17 @@ if 'torch_gpu' not in st.session_state:
     with st.spinner("Checking Torch GPU support..."):
         st.session_state.torch_gpu_support = torch.cuda.is_available()
 
+if 'buttons_created' not in st.session_state:
+    st.session_state.buttons_created = False
+    
 if 'current_tab' not in st.session_state:
     st.session_state.current_tab = "HELPER"
     
 tabs = ["HELPER", "EXPORT", "CONFIG", "TRAIN", "TESTS"]
-st.session_state.current_tab = st.radio("Tools", tabs, key="tab_selector", horizontal=True, label_visibility="hidden")
+st.session_state.current_tab = st.radio("Tools", tabs, horizontal=True, label_visibility="hidden", key="radio_global_tabs")
 
 if st.session_state.current_tab == "HELPER":
     st.title("Helper")
-
-    def download_file(url, filename):
-        response = requests.get(url, stream=True)
-        total_size_in_bytes = int(response.headers.get("content-length", 0))
-        progress_bar = st.progress(0)
-        downloaded_size = 0
-        start_time = time.time()
-
-        speed_text = st.empty()
-
-        with open(filename, 'wb') as file:
-            for data in response.iter_content(1024):
-                downloaded_size += len(data)
-                file.write(data)
-                if total_size_in_bytes > 0:
-                    progress_bar.progress(downloaded_size / total_size_in_bytes)
-
-                elapsed_time = time.time() - start_time
-                speed = downloaded_size / elapsed_time if elapsed_time > 0 else 0
-                speed_text.text(f"Speed: {speed / 1024:.2f} KB/s")
-
-        if total_size_in_bytes != 0 and downloaded_size != total_size_in_bytes:
-            st.error("Error with downloading file.")
-        else:
-            st.success("File downloaded successfully.")
                 
     ultralytics_version_text = st.empty()
     ultralytics_version_text.text(f"Ultralytics version: {st.session_state.ultralytics_version}")
@@ -315,35 +338,36 @@ if st.session_state.current_tab == "HELPER":
         reinstall_aimbot()
 
     # Buttons
-    if st.button("Update/Install Sunone Aimbot", key="reinstall_aimbot_button"):
-        st.text("Are you sure?")
-        if st.button("Yes", key="reinstall_aimbot_button_yes"):
-            reinstall_aimbot()
-        if st.button("No", key="reinstall_aimbot_button_no"):
-            pass
-        
-    if st.button("Download CUDA 12.4", key="Download_cuda_button"):
-        install_cuda()
-
-    if st.button("Install Torch", key="install_torch_button"):
-        if not find_cuda_path():
-            st.error("Please, download and install CUDA first.")
-        else:
-            with st.spinner("Installing Torch"):
-                os.system("pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu124")
+    if not st.session_state.buttons_created:
+        if st.button(label="Update/Install Sunone Aimbot", key="reinstall_aimbot_button"):
+            st.text(body="Are you sure?")
+            if st.button(label="Yes", key="reinstall_aimbot_button_yes"):
+                reinstall_aimbot()
+            if st.button(label="No", key="reinstall_aimbot_button_no"):
+                pass
             
-    if st.button("Install TensorRT", key="install_tensorrt_button"):
-        if find_cuda_path():
-            with st.spinner("Installing TensorRT"):
-                os.system("pip install tensorrt")
-        else:
-            st.error("Please, download and install CUDA first.")
+        if st.button(label="Download CUDA 12.4", key="Download_cuda_button"):
+            install_cuda()
 
-    if st.button("Run Aimbot", key="run_aimbot_button"):
-        os.system("python run.py")
+        if st.button(label="Install Torch", key="install_torch_button"):
+            if not find_cuda_path():
+                st.error("Please, download and install CUDA first.")
+            else:
+                with st.spinner("Installing Torch"):
+                    os.system("pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu124")
+                
+        if st.button(label="Install TensorRT", key="install_tensorrt_button"):
+            if find_cuda_path():
+                with st.spinner("Installing TensorRT"):
+                    os.system("pip install tensorrt")
+            else:
+                st.error("Please, download and install CUDA first.")
+
+        if st.button(label="Run Aimbot", key="run_aimbot_button"):
+            os.system("python run.py")
 
 elif st.session_state.current_tab == "EXPORT":
-    st.title("Model exporter")
+    st.title(body="Model exporter")
     
     models = []
     for root, dirs, files in os.walk("./models"):
@@ -351,19 +375,19 @@ elif st.session_state.current_tab == "EXPORT":
             if file.endswith(".pt"):
                 models.append(file)
                 
-    selected_model = st.selectbox("**Select model to export.**", models, key="export_selected_model_selectbox")
+    selected_model = st.selectbox(label="**Select model to export.**", options=models, key="export_selected_model_selectbox")
     
-    image_size = st.radio("**Select model size**",(320, 480, 640), help="The size of the model image must be correct.", key="export_image_size_radio")
+    image_size = st.radio(label="**Select model size**",options=(320, 480, 640), help="The size of the model image must be correct.", key="export_image_size_radio")
     
-    if st.button("Export model", key="export_export_model_button"):
+    if st.button(label="Export model", key="export_export_model_button"):
         yolo_model = YOLO(f"./models/{selected_model}")
         
-        with st.spinner(f"Model {selected_model} exporting..."):
+        with st.spinner(text=f"Model {selected_model} exporting..."):
             yolo_model.export(format="engine", imgsz=image_size, half=True, device=0)
             st.success("Model exported!", icon="✅")
             
 elif st.session_state.current_tab == "CONFIG":
-    st.title("Config Editor")
+    st.title(body="Config Editor")
     
     def load_config():
         config = configparser.ConfigParser()
