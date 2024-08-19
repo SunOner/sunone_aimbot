@@ -37,7 +37,7 @@ Before you get started, make sure you have the following prerequisites installed
   - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
   - [Discord сервер](https://discord.gg/sunone)
 <br></br>
-- To launch the aimbot after all installations, type `py run.py`.
+- To launch the aimbot after all installations, start run_ai.bat or type `py run.py`.
 
 ## Tested Environment
 ### The Sunone Aimbot has been tested on the following environment:
@@ -46,9 +46,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.2.0</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.71</td></tr></thead>
-  <thead><tr><th>GitHub AI Model:</th><td>0.4.1 (YOLOv8)</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.6.1 (YOLOv10)</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.2.79</td></tr></thead>
+  <thead><tr><th>GitHub AI Model:</th><td>0.5.6</td></tr></thead>
+  <thead><tr><th>Boosty AI Model:</th><td>0.6.2</td></tr></thead>
 </table>
 
 ## Options

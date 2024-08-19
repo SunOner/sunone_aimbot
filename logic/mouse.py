@@ -4,11 +4,13 @@ import torch.nn as nn
 import time
 import math
 import os
-from logic.rzctl import RZCONTROL
 from logic.config_watcher import cfg
 from logic.visual import visuals
 from logic.shooting import shooting
 from logic.buttons import Buttons
+
+if cfg.mouse_rzr:
+    from logic.rzctl import RZCONTROL
 
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import arduino
@@ -200,16 +202,16 @@ class MouseThread:
         if x != 0 and y != 0:
             if (self.get_shooting_key_state() and not cfg.mouse_auto_aim and not cfg.triggerbot) or cfg.mouse_auto_aim:
 
-                if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr and x is not None and y is not None:  # Native move
+                if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:  # Native move
                     win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
 
-                if cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr and x is not None and y is not None:  # ghub move
+                if cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:  # ghub move
                     self.ghub.mouse_xy(int(x), int(y))
 
-                if cfg.arduino_move and not cfg.mouse_rzr and x is not None and y is not None:  # Arduino move
+                if cfg.arduino_move and not cfg.mouse_rzr:  # Arduino move
                     arduino.move(int(x), int(y))
 
-                if cfg.mouse_rzr and x is not None and y is not None:  # Razer move
+                if cfg.mouse_rzr:  # Razer move
                     self.rzr.mouse_move(int(x), int(y), True)  
     
     def get_shooting_key_state(self):
@@ -249,5 +251,5 @@ class MouseThread:
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
         self.center_y = self.screen_height / 2
-                
+        
 mouse = MouseThread()

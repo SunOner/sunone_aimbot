@@ -4,9 +4,10 @@ import os
 import win32con, win32api
 from logic.ghub import gHub
 from logic.config_watcher import cfg
-from logic.rzctl import RZCONTROL 
-from logic.rzctl import MOUSE_CLICK
 
+if cfg.mouse_rzr:
+    from logic.rzctl import RZCONTROL 
+    from logic.rzctl import MOUSE_CLICK
 
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import arduino
