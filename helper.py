@@ -311,7 +311,7 @@ if st.session_state.current_tab == "HELPER":
             './docs/en/helper_en.md', './docs/en/install_guide_en.md', './docs/en/questions_en.md',
             './docs/ru/helper_ru.md', './docs/ru/install_guide_ru.md', './docs/ru/questions_ru.md',
             # models
-            './models/sunxds_0.4.1.pt'
+            './models/sunxds_0.5.6.pt'
         ]
 
         for temp_file in temp_aimbot_files:
