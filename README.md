@@ -156,7 +156,7 @@ cd C:\Users\your_username\downloads\sunone_aimbot-main
 ```
 3. Then export the model from the .pt format in .engine format.
 ```cmd
-yolo export model="models/sunxds_0.4.1.pt" format=engine device=0 imgsz=480 half=True
+yolo export model="models/sunxds_0.5.6.pt" format=engine device=0 imgsz=640 half=True
 ```
   - `model="model_path/model_name.pt"`: Path to model.
   - `format=engine`: TensorRT model format.
