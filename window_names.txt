@@ -7,7 +7,7 @@ Spyglass Supreme
 Bullseye Babbler
 Scope & Soapbox
 The Debugger's Diary
-Hitman’s Hints
+Hitman's Hints
 Ninja Notifier
 The Eagle's Eye
 Target Talk
@@ -25,76 +25,76 @@ Scope & Tell
 The Debugger's Dream
 The Spotter's Guide
 Target Tales
-The Object Oracle
 The Debug Diary
 Scope Stories
 The Hidden Helper
 Target Talker
-The Debug Detective
-Object Observer
 Scope Sage
-The Spotter's Secret
 Target Teller
-The Debugger's Delight
-The Hidden Helper
-Target Tracker
-The Debug Digest
-Object Oracle
-Scope Scribe
-The Spotter's Secret
-Target Tales
-The Debug Diary
-Object Observer
-Scope Sage
-The Hidden Helper
-Target Talker
-The Debug Detective
-Object Oracle
-Scope Scribe
-The Spotter's Secret
-Target Teller
-The Debugger's Delight
-The Hidden Helper
-Target Tracker
-The Debug Digest
-Object Oracle
-Scope Scribe
-The Spotter's Secret
-Target Tales
-The Debug Diary
-Object Observer
-Scope Sage
-The Hidden Helper
-Target Talker
-The Debug Detective
-Object Oracle
-Scope Scribe
-The Spotter's Secret
-Target Teller
-The Debugger's Delight
-The Hidden Helper
-Target Tracker
-The Debug Digest
-Object Oracle
-Scope Scribe
-The Spotter's Secret
-Target Tales
-The Debug Diary
-Object Observer
-Scope Sage
-The Hidden Helper
-Target Talker
-The Debug Detective
-Object Oracle
-Scope Scribe
-The Spotter's Secret
-Target Teller
-The Debugger's Delight
-The Hidden Helper
-Target Tracker
-The Debug Digest
-Object Oracle
-Scope Scribe
-The Spotter's Secret
-Target Tales
-The Debug Diary
+Aim Assist Ally
+Crosshair Confidant
+The Marksman's Mentor
+Pixel Perfect Pal
+The Trigger Whisperer
+Headshot Helper
+The Reticle Reader
+Accuracy Ace
+The Targeting Tutor
+Bullet Trajectory Buddy
+The Frag Forecaster
+Aim Analysis Assistant
+The Killstreak Keeper
+Lock-On Liaison
+The Precision Partner
+Sharpshooter's Sidekick
+The Aim Alchemist
+Crosshair Consultant
+The Sight Sage
+Bullet Path Predictor
+The Targeting Tactician
+Aim Alignment Advisor
+The Recoil Reducer
+Bullet Spread Buddy
+The Accuracy Amplifier
+Targeting Telemetry
+The Hitbox Hinter
+Aim Correction Companion
+The Trajectory Tracker
+Headshot Hotline
+The Bullet Bend Buddy
+Precision Pointer
+The Aim Assist Analyst
+Crosshair Calibrator
+The Target Tuner
+Bullet Physics Buddy
+The Accuracy Augmenter
+Aim Adjustment Ally
+The Reticle Refiner
+Targeting Technician
+The Bullet Behavior Buddy
+Precision Profiler
+The Aim Assist Architect
+Crosshair Choreographer
+The Bullet Path Plotter
+Targeting Telepath
+The Aim Alignment Artist
+Bullet Trajectory Tailor
+The Precision Pathfinder
+Crosshair Curator
+The Aim Assist Artisan
+Bullet Bend Botanist
+The Targeting Tinkerer
+Precision Plotter
+The Aim Assist Alchemist
+Crosshair Connoisseur
+The Bullet Behavior Bard
+Targeting Taskmaster
+The Aim Alignment Ace
+Bullet Path Philosopher
+The Precision Prodigy
+Crosshair Craftsman
+The Aim Assist Savant
+Bullet Bend Sage
+The Targeting Virtuoso
+Precision Prophet
+The Aim Assist Maestro 
