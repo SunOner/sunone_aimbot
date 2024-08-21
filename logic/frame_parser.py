@@ -23,10 +23,11 @@ class FrameParser:
         for frame in result:
             if frame.boxes:
                 target = self.sort_targets(frame)
-                
+
                 if target:
                     if hotkeys_watcher.clss is None:
                         hotkeys_watcher.active_classes()
+                    
                     if target.cls in hotkeys_watcher.clss:
                         mouse.process_data((target.x, target.y, target.w, target.h, target.cls))
                 
@@ -53,7 +54,15 @@ class FrameParser:
         center = torch.tensor([capture.screen_x_center, capture.screen_y_center], device=self.arch)
         distances_sq = torch.sum((boxes_array[:, :2] - center) ** 2, dim=1)
 
-        if not cfg.disable_headshot:
+        if cfg.disable_headshot:
+            non_head_mask = classes_tensor != 7
+            if non_head_mask.any():
+                non_head_distances_sq = distances_sq[non_head_mask]
+                nearest_idx = torch.argmin(non_head_distances_sq)
+                nearest_idx = torch.nonzero(non_head_mask)[nearest_idx].item()
+            else:
+                return None
+        else:
             head_mask = classes_tensor == 7
             if head_mask.any():
                 head_distances_sq = distances_sq[head_mask]
@@ -61,12 +70,10 @@ class FrameParser:
                 nearest_idx = torch.nonzero(head_mask)[nearest_head_idx].item()
             else:
                 nearest_idx = torch.argmin(distances_sq)
-        else:
-            nearest_idx = torch.argmin(distances_sq)
 
         target_data = boxes_array[nearest_idx, :4].cpu().numpy()
         target_class = classes_tensor[nearest_idx].item()
-        
+
         return Target(*target_data, target_class)
     
     def get_arch(self):
