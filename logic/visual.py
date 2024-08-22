@@ -86,20 +86,40 @@ class Visuals(threading.Thread):
                             if cfg.show_window and cfg.show_labels and not cfg.show_conf:
                                 cv2.putText(self.image, str_cls, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
                             
-                            # overlay labels
-                            if cfg.show_overlay and cfg.overlay_show_labels and not cfg.overlay_show_conf:
-                                overlay.draw_text(x0 + 30, y0 + 7, str_cls)
+                            # format conf text for cv2 and overlay
+                            if cfg.show_window or cfg.show_overlay:
+                                conf_text = '{} {:.2f}'.format(str_cls, conf.item())
                             
                             # cv2 conf
-                            conf_text = '{} {:.2f}'.format(str_cls, conf.item())
-                            
                             if cfg.show_window and cfg.show_conf:
                                 cv2.putText(self.image, conf_text, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
+                            
+                            if cfg.show_overlay and cfg.overlay_show_conf or cfg.show_overlay and cfg.overlay_show_labels:
+                                # out of overlay
+                                x_out = 0
+                                y_out = 0
+                                
+                                if y0 <= 15:
+                                    x_out = x0 - 45
+                                    y_out = y0 + 15
+                                else:
+                                    x_out = x0 + 45
+                                    y_out = y0 - 15
+                                
+                                if x0 <= 40:
+                                    x_out = x0 + 40
+                                
+                                if x0 >= cfg.detection_window_width - 80:
+                                    x_out = x0 - 40
 
-                            # overlay conf
-                            if cfg.show_overlay and cfg.overlay_show_conf:
-                                overlay.draw_text(x0 + 45, y0 + 7, conf_text)
-            
+                                # overlay conf
+                                if cfg.overlay_show_conf:
+                                    overlay.draw_text(x_out, y_out, conf_text)
+
+                                # overlay labels
+                                if cfg.overlay_show_labels and not cfg.overlay_show_conf:
+                                    overlay.draw_text(x_out, y_out, str_cls)
+                                
             # speed
             if self.draw_speed_data:
                 if cfg.show_window:

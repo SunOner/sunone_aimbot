@@ -10,6 +10,13 @@ import ctypes
 import configparser
 import threading
 
+
+try:
+    import torch
+except ModuleNotFoundError:
+    print("Torch not found. Installing...")
+    os.system("pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124")
+    
 try:
     import streamlit as st
     import requests
@@ -24,12 +31,14 @@ try:
     import cv2
     import cuda
     import onnxruntime
-    import torch
     from packaging import version
     import numpy as np
 except ModuleNotFoundError:
-    os.system("pip install -r requirements.txt")
-    os.system("streamlit run helper.py")
+    if os.path.exists("./requirements.txt"):
+        os.system("pip install -r requirements.txt")
+        os.system("streamlit run helper.py")
+    else:
+        print("requirements.txt file not found. Please, redownload aimbot.")
     quit()
 
 import os
@@ -354,7 +363,7 @@ if st.session_state.current_tab == "HELPER":
                 st.error("Please, download and install CUDA first.")
             else:
                 with st.spinner("Installing Torch"):
-                    os.system("pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu124")
+                    os.system("pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124")
                 
         if st.button(label="Install TensorRT", key="install_tensorrt_button"):
             if find_cuda_path():
@@ -387,6 +396,8 @@ elif st.session_state.current_tab == "EXPORT":
             st.success("Model exported!", icon="✅")
             
 elif st.session_state.current_tab == "CONFIG":
+    from logic.config_watcher import cfg
+    
     st.title(body="Config Editor")
     
     def load_config():
@@ -457,13 +468,15 @@ elif st.session_state.current_tab == "CONFIG":
     hideout_targets = st.checkbox(label="Hideout targets", value=config.getboolean('Aim', 'hideout_targets'), key="config_hideout_targets")
     disable_headshot = st.checkbox(label="Disable headshot", value=config.getboolean('Aim', 'disable_headshot'), key="config_disable_headshot")
     disable_prediction = st.checkbox(label="Disable prediction", value=config.getboolean('Aim', 'disable_prediction'), key="config_disable_prediction")
-    prediction_interval = st.number_input(label="Prediction interval", value=config.getfloat('Aim', 'prediction_interval'), format="%.1f", min_value=0.1, max_value=5.0, step=0.1, key="config_prediction_interval")
+    if not disable_prediction:
+        prediction_interval = st.number_input(label="Prediction interval", value=config.getfloat('Aim', 'prediction_interval'), format="%.1f", min_value=0.1, max_value=5.0, step=0.1, key="config_prediction_interval")
+        config.set('Aim', 'disable_prediction', str(disable_prediction))
+        config.set('Aim', 'prediction_interval', str(prediction_interval))
+        
     third_person = st.checkbox(label="Third person mode", value=config.getboolean('Aim', 'third_person'), key="config_third_person")
     config.set('Aim', 'body_y_offset', str(body_y_offset))
     config.set('Aim', 'hideout_targets', str(hideout_targets))
     config.set('Aim', 'disable_headshot', str(disable_headshot))
-    config.set('Aim', 'disable_prediction', str(disable_prediction))
-    config.set('Aim', 'prediction_interval', str(prediction_interval))
     config.set('Aim', 'third_person', str(third_person))
 
     # Hotkeys
@@ -471,12 +484,16 @@ elif st.session_state.current_tab == "CONFIG":
     hotkey_options = []
     from logic.buttons import Buttons
     for i in Buttons.KEY_CODES:
-        hotkey_options.append(i)
-    hotkey_targeting = st.selectbox(label="Hotkey targeting", options=hotkey_options, index=hotkey_options.index(config.get('Hotkeys', 'hotkey_targeting')), key="config_hotkey_targeting")
+        hotkey_options.append(str(i))
+        
+    hotkey_targeting = st.multiselect(label="Hotkey targeting", options=hotkey_options, default=cfg.hotkey_targeting_list, key="config_hotkey_targeting")
     hotkey_exit = st.selectbox(label="Hotkey exit", options=hotkey_options, index=hotkey_options.index(config.get('Hotkeys', 'hotkey_exit')), key="config_hotkey_exit")
     hotkey_pause = st.selectbox(label="Hotkey pause",options=hotkey_options,  index=hotkey_options.index(config.get('Hotkeys', 'hotkey_pause')), key="config_hotkey_pause")
     hotkey_reload_config = st.selectbox(label="Hotkey reload config",options=hotkey_options,  index=hotkey_options.index(config.get('Hotkeys', 'hotkey_reload_config')), key="config_hotkey_reload_config")
-    config.set('Hotkeys', 'hotkey_targeting', hotkey_targeting)
+    
+    targeting_hotkeys_list = ",".join(hotkey_targeting)
+    
+    config.set('Hotkeys', 'hotkey_targeting', targeting_hotkeys_list)
     config.set('Hotkeys', 'hotkey_exit', hotkey_exit)
     config.set('Hotkeys', 'hotkey_pause', hotkey_pause)
     config.set('Hotkeys', 'hotkey_reload_config', hotkey_reload_config)

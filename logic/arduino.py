@@ -106,6 +106,6 @@ class ArduinoMouse:
                                 print(f'Arduino: Disable `ENABLE_UHS_DEBUGGING` setting in {hid_settings} file.')
                                 break
         except Exception as e:
-            print(f'Arduino: USB_Host_Shield lib not found.\nFull message:\n{e}')
+            print(f'Arduino: USB_Host_Shield lib not found.\n{e}')
             
 arduino = ArduinoMouse()
