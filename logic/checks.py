@@ -40,7 +40,7 @@ def check_model_fp16():
 
 def Warnings():
         if ".pt" in cfg.AI_model_name:
-            print("WARNING: Export the model to `.engine` for better performance!\nHOW TO EXPORT TO ENGINE: 'https://github.com/SunOner/sunone_aimbot?tab=readme-ov-file#export-pt-model-to-engine'")
+            print("WARNING: Export the model to `.engine` for better performance!\nHOW TO EXPORT TO ENGINE: 'https://github.com/SunOner/sunone_aimbot_docs/blob/main/ai_models/ai_models.md'")
         if cfg.show_window:
             print("WARNING: An open debug window can affect performance.")
         if cfg.bettercam_capture_fps >= 120:
