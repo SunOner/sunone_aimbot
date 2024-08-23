@@ -302,7 +302,7 @@ if st.session_state.current_tab == "HELPER":
         log_text.text("Deleting downloaded zip...")
         os.remove(r"./main.zip")
         
-        new_dirs = ['./logic', './media', './media/tests', './docs/en', './docs/ru', './models']
+        new_dirs = ['./logic', './media', './media/tests', './models']
         for dir in new_dirs:
             if not os.path.isdir(dir):
                 os.makedirs(dir)
@@ -315,10 +315,7 @@ if st.session_state.current_tab == "HELPER":
             './logic/buttons.py', './logic/overlay.py', './logic/mouse.py', './logic/visual.py', './logic/frame_parser.py', './logic/hotkeys_watcher.py',
             './logic/shooting.py', './logic/checks.py',
             # media
-            './media/aimbot.png', './media/cuda.png', './media/one.gif', './media/python.png', './media/tests/test_det.mp4',
-            # docs
-            './docs/en/helper_en.md', './docs/en/install_guide_en.md', './docs/en/questions_en.md',
-            './docs/ru/helper_ru.md', './docs/ru/install_guide_ru.md', './docs/ru/questions_ru.md',
+            './media/one.gif', './media/tests/test_det.mp4',
             # models
             './models/sunxds_0.5.6.pt'
         ]
