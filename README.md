@@ -16,31 +16,23 @@ Sunone Aimbot is an AI-powered aim bot for first-person shooter games. It levera
 > [!WARNING]
 > Use it at your own risk, we do not guarantee that you may be blocked!
 
-> [!NOTE] 
-> This application only works on Nvidia graphics cards. AMD support is testing. See [AI_enable_AMD](https://github.com/SunOner/sunone_aimbot?tab=readme-ov-file#ai) option.
+> [!NOTE]
 > The recommended graphics card for starting and more productive and stable operation starts with the rtx 20 series.
 
 ## Requirements
 Before you get started, make sure you have the following prerequisites installed and pay attention to the versions in [Tested Environment](https://github.com/SunOner/sunone_aimbot?tab=readme-ov-file#tested-environment) block, this may cause errors in launching the aimbot.
 
-- Information in English:
-  - [Auto-Install guide](https://github.com/SunOner/sunone_aimbot/blob/main/docs/en/helper_en.md)
-  - [Self install guide](https://github.com/SunOner/sunone_aimbot/blob/main/docs/en/install_guide_en.md)
-  - [Questions and answers](https://github.com/SunOner/sunone_aimbot/blob/main/docs/en/questions_en.md)
-  - [Arduino setup](https://github.com/SunOner/HID_Arduino)
-  - [Discord server](https://discord.gg/sunone)
-<br></br>
-- Информация на Русском языке:
-  - [Инструкция по автоматической установке](https://github.com/SunOner/sunone_aimbot/blob/main/docs/ru/helper_ru.md)
-  - [Инструкция по установке в ручную](https://github.com/SunOner/sunone_aimbot/blob/main/docs/ru/install_guide_ru.md)
-  - [Вопросы и ответы](https://github.com/SunOner/sunone_aimbot/blob/main/docs/ru/questions_ru.md)
-  - [Установка ардуино](https://github.com/SunOner/HID_Arduino)
-  - [Discord сервер](https://discord.gg/sunone)
+- [Config options](https://github.com/SunOner/sunone_aimbot_docs/blob/main/config/config.md)
+- [Install guide](https://github.com/SunOner/sunone_aimbot_docs/blob/main/install/helper.md)
+- [Questions](https://github.com/SunOner/sunone_aimbot_docs/blob/main/questions/questions.md)
+- [Arduino setup](https://github.com/SunOner/HID_Arduino)
+- [Arduino Logitech G-series](https://github.com/SunOner/usb-host-shield-mouse_for_ai_aimbot)
+- [Discord server](https://discord.gg/sunone)
+- [AI Models docs](https://github.com/SunOner/sunone_aimbot_docs/blob/main/ai_models/ai_models.md)
 <br></br>
 - To launch the aimbot after all installations, start run_ai.bat or type `py run.py`.
 
-## Tested Environment
-### The Sunone Aimbot has been tested on the following environment:
+## Working environment:
 <table>
   <thead><tr><th>Windows</th><td>10 and 11(priority)</td></thead>
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
@@ -50,122 +42,6 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>GitHub AI Model:</th><td>0.5.6</td></tr></thead>
   <thead><tr><th>Boosty AI Model:</th><td>0.6.2</td></tr></thead>
 </table>
-
-## Options
-The behavior of the aimbot can be configured via the [`config.ini`](https://github.com/SunOner/sunone_aimbot/blob/main/config.ini) file. Here are the available options:
-
-### Object Search window resolution:
-- detection_window_width `int`: Horizontal resolution of the object search window.
-- detection_window_height `int`: Vertical resolution of the object search window.
-
-### Bettercam capture method:
-- Bettercam_capture `bool`: Use [Bettercam](https://github.com/RootKit-Org/BetterCam) to capture images from the screen.
-- bettercam_capture_fps `int`: Specific fps value for screen capture.
-- bettercam_monitor_id `int`: Id of the monitor from which the images will be captured.
-- bettercam_gpu_id `int`: Id of the GPU to be used for image capture
-
-### Obs capture method:
-- Obs_capture `bool`: Use [Obs](https://github.com/obsproject/obs-studio) to capture images from the screen.
-- Obs_camera_id `str` or `int`: `auto` or number of Virtual Camera ID.
-- Obs_capture_fps `int`: Specific fps value for screen capture.
-
-### Aim:
-- body_y_offset `float`: Allows correction of y coordinates inside the body detected box if head is not detected.
-- hideout_targets `bool`: Allows shooting at targets on the range (for example in warface on the polygon or in aimlabs).
-- disable_headshot `bool`: Disable head targerting.
-- disable_prediction `bool`: Disable target position prediction.
-- prediction_interval `float`: The time frame used to estimate an object's future position based on its current motion.
-- third_person `bool`: Turn on the third-person game mode. (sunxds_0.5.7+)
-
-### Hot keys:
-- The names of all the keys are [here](https://github.com/SunOner/sunone_aimbot/blob/main/logic/buttons.py). Type `None` is empty button.
-- hotkey_targeting `str`: Aiming at the target. Supports multi keys, for example `hotkey_targeting = RightMouseButton,X2MouseButton`
-- hotkey_exit `str`: Exit.
-- hotkey_pause `str`: Pause AIM.
-- hotkey_reload_config `str`: Reload config.
-
-### Mouse:
-- mouse_dpi `int`: Mouse DPI.
-- mouse_sensitivity  `float`: Aim sensitivity.
-- mouse_fov_width  `int`: The current horizontal value of the viewing angle in the game.
-- mouse_fov_height  `int`: The current vertical value of the viewing angle in the game.
-- mouse_min_speed_multiplier `float`: Minimum mouse movement speed multiplier.
-- mouse_max_speed_multiplier `float`: Maximum mouse movement speed multiplier.
-- mouse_lock_target `bool`: True: Press once to permanently aim at the target, press again to turn off the aiming. False: Hold down the button to constantly aim at the target.
-- mouse_auto_aim `bool`: Automatic targeting.
-- mouse_ghub `bool`: Uses Logitech GHUB exploit for mouse input. Install [this](https://disk.yandex.ru/d/LagJI9dR-kM9cQ) version.
-- mouse_rzr `bool`: For Razer mouses. Install [synapse 3](https://www.razer.com/synapse-3).
-
-### Shooting:
-- auto_shoot `bool`: Automatic shooting. (For some games need [arduino](https://github.com/SunOner/HID_Arduino)).
-- triggerbot `bool`: Automatic shooting at a target if it is in the scope, requires the `mouse_auto_shoot` option enabled, and aiming will also be automatically turned off.
-- force_click `bool`: Shooting will be performed even if the sight is not located within the object.
-- bScope_multiplier `float`: The multiplier of the target trigger size.
-
-### Arduino:
-- arduino_move `bool`: Sends a command to the arduino to move the mouse.
-- arduino_shoot `bool`: Sends a command to the arduino to fire with the mouse.
-- arduino_port `str`: Arduino COM port. Use `COM1` or `COM2` ... or `auto`.
-- arduino_baudrate `int`: Custom Arduino baudrate.
-- arduino_16_bit_mouse `bool`: Send 16 bit data to the arduino port to move the mouse.
-
-### AI:
-- AI_model_name `str`: AI model name.
-- AI_model_image_size `int`: AI model image size.
-- AI_conf `float`: How many percent is AI sure that this is the right goal.
-- AI_device `int` or `str`: Device to run on, `0`, `1`... or `cpu`.
-- AI_enable_AMD `bool`: Enable support Amd GPUs. Install ROCm, [Zluda](https://github.com/vosen/ZLUDA) and PyTorch. See [AMD docs](https://rocm.docs.amd.com/projects/install-on-windows/en/latest/how-to/install.html).
-- AI_mouse_net `bool`: Use a neural network to calculate mouse movements. See [this repository](https://github.com/SunOner/mouse_net).
-
-### Overlay:
-- show_overlay `bool`: Enables the overlay. It is not recommended for gameplay, only for debugging.
-- overlay_show_borders `bool`: Displaying the borders of the overlay.
-- overlay_show_boxes `bool`: Display of boxes.
-- overlay_show_target_line `bool`: Displaying the line to the target.
-- overlay_show_target_prediction_line `bool`: Displaying the predictive line to the target.
-- overlay_show_labels `bool`: Displaying label names.
-- overlay_show_conf `bool`: Displaying the label names as well as the confidence level.
-
-### Debug window:
-- show_window `bool`: Shows the OpenCV2 window for visual feedback.
-- show_detection_speed `bool`: Displays speed information inside the debug window.
-- show_window_fps `bool`: Displays FPS in the corner.
-- show_boxes `bool`: Displays detectable objects.
-- show_labels `bool`: Displays the name of the detected object.
-- show_conf `bool`: Displays object confidence threshold for detection.
-- show_target_line `bool`: Shows the mouse finishing line.
-- show_target_prediction_line `bool`: Show mouse prediction line.
-- show_bScope_box  `bool`: Show the trigger box for auto shooting.
-- show_history_points `bool`: Show history points.
-- debug_window_always_on_top `bool`: The debug window will always be on top of other windows.
-- spawn_window_pos_x `int`: When the debugging window starts, it takes the x position.
-- spawn_window_pos_y `int`: When the debugging window starts, it takes the y position.
-- debug_window_scale_percent `int`: Adjusts the size of the debug window.
-- The names of the debugging window can be written in the file window_names.txt they will be randomly selected.
-
-## AI Models
-- *.pt: Default AI model.
-- *.onnx: The model is optimized to run on processors.
-- *.engine: Final exported model, which is faster than the previous two.
-
-## Export .pt model to .engine
-1. All commands are executed in the console window:
-2. First, go to the aimbot directory using the command:
-```cmd
-cd C:\Users\your_username\downloads\sunone_aimbot-main
-```
-3. Then export the model from the .pt format in .engine format.
-```cmd
-yolo export model="models/sunxds_0.5.6.pt" format=engine device=0 imgsz=640 half=True
-```
-  - `model="model_path/model_name.pt"`: Path to model.
-  - `format=engine`: TensorRT model format.
-  - `half=true`: Use Half-precision floating-point format.
-  - `device=0`: GPU id.
-  - `workspace=8`: GPU max video memory.
-  - `verbose=False`: Debug stuff. Convenient function, can show errors when exporting.
-
-4. Each model has its own image size with which it was trained, export only with the image size with which it was published.
 
 ## Notes / Recommendations
 - Limit the maximum value of frames per second in the game in which you will use it. And also do not set the screen resolution to high. Do not overload the graphics card.
