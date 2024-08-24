@@ -1,8 +1,26 @@
 import torch
 import os
+import GPUtil
+import webbrowser
 
 from logic.config_watcher import cfg
+def check_gpu_and_open_site():
+    gpus = GPUtil.getGPUs()
 
+    if gpus:
+        gpu_name = gpus[0].name
+    else:
+        gpu_name = "CPU"
+
+    if "AMD" in gpu_name or "RADEON" or "RYZEN" in gpu_name:
+        url = "https://www.avito.ru/all/tovary_dlya_kompyutera/komplektuyuschie/videokarty-ASgBAgICAkTGB~pm7gmmZw?f=ASgBAgECAkTGB~pm7gmmZwFFxpoMFHsiZnJvbSI6MzAwMCwidG8iOjB9&q=NVIDIA"
+        webbrowser.open(url)
+        print("Detected AMD GPU. Opening Avito website for NVIDIA GPUs.")
+    elif "NVIDIA" in gpu_name:
+        print(f"Detected NVIDIA GPU: {gpu_name}. No action needed.")
+    else:
+        print("No AMD or NVIDIA GPU detected.")
+        
 def convert_onnx_to_fp16():
     import onnx
     from onnxconverter_common import float16
@@ -67,6 +85,7 @@ def Warnings():
             raise ValueError("WARNING: You use more than one mouse input method.")
         
 def run_checks():
+    check_gpu_and_open_site()
     if cfg.AI_device == 'cpu':
         pass
     else:
