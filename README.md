@@ -39,8 +39,8 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.2.0</td></tr></thead>
   <thead><tr><th>Ultralytics:</th><td>8.2.79</td></tr></thead>
-  <thead><tr><th>GitHub AI Model:</th><td>0.5.6</td></tr></thead>
-  <thead><tr><th>Boosty AI Model:</th><td>0.6.2</td></tr></thead>
+  <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.6.4</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
@@ -53,7 +53,7 @@ Before you get started, make sure you have the following prerequisites installed
 - If you have started the application and nothing happens, it may be working, close it with the F2 key and change the `show_window` option to `True` in the file [config.ini](https://github.com/SunOner/sunone_aimbot/blob/main/config.ini) to make sure that the application is working.
 
 ## Support the project
-I will post new models [here](https://boosty.to/sunone).
+[Boosty](https://boosty.to/sunone) [Patreon](https://www.patreon.com/sunone).
 
 ## License
 This project is licensed under the MIT License. See **[LICENSE](https://github.com/SunOner/sunone_aimbot/blob/main/LICENSE)** for details

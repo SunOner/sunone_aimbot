@@ -4,10 +4,13 @@ import time
 import cv2
 import torch
 import win32gui, win32con
+import win32api
+import os
 
 from logic.config_watcher import cfg
 from logic.capture import capture
 from logic.overlay import overlay
+from logic.buttons import Buttons
 
 class Visuals(threading.Thread):
     def __init__(self):
@@ -19,6 +22,7 @@ class Visuals(threading.Thread):
             self.daemon = True
             self.name = 'Visuals'
             self.image = None
+            self.screenshot_taken = False
             
             if cfg.show_window:
                 self.interpolation = cv2.INTER_NEAREST
@@ -57,6 +61,17 @@ class Visuals(threading.Thread):
             if self.image is None:
                 self.destroy()
                 break
+            
+            # screenshot
+            screenshot_key_state = win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.debug_window_screenshot_key))
+            if screenshot_key_state == -32768:
+                if not self.screenshot_taken:
+                    if not os.path.isdir("screenshots"):
+                        os.makedirs("screenshots")
+                    cv2.imwrite(f"./screenshots/{time.time()}.jpg", self.image)
+                    self.screenshot_taken = True
+            else:
+                self.screenshot_taken = False
             
             # simple line
             if self.draw_line_data:
