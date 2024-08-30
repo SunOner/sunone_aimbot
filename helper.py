@@ -16,7 +16,8 @@ try:
 except ModuleNotFoundError:
     print("Torch not found. Installing...")
     os.system("pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124")
-    
+# TODO add another exceptions
+
 try:
     import streamlit as st
     import requests
@@ -618,6 +619,7 @@ elif st.session_state.current_tab == "CONFIG":
         spawn_window_pos_x = st.number_input(label="Spawn window position X", value=config.getint('Debug window', 'spawn_window_pos_x'), key="config_spawn_window_pos_x")
         spawn_window_pos_y = st.number_input(label="Spawn window position Y", value=config.getint('Debug window', 'spawn_window_pos_y'), key="config_spawn_window_pos_y")
         debug_window_scale_percent = st.number_input(label="Debug window scale percent:", value=config.getint('Debug window', 'debug_window_scale_percent'), key="config_debug_window_scale_percent")
+        debug_window_screenshot_key = st.selectbox(label="Screenshot key", options=hotkey_options, index=hotkey_options.index(config.get('Debug window', 'debug_window_screenshot_key')), key="config_debug_window_screenshot_key")
         config.set('Debug window', 'show_window', "True")
         config.set('Debug window', 'show_detection_speed', str(show_detection_speed))
         config.set('Debug window', 'show_window_fps', str(show_window_fps))
@@ -632,6 +634,7 @@ elif st.session_state.current_tab == "CONFIG":
         config.set('Debug window', 'spawn_window_pos_x', str(spawn_window_pos_x))
         config.set('Debug window', 'spawn_window_pos_y', str(spawn_window_pos_y))
         config.set('Debug window', 'debug_window_scale_percent', str(debug_window_scale_percent))
+        config.set('Debug window', 'debug_window_screenshot_key', str(debug_window_screenshot_key))
     else:
         config.set('Debug window', 'show_window', "False")
 
