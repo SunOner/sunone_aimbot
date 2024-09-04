@@ -9,14 +9,16 @@ import zipfile
 import ctypes
 import configparser
 import threading
+import signal
 
+def restart():
+    os.system("streamlit run helper.py")
+    quit()
 
-try:
-    import torch
-except ModuleNotFoundError:
-    print("Torch not found. Installing...")
-    os.system("pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124")
-# TODO add another exceptions
+# must be installed from .bat startup file
+import streamlit as st
+
+st.set_page_config(page_title="HELPER", page_icon=":wrench:", layout="wide", initial_sidebar_state="expanded")
 
 try:
     import streamlit as st
@@ -24,28 +26,24 @@ try:
     import numpy
     import bettercam
     import win32api, win32con, win32gui
-    import ultralytics
-    from ultralytics import YOLO
     import screeninfo
     import asyncio
     import serial
     import cv2
     import cuda
     import onnxruntime
+    import keyboard
     from packaging import version
     import numpy as np
-except ModuleNotFoundError:
-    if os.path.exists("./requirements.txt"):
-        os.system("pip install -r requirements.txt")
-        os.system("streamlit run helper.py")
-    else:
-        print("requirements.txt file not found. Please, redownload aimbot.")
-    quit()
-
-import os
-import requests
-import streamlit as st
-import time
+    import ultralytics
+    from ultralytics import YOLO
+except (ModuleNotFoundError, ImportError):
+    with st.spinner("Installing the needed components"):
+        if os.path.exists("./requirements.txt"):
+            os.system("pip install -r requirements.txt")
+        else:
+            print("requirements.txt file not found. Please, redownload aimbot.")
+    restart()
 
 def download_file(url, filename):
     if os.path.exists(filename):
@@ -192,65 +190,8 @@ def upgrade_ultralytics():
         return ultralytics_repo_version
     else:
         return ultralytics_current_version
-        
-if 'ultralytics_version' not in st.session_state:
-    with st.spinner('Checking for ultralytics updates...'):
-        st.session_state.ultralytics_version = upgrade_ultralytics()
 
-if 'pip_version' not in st.session_state:
-    with st.spinner('Checking for pip updates...'):
-        st.session_state.pip_version = upgrade_pip()
-
-if 'aimbot_versions' not in st.session_state:
-    with st.spinner('Checking Aimbot versions...'):
-        st.session_state.aimbot_versions = get_aimbot_offline_version(), get_aimbot_online_version()
-
-if 'cuda' not in st.session_state:
-    with st.spinner('Searching CUDA...'):
-        st.session_state.cuda = find_cuda_path()
-
-if 'python_version' not in st.session_state:
-    with st.spinner("Checking Python version..."):
-        st.session_state.python_version = sys.version_info
-
-if 'torch_gpu' not in st.session_state:
-    with st.spinner("Checking Torch GPU support..."):
-        st.session_state.torch_gpu_support = torch.cuda.is_available()
-
-if 'buttons_created' not in st.session_state:
-    st.session_state.buttons_created = False
-    
-if 'current_tab' not in st.session_state:
-    st.session_state.current_tab = "HELPER"
-    
-tabs = ["HELPER", "EXPORT", "CONFIG", "TRAIN", "TESTS"]
-st.session_state.current_tab = st.radio("Tools", tabs, horizontal=True, label_visibility="hidden", key="radio_global_tabs")
-
-if st.session_state.current_tab == "HELPER":
-    st.title("Helper")
-                
-    ultralytics_version_text = st.empty()
-    ultralytics_version_text.text(f"Ultralytics version: {st.session_state.ultralytics_version}")
-
-    pip_version_text = st.empty()
-    pip_version_text.text(f"Pip version: {st.session_state.pip_version}")
-
-    aimbot_versions_text = st.empty()
-    aimbot_versions_text.text(f"Installed/Github aimbot versions: {st.session_state.aimbot_versions[0][0]}/{st.session_state.aimbot_versions[1][0]}")
-
-    if st.session_state.cuda is not None:
-        cuda_active = st.toggle(f"CUDA 12.4 FOUND", disabled=True, value=True, key="cuda_active_toggle")
-    else:
-        cuda_active = st.toggle("CUDA 12.4 NOT FOUND", disabled=True, value=False, key="cuda_active_toggle")
-
-    if st.session_state.python_version.major == 3 and st.session_state.python_version.minor == 11 and st.session_state.python_version.micro == 6:
-        needed_python = st.toggle(f"Running from Python 3.11.6", disabled=True, value=True, key="needed_python_toggle")
-    else:
-        needed_python = st.toggle(f"Running not from Python 3.11.6", disabled=True, value=False, key="needed_python_toggle")
-
-    torch_gpu_support = st.toggle("Torch with GPU", value=st.session_state.torch_gpu_support, disabled=True, key="torch_gpu_support_toggle")
-
-    def reinstall_aimbot():
+def reinstall_aimbot():
         log_text = st.empty()
         log_text.text("Deleting old files...")
         try:
@@ -338,40 +279,150 @@ if st.session_state.current_tab == "HELPER":
         os.system("streamlit run helper.py")
         quit()
 
+def torch_check():
+    try:
+        import torch
+        return torch.cuda.is_available()
+    except ModuleNotFoundError:
+        return None
+
+def tensorrt_version_check():
+    try:
+        import tensorrt
+        return (True, tensorrt.__version__)
+    except ModuleNotFoundError:
+        return (False, 0)
+
+if 'ultralytics_version' not in st.session_state:
+    with st.spinner('Checking for ultralytics updates...'):
+        st.session_state.ultralytics_version = upgrade_ultralytics()
+
+if 'pip_version' not in st.session_state:
+    with st.spinner('Checking for pip updates...'):
+        st.session_state.pip_version = upgrade_pip()
+
+if 'aimbot_versions' not in st.session_state:
+    with st.spinner('Checking Aimbot versions...'):
+        st.session_state.aimbot_versions = get_aimbot_offline_version(), get_aimbot_online_version()
+
+if 'cuda' not in st.session_state:
+    with st.spinner('Searching CUDA...'):
+        st.session_state.cuda = find_cuda_path()
+
+if 'python_version' not in st.session_state:
+    with st.spinner("Checking Python version..."):
+        st.session_state.python_version = sys.version_info
+
+if 'torch_gpu' not in st.session_state:
+    with st.spinner("Checking Torch GPU support..."):
+        st.session_state.torch_gpu_support = torch_check()
+
+if 'tensorrt_version' not in st.session_state:
+    with st.spinner("Checking Tensorrt..."):
+        st.session_state.tensorrt_version = tensorrt_version_check()
+        
+if 'current_tab' not in st.session_state:
+    st.session_state.current_tab = "HELPER"
+
+with st.sidebar:
+    tabs = ["HELPER", "EXPORT", "CONFIG", "TRAIN", "TESTS"]
+    st.session_state.current_tab = st.radio(label="**Select tab**", options=tabs, horizontal=False, label_visibility="visible", key="radio_global_tabs")
+
+    exit_button_col, send_buttons_col = st.columns(2)
+    
+    send_c_w = False
+    with send_buttons_col:
+        send_c_w = st.toggle(label="Send ctrl+w", value=True, key="sidebar_send_c_w_toggle", help="Use the automatic keyboard shortcut 'ctrl+w' to close the tab.")    
+    
+    with exit_button_col:
+        if st.button(label="Exit"):
+            if send_c_w == True:
+                keyboard.press_and_release('ctrl+w')
+            os.kill(os.getpid(), signal.SIGTERM)
+    
+if st.session_state.current_tab == "HELPER":
+    st.title("Helper")
+
+    if not st.session_state.python_version.major == 3 and st.session_state.python_version.minor == 11 and st.session_state.python_version.micro == 6:
+        st.error(f"❌ Running not from Python 3.11.6!")
+
+    # AIMBOT
+    st.subheader("Aimbot", divider=True)
+    aimbot_version_col, aimbot_reinstall_button = st.columns(2)
+    
+    with aimbot_version_col:
+        st.markdown(f"Installed Aimbot version: {st.session_state.aimbot_versions[0][0]}  \\\n Github version: {st.session_state.aimbot_versions[1][0]}")
+    
+    with aimbot_reinstall_button:
+            if st.button(label="Update/Install Sunone Aimbot", key="reinstall_aimbot_button"):
+                st.text(body="Are you sure?")
+                if st.button(label="Yes", key="reinstall_aimbot_button_yes"):
+                    reinstall_aimbot()
+                if st.button(label="No", key="reinstall_aimbot_button_no"):
+                    pass
+    
+    # CUDA
+    st.subheader("CUDA", divider=True)
+    cuda_version_col, cuda_install_button = st.columns(2)
+    
+    with cuda_version_col:
+        if st.session_state.cuda is not None:
+            st.markdown("✅ CUDA 12.4 FOUND")
+        else:
+            st.markdown("❌ CUDA 12.4 NOT FOUND")
+    
+    with cuda_install_button:
+        if st.button(label="Download CUDA 12.4", key="Download_cuda_button"):
+            install_cuda()
+        
+    # TORCH
+    st.subheader("Torch", divider=True)
+    torch_support_col, torch_reinstall_button = st.columns(2)
+    
+    with torch_support_col:
+        if st.session_state.torch_gpu_support is not None:
+            if st.session_state.torch_gpu_support == True:
+                st.markdown("✅ Torch is installed with GPU support")
+            else:
+                st.markdown("❌ Torch is installed without GPU support, reinstall Torch.")
+        else:
+            st.markdown("❌ Torch is not installed, install Torch.")
+
+    with torch_reinstall_button:
+        if st.button(label="Reinstall Torch", key="install_torch_button"):
+            if not find_cuda_path():
+                st.error("Please, download and install CUDA first.")
+            else:
+                with st.spinner("Reinstalling Torch. After installation, the application will restart and a new window will open."):
+                    os.system("pip uninstall torch torchvision torchaudio -y ")
+                    os.system("pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124")
+                    restart()
+    # TENSORRT
+    st.subheader("TensorRT", divider=True)
+    tensorrt_ver_col, tensorrt_reinstall_col = st.columns(2)
+    
+    with tensorrt_ver_col:
+        if st.session_state.tensorrt_version[0] == True:
+            st.markdown(f"✅ TensorRT version: {st.session_state.tensorrt_version[1]}")
+        else:
+            st.markdown("❌ TensorRT not installed")
+        
+    with tensorrt_reinstall_col:
+        if st.button(label="Reinstall TensorRT", key="install_tensorrt_button"):
+            if find_cuda_path():
+                with st.spinner("Installing TensorRT. After installation, the application will restart and a new window will open."):
+                    os.system("pip uninstall tensorrt tensorrt-bindings tensorrt-cu12 tensorrt-cu12_bindings tensorrt-cu12_libs tensorrt-libs -y")
+                    os.system("pip install tensorrt")
+                    restart()
+            else:
+                st.error("❌ Please, download and install CUDA first.")
+                
+    # startup check
     try:
         from logic.config_watcher import cfg
         import logic.buttons
     except ModuleNotFoundError:
         reinstall_aimbot()
-
-    # Buttons
-    if not st.session_state.buttons_created:
-        if st.button(label="Update/Install Sunone Aimbot", key="reinstall_aimbot_button"):
-            st.text(body="Are you sure?")
-            if st.button(label="Yes", key="reinstall_aimbot_button_yes"):
-                reinstall_aimbot()
-            if st.button(label="No", key="reinstall_aimbot_button_no"):
-                pass
-            
-        if st.button(label="Download CUDA 12.4", key="Download_cuda_button"):
-            install_cuda()
-
-        if st.button(label="Install Torch", key="install_torch_button"):
-            if not find_cuda_path():
-                st.error("Please, download and install CUDA first.")
-            else:
-                with st.spinner("Installing Torch"):
-                    os.system("pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124")
-                
-        if st.button(label="Install TensorRT", key="install_tensorrt_button"):
-            if find_cuda_path():
-                with st.spinner("Installing TensorRT"):
-                    os.system("pip install tensorrt")
-            else:
-                st.error("Please, download and install CUDA first.")
-
-        if st.button(label="Run Aimbot", key="run_aimbot_button"):
-            os.system("python run.py")
 
 elif st.session_state.current_tab == "EXPORT":
     st.title(body="Model exporter")
@@ -638,8 +689,9 @@ elif st.session_state.current_tab == "CONFIG":
     else:
         config.set('Debug window', 'show_window', "False")
 
-    if st.button('Save Config', key="config_save_button"):
-        save_config(config)
+    with st.sidebar:
+        if st.button('Save Config', key="sidebar_config_save_button"):
+            save_config(config)
 
 elif st.session_state.current_tab == "TRAIN":
     st.title("Train model")

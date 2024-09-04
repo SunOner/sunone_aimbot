@@ -2,7 +2,6 @@ cuda_python
 bettercam
 numpy
 pywin32
-ultralytics
 screeninfo
 asyncio
 onnxruntime
@@ -11,3 +10,5 @@ pyserial
 requests
 opencv-python
 packaging
+ultralytics
+keyboard
