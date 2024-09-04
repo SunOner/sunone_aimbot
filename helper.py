@@ -204,7 +204,7 @@ def reinstall_aimbot():
             pass
 
         base_dir_files = [
-            './.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', './run.py', './requirements.txt', './launcher.py', 'window_names.txt',
+            './.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', 'run_helper.bat', './run.py', 'run_ai.bat', './requirements.txt', './launcher.py', 'window_names.txt',
         ]
         for file in base_dir_files:
             try:
@@ -251,7 +251,7 @@ def reinstall_aimbot():
 
         temp_aimbot_files = [
             # main
-            './.gitattributes', './.gitignore', './config.ini', './helper.py', 'run_helper.bat', './LICENSE', './README.md', './run.py', './requirements.txt', './version', 'window_names.txt',
+            './.gitattributes', './.gitignore', './config.ini', './helper.py', 'run_helper.bat', './LICENSE', './README.md', './run.py', 'run_ai.bat', './requirements.txt', './version', 'window_names.txt',
              # logic
             './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll',
             './logic/buttons.py', './logic/overlay.py', './logic/mouse.py', './logic/visual.py', './logic/frame_parser.py', './logic/hotkeys_watcher.py',
