@@ -11,6 +11,10 @@ import configparser
 import threading
 import signal
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
 def restart():
     os.system("streamlit run helper.py")
     quit()
@@ -45,6 +49,13 @@ except (ModuleNotFoundError, ImportError):
             print("requirements.txt file not found. Please, redownload aimbot.")
     restart()
 
+# Aimbot modules
+try:
+    from logic.config_watcher import cfg
+    from logic.buttons import Buttons
+except ModuleNotFoundError:
+    st.error("Some modules not found. Please, reinstall Aimbot.")
+        
 def download_file(url, filename):
     if os.path.exists(filename):
         existing_file_size = os.path.getsize(filename)
@@ -191,93 +202,69 @@ def upgrade_ultralytics():
     else:
         return ultralytics_current_version
 
-def reinstall_aimbot():
-        log_text = st.empty()
-        log_text.text("Deleting old files...")
+def update_config(new_config_path, current_config_path='config.ini'):
+    logger.info("Updating config...")
+    shutil.copy(new_config_path, current_config_path)
+    logger.info("Config updated successfully.")
+    return True
+
+def reinstall_aimbot():    
+    logger.info("Checking config versions...")
+    config_online_version = int(get_aimbot_online_version()[1])
+    config_current_version = get_aimbot_offline_version()
+    
+    if config_current_version:
+        config_current_version = int(config_current_version[1])
+    
+    logger.info(f"Config current version: {config_current_version}\nConfig online version {config_online_version}")
+    
+    replace_config = config_online_version != config_current_version
+    
+    if replace_config:
+        logger.info("Config needs update. Will replace with new version.")
+    else:
+        logger.info("Config is up to date. Will keep current version.")
+
+    logger.info("Deleting old files...")
+    for folder in ["./logic", "./media"]:
         try:
-            delete_files_in_folder("./logic")
-        except:
-            pass
-        try:
-            delete_files_in_folder("./media")
-        except:
-            pass
-
-        base_dir_files = [
-            './.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', 'run_helper.bat', './run.py', 'run_ai.bat', './requirements.txt', './launcher.py', 'window_names.txt',
-        ]
-        for file in base_dir_files:
-            try:
-                os.remove(file)
-            except:
-                log_text.text(f"{file} not found, continued")
-
-        replace_config = False
-        config_online_version = int(get_aimbot_online_version()[1])
-        config_current_version = get_aimbot_offline_version()
-        
-        if config_current_version:
-            config_current_version = int(config_current_version[1])
-        
-        log_text.text(f"Config current version: {config_current_version}\nConfig online version {config_online_version}")
-        
-        if config_online_version != config_current_version:
-            log_text.text("Removing config with old version and installing fresh.")
-            try:
-                os.remove("./config.ini")
-            except:
-                pass
-            replace_config = True
-        else:
-            log_text.text("Config has a fresh version. We don't touch him.")
-            
-        try:
-            os.remove("./version")
-        except:
-            pass
-        
-        log_text.text("Downloading repo. Please wait...")
-        download_file("https://github.com/SunOner/sunone_aimbot/archive/refs/heads/main.zip", "main.zip")
-        log_text.text("Unpacking...")
-        with zipfile.ZipFile(r"./main.zip", "r") as zip_ref:
-            zip_ref.extractall("./")
-        log_text.text("Deleting downloaded zip...")
-        os.remove(r"./main.zip")
-        
-        new_dirs = ['./logic', './media', './media/tests', './models']
-        for dir in new_dirs:
-            if not os.path.isdir(dir):
-                os.makedirs(dir)
-
-        temp_aimbot_files = [
-            # main
-            './.gitattributes', './.gitignore', './config.ini', './helper.py', 'run_helper.bat', './LICENSE', './README.md', './run.py', 'run_ai.bat', './requirements.txt', './version', 'window_names.txt',
-             # logic
-            './logic/arduino.py', './logic/capture.py', './logic/config_watcher.py', './logic/game.yaml', './logic/ghub_mouse.dll',
-            './logic/buttons.py', './logic/overlay.py', './logic/mouse.py', './logic/visual.py', './logic/frame_parser.py', './logic/hotkeys_watcher.py',
-            './logic/shooting.py', './logic/checks.py',
-            # media
-            './media/one.gif', './media/tests/test_det.mp4',
-            # models
-            './models/sunxds_0.5.6.pt'
-        ]
-
-        for temp_file in temp_aimbot_files:
-            try:
-                if temp_file == "./sunone_aimbot-main/config.ini" and not replace_config:
-                    continue
-                shutil.move(f"sunone_aimbot-main/{temp_file}", temp_file)
-            except:
-                pass
-
-        try:
-            delete_files_in_folder("./sunone_aimbot-main")
-            os.rmdir("./sunone_aimbot-main")
+            delete_files_in_folder(folder)
         except:
             pass
 
-        os.system("streamlit run helper.py")
-        quit()
+    base_dir_files = [
+        './.gitattributes', './.gitignore', './LICENSE', './README.md', './helper.py', 'run_helper.bat', 
+        './run.py', 'run_ai.bat', './requirements.txt', './launcher.py', 'window_names.txt', './version'
+    ]
+    for file in base_dir_files:
+        try:
+            os.remove(file)
+        except:
+            logger.info(f"{file} not found, continued")
+
+    logger.info("Downloading repo. Please wait...")
+    download_file("https://github.com/SunOner/sunone_aimbot/archive/refs/heads/main.zip", "main.zip")
+    
+    logger.info("Unpacking...")
+    with zipfile.ZipFile("./main.zip", "r") as zip_ref:
+        zip_ref.extractall("./temp_extract")
+    
+    logger.info("Moving files...")
+    for root, dirs, files in os.walk("./temp_extract"):
+        for file in files:
+            src_path = os.path.join(root, file)
+            dest_path = os.path.join(".", os.path.relpath(src_path, "./temp_extract/sunone_aimbot-main"))
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            if file != "config.ini" or replace_config:
+                shutil.move(src_path, dest_path)
+
+    logger.info("Cleaning up...")
+    os.remove("./main.zip")
+    shutil.rmtree("./temp_extract")
+
+    logger.info("Reinstallation complete. Restarting...")
+    
+    restart()
 
 def torch_check():
     try:
@@ -328,6 +315,9 @@ with st.sidebar:
     tabs = ["HELPER", "EXPORT", "CONFIG", "TRAIN", "TESTS"]
     st.session_state.current_tab = st.radio(label="**Select tab**", options=tabs, horizontal=False, label_visibility="visible", key="radio_global_tabs")
 
+    if st.button(label="Run Aimbot", key="sidebar_run_aimbot_button"):
+        os.system("python run.py")
+    
     exit_button_col, send_buttons_col = st.columns(2)
     
     send_c_w = False
@@ -348,18 +338,31 @@ if st.session_state.current_tab == "HELPER":
 
     # AIMBOT
     st.subheader("Aimbot", divider=True)
+    
     aimbot_version_col, aimbot_reinstall_button = st.columns(2)
     
     with aimbot_version_col:
         st.markdown(f"Installed Aimbot version: {st.session_state.aimbot_versions[0][0]}  \\\n Github version: {st.session_state.aimbot_versions[1][0]}")
     
+    if 'show_confirm' not in st.session_state:
+        st.session_state.show_confirm = False
+    
     with aimbot_reinstall_button:
+        if not st.session_state.show_confirm:
             if st.button(label="Update/Install Sunone Aimbot", key="reinstall_aimbot_button"):
-                st.text(body="Are you sure?")
-                if st.button(label="Yes", key="reinstall_aimbot_button_yes"):
+                st.session_state.show_confirm = True
+                st.rerun()
+        else:
+            st.write("Are you sure you want to reinstall?")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Yes", key="confirm_yes"):
                     reinstall_aimbot()
-                if st.button(label="No", key="reinstall_aimbot_button_no"):
-                    pass
+                    st.session_state.show_confirm = False
+            with col2:
+                if st.button("No", key="confirm_no"):
+                    st.session_state.show_confirm = False
+                    st.rerun()
     
     # CUDA
     st.subheader("CUDA", divider=True)
@@ -416,13 +419,6 @@ if st.session_state.current_tab == "HELPER":
                     restart()
             else:
                 st.error("❌ Please, download and install CUDA first.")
-                
-    # startup check
-    try:
-        from logic.config_watcher import cfg
-        import logic.buttons
-    except ModuleNotFoundError:
-        reinstall_aimbot()
 
 elif st.session_state.current_tab == "EXPORT":
     st.title(body="Model exporter")
@@ -445,8 +441,6 @@ elif st.session_state.current_tab == "EXPORT":
             st.success("Model exported!", icon="✅")
             
 elif st.session_state.current_tab == "CONFIG":
-    from logic.config_watcher import cfg
-    
     st.title(body="Config Editor")
     
     def load_config():
@@ -531,7 +525,7 @@ elif st.session_state.current_tab == "CONFIG":
     # Hotkeys
     st.subheader("Hotkeys", divider=True)
     hotkey_options = []
-    from logic.buttons import Buttons
+    
     for i in Buttons.KEY_CODES:
         hotkey_options.append(str(i))
         
