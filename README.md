@@ -29,6 +29,7 @@ Before you get started, make sure you have the following prerequisites installed
 - [Arduino Logitech G-series](https://github.com/SunOner/usb-host-shield-mouse_for_ai_aimbot)
 - [Discord server](https://discord.gg/sunone)
 - [AI Models docs](https://github.com/SunOner/sunone_aimbot_docs/blob/main/ai_models/ai_models.md)
+- [C++ AI Aimbot Edition](https://github.com/SunOner/sunone_aimbot_cpp)
 <br></br>
 - To launch the aimbot after all installations, start run_ai.bat or type `py run.py`.
 
