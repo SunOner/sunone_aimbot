@@ -43,6 +43,9 @@ def init():
     while True:
         image = capture.get_new_frame()
         
+        if cfg.circle_capture:
+            image = capture.convert_to_circle(image)
+        
         if cfg.show_window or cfg.show_overlay:
             visuals.queue.put(image)
         

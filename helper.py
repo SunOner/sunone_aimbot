@@ -692,7 +692,9 @@ elif st.session_state.current_tab == "TRAIN":
     resume = False
     
     # model selection
-    pretrained_models = ["yolov8n.pt", "yolov8s.pt", "yolov8m.pt", "yolov10n.pt", "yolov10s.pt", "yolov10m.pt"]
+    pretrained_models = ["yolov8n.pt", "yolov8s.pt", "yolov8m.pt",
+                         "yolov10n.pt", "yolov10s.pt", "yolov10m.pt",
+                         "yolo11n.pt", "yolo11s.pt", "yolo11m.pt"]
     
     user_trained_models = st.checkbox(label="Use user pretrained models", value=False, key="TRAIN_user_trained_models")
     if user_trained_models:
@@ -744,6 +746,7 @@ elif st.session_state.current_tab == "TRAIN":
                             options=batch_size_options,
                             index=0,
                             key="TRAIN_batch_size")
+    
     if batch_size == "auto":
         batch_size = "-1"
     batch_size = int(batch_size)
@@ -759,7 +762,6 @@ elif st.session_state.current_tab == "TRAIN":
     if st.button(label="Start", key="TRAIN_start_train_button"):
         with st.spinner("Train in process, check terminal window."):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as temp_script:
-                # for multiprocessing "if __name__ == '__main__':" required
                 script_content = f"""
 if __name__ == '__main__':
     from ultralytics import YOLO

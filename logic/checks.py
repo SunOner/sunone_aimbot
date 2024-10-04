@@ -67,16 +67,13 @@ def Warnings():
             raise ValueError("WARNING: You use more than one mouse input method.")
         
 def run_checks():
-    if cfg.AI_device == 'cpu':
-        pass
-    else:
-        if not torch.cuda.is_available():
-            print("You need to install a version of PyTorch that supports CUDA.\n"
-                "First, uninstall all torch packages.\n"
-                "Run command 'pip uninstall torch torchvision torchaudio'\n"
-                "Next, go to 'https://pytorch.org/get-started/locally/' and install torch with CUDA support.\n"
-                "Don't forget your CUDA version (Minimum version is 12.1, max version is 12.4).")
-            quit()
+    if torch.cuda.is_available() is False:
+        print("You need to install a version of pytorch that supports CUDA.\n"
+            "First uninstall all torch packages.\n"
+            "Run command 'pip uninstall torch torchvision torchaudio'\n"
+            "Next go to 'https://pytorch.org/get-started/locally/' and install torch with CUDA support.\n"
+            "Don't forget your CUDA version (Minimum version is 12.1, max version is 12.4).")
+        quit()
         
     if cfg.Bettercam_capture == False and cfg.Obs_capture == False:
         print("Use at least one image capture method.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.")

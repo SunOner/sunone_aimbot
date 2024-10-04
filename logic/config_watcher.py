@@ -19,6 +19,7 @@ class Config():
         self.config_Detection_window = self.config["Detection window"]
         self.detection_window_width = int(self.config_Detection_window["detection_window_width"])
         self.detection_window_height = int(self.config_Detection_window["detection_window_height"])
+        self.circle_capture = self.config_Detection_window.getboolean("circle_capture")
         # Capture Method Bettercam
         self.config_Bettercam_Capture = self.config["Capture Methods"]
         self.Bettercam_capture = self.config_Bettercam_Capture.getboolean("Bettercam_capture")

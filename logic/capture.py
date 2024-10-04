@@ -3,6 +3,8 @@ import bettercam
 from screeninfo import get_monitors
 import threading
 import queue
+import ctypes
+import numpy as np
 
 from logic.config_watcher import cfg
 
@@ -27,12 +29,13 @@ class Capture(threading.Thread):
         
         self.frame_queue = queue.Queue(maxsize=1)
         self.running = True
-        
+    
         if cfg.Bettercam_capture:
             self.setup_bettercam()
+            
         elif cfg.Obs_capture:
             self.setup_obs()
-            
+        
     def setup_bettercam(self):
         self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id,
                                    output_idx=cfg.bettercam_gpu_id,
@@ -68,9 +71,10 @@ class Capture(threading.Thread):
                     self.frame_queue.get()
                 self.frame_queue.put(frame)
             
-    def capture_frame(self):
+    def capture_frame(self):          
         if cfg.Bettercam_capture:
             return self.bc.get_latest_frame()
+        
         elif cfg.Obs_capture:
             ret_val, img = self.obs_camera.read()
             if ret_val:
@@ -156,7 +160,21 @@ class Capture(threading.Thread):
                 f'[{cfg.hotkey_exit}] - EXIT\n',
                 f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
                 f'[{cfg.hotkey_reload_config}] - Reload config\n')
-            
+    
+    def convert_to_circle(self, image):
+        height, width = image.shape[:2]
+
+        mask = np.zeros((height, width), dtype=np.uint8)
+
+        center = (width // 2, height // 2)
+        axes = (width // 2, height // 2)
+
+        cv2.ellipse(mask, center, axes, angle=0, startAngle=0, endAngle=360, color=(255), thickness=-1)
+
+        mask_3d = cv2.merge([mask, mask, mask])
+
+        return cv2.bitwise_and(image, mask_3d)
+    
     def Quit(self):
         self.running = False
         if cfg.Bettercam_capture and self.bc.is_capturing:

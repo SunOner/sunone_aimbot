@@ -55,7 +55,10 @@ class Overlay:
             self.canvas.bind("<FocusOut>", lambda e: "break")
 
             if cfg.overlay_show_borders:
-                self.square_id = self.canvas.create_rectangle(0, 0, width, height, outline='red', width=2)
+                if cfg.circle_capture:
+                    self.square_id = self.canvas.create_oval(0, 0, width, height, outline='red', width=2)
+                else:
+                    self.square_id = self.canvas.create_rectangle(0, 0, width, height, outline='red', width=2)
 
             self.process_queue()
             self.root.mainloop()

@@ -41,7 +41,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>TensorRT:</th><td>10.3.0</td></tr></thead>
   <thead><tr><th>Ultralytics:</th><td>8.2.87</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6</td></tr></thead>
-  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.6.4</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.6.5</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
