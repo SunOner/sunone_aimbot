@@ -43,13 +43,13 @@ def init():
     while True:
         image = capture.get_new_frame()
         
-        if cfg.circle_capture:
-            image = capture.convert_to_circle(image)
-        
-        if cfg.show_window or cfg.show_overlay:
-            visuals.queue.put(image)
-        
         if image is not None:
+            if cfg.circle_capture:
+                image = capture.convert_to_circle(image)
+            
+            if cfg.show_window or cfg.show_overlay:
+                visuals.queue.put(image)
+                
             result = perform_detection(model, image)
 
             if hotkeys_watcher.app_pause == 0:
