@@ -29,9 +29,12 @@ Before you get started, make sure you have the following prerequisites installed
 - [Arduino Logitech G-series](https://github.com/SunOner/usb-host-shield-mouse_for_ai_aimbot)
 - [Discord server](https://discord.gg/sunone)
 - [AI Models docs](https://github.com/SunOner/sunone_aimbot_docs/blob/main/ai_models/ai_models.md)
-- [C++ AI Aimbot Edition](https://github.com/SunOner/sunone_aimbot_cpp)
+
 <br></br>
 - To launch the aimbot after all installations, start run_ai.bat or type `py run.py`.
+
+## C++ Version
+- [Sunone_aimbot_cpp](https://github.com/SunOner/sunone_aimbot_cpp): This is a version rewritten in C++. It is currently under active development.
 
 ## Working environment:
 <table>
@@ -39,9 +42,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.3.0</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.2.87</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.3.33</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6 (YOLOv10)</td></tr></thead>
-  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.6.6 (YOLOv11)</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.1 (YOLOv11)</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
