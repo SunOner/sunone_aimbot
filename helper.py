@@ -22,7 +22,10 @@ def restart():
 # must be installed from .bat startup file
 import streamlit as st
 
-st.set_page_config(page_title="HELPER", page_icon=":wrench:", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="HELPER",
+                   page_icon=":wrench:",
+                   layout="wide",
+                   initial_sidebar_state="expanded")
 
 try:
     import streamlit as st
@@ -33,7 +36,6 @@ try:
     import screeninfo
     import asyncio
     import serial
-    import cv2
     import cuda
     import onnxruntime
     import keyboard
@@ -46,8 +48,13 @@ except (ModuleNotFoundError, ImportError):
         if os.path.exists("./requirements.txt"):
             os.system("pip install -r requirements.txt")
         else:
-            print("requirements.txt file not found. Please, redownload aimbot.")
+            logger.info("requirements.txt file not found. Please, redownload aimbot.")
     restart()
+
+try:
+    import cv2
+except Exception as e:
+    logger.info(f"OpenCV import error:\n{e}")
 
 # Aimbot modules
 try:
