@@ -203,11 +203,16 @@ def upgrade_ultralytics():
     ).content.decode('utf-8')
     ultralytics_repo_version = re.search(r"__version__\s*=\s*\"([^\"]+)", ultralytics_repo_version).group(1)
 
-    if ultralytics_current_version != ultralytics_repo_version:
-        os.system("pip install ultralytics --upgrade")
+    if ultralytics_current_version != "8.3.40":
+        os.system("pip install ultralytics==8.3.40")
         return ultralytics_repo_version
-    else:
-        return ultralytics_current_version
+    return ultralytics_repo_version
+
+    # if ultralytics_current_version != ultralytics_repo_version:
+    #     os.system("pip install ultralytics -U")
+        # return ultralytics_repo_version
+    # else:
+        # return ultralytics_current_version
 
 def update_config(new_config_path, current_config_path='config.ini'):
     logger.info("Updating config...")
