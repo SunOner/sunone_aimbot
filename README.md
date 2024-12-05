@@ -42,9 +42,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.3.0</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.3.33</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.3.40</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6 (YOLOv10)</td></tr></thead>
-  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.1 (YOLOv11)</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.2 (YOLOv11)</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
