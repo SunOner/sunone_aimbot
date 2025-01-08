@@ -4,10 +4,12 @@ import torch.nn as nn
 import time
 import math
 import os
+import numpy as np
 from logic.config_watcher import cfg
 from logic.visual import visuals
 from logic.shooting import shooting
 from logic.buttons import Buttons
+from filterpy.kalman import KalmanFilter
 
 if cfg.mouse_rzr:
     from logic.rzctl import RZCONTROL
@@ -134,8 +136,16 @@ class MouseThread:
 
         prediction_interval = delta_time * self.prediction_interval
 
-        predicted_x = target_x + velocity_x * prediction_interval + 0.5 * acceleration_x * (prediction_interval ** 2)
-        predicted_y = target_y + velocity_y * prediction_interval + 0.5 * acceleration_y * (prediction_interval ** 2)
+        # Calculate current distance from the last known position to the target
+        current_distance = math.sqrt((target_x - self.prev_x)**2 + (target_y - self.prev_y)**2)
+        
+        # Use a function to adjust prediction based on proximity
+        # Here, we're using a simple inverse linear function for demonstration
+        proximity_factor = min(1, 1 / (current_distance + 1))  # +1 to avoid division by zero
+
+        # Adjust prediction with proximity factor to aim more towards the center
+        predicted_x = target_x + velocity_x * prediction_interval * proximity_factor + 0.5 * acceleration_x * (prediction_interval ** 2) * proximity_factor**2
+        predicted_y = target_y + velocity_y * prediction_interval * proximity_factor + 0.5 * acceleration_y * (prediction_interval ** 2) * proximity_factor**2
 
         self.prev_x = target_x
         self.prev_y = target_y
@@ -144,7 +154,6 @@ class MouseThread:
         self.prev_time = current_time
 
         return predicted_x, predicted_y
-    
     def calculate_speed_multiplier(self, distance):
         normalized_distance = min(distance / self.max_distance, 1)
         speed_multiplier = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
@@ -164,12 +173,24 @@ class MouseThread:
             degrees_per_pixel_y = self.fov_y / self.screen_height
             
             mouse_move_x = offset_x * degrees_per_pixel_x
-            move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
-
             mouse_move_y = offset_y * degrees_per_pixel_y
-            move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
+
+            # Apply smoothing (using a simple low-pass filter)
+            alpha = 0.8  # You might want to adjust this based on how much smoothing you need
+            if not hasattr(self, 'last_move_x'):
+                self.last_move_x, self.last_move_y = 0, 0
+            
+            move_x = alpha * mouse_move_x + (1 - alpha) * self.last_move_x
+            move_y = alpha * mouse_move_y + (1 - alpha) * self.last_move_y
+            
+            self.last_move_x, self.last_move_y = move_x, move_y  # Store for next iteration
+
+            # Convert to actual mouse movement considering DPI and sensitivity
+            move_x = (move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
+            move_y = (move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
                 
             return move_x, move_y
+    
         else:
             input_data = [
                 self.screen_width,

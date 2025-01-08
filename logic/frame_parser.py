@@ -31,9 +31,9 @@ class FrameParser:
                     if target.cls in hotkeys_watcher.clss:
                         mouse.process_data((target.x, target.y, target.w, target.h, target.cls))
                 
-                if cfg.show_window or cfg.show_overlay:
-                    if cfg.show_boxes or cfg.overlay_show_boxes:
-                        visuals.draw_helpers(frame.boxes)
+            if cfg.show_window or cfg.show_overlay:
+                if cfg.show_boxes or cfg.overlay_show_boxes:
+                    visuals.draw_helpers(frame.boxes)
             else:
                 # no detections
                 if cfg.auto_shoot or cfg.triggerbot:
@@ -53,9 +53,16 @@ class FrameParser:
 
         center = torch.tensor([capture.screen_x_center, capture.screen_y_center], device=self.arch)
         distances_sq = torch.sum((boxes_array[:, :2] - center) ** 2, dim=1)
-
+        weights = torch.ones_like(distances_sq)
         if cfg.disable_headshot:
-            non_head_mask = classes_tensor != 7
+            non_head_mask = classes_tensor!= 7
+            weights = torch.ones_like(classes_tensor)
+            weights[classes_tensor == 7] *= 0.5  #Lower weight for headshots
+            # Normalize by size to account for larger targets being potentially easier to hit
+            size_factor = boxes_array[:, 2] * boxes_array[:, 3]
+            distances_sq = distances_sq / size_factor
+            distances_sq = weights * distances_sq / size_factor  # Normalize by weight and size to account for larger targets being potentially easier to hit
+
             if non_head_mask.any():
                 non_head_distances_sq = distances_sq[non_head_mask]
                 nearest_idx = torch.argmin(non_head_distances_sq)
@@ -70,7 +77,8 @@ class FrameParser:
                 nearest_idx = torch.nonzero(head_mask)[nearest_head_idx].item()
             else:
                 nearest_idx = torch.argmin(distances_sq)
-
+        if not classes_tensor.numel():
+            return None  
         target_data = boxes_array[nearest_idx, :4].cpu().numpy()
         target_class = classes_tensor[nearest_idx].item()
 
