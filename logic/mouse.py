@@ -4,12 +4,11 @@ import torch.nn as nn
 import time
 import math
 import os
-import numpy as np
 from logic.config_watcher import cfg
 from logic.visual import visuals
 from logic.shooting import shooting
 from logic.buttons import Buttons
-from filterpy.kalman import KalmanFilter
+
 
 if cfg.mouse_rzr:
     from logic.rzctl import RZCONTROL
@@ -45,16 +44,15 @@ class MouseThread:
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
         self.center_y = self.screen_height / 2
-
         self.prev_x = 0
         self.prev_y = 0
         self.prev_time = None
         self.max_distance = math.sqrt(self.screen_width**2 + self.screen_height**2) / 2
         self.min_speed_multiplier = cfg.mouse_min_speed_multiplier
         self.max_speed_multiplier = cfg.mouse_max_speed_multiplier
-        
+        self.prev_distance = None
+        self.speed_correction_factor = 0.1  # How much previous speed affects current speed
         self.bScope = False
-        
         self.arch = self.get_arch()
         
         if cfg.mouse_ghub:
@@ -139,26 +137,38 @@ class MouseThread:
         # Calculate current distance from the last known position to the target
         current_distance = math.sqrt((target_x - self.prev_x)**2 + (target_y - self.prev_y)**2)
         
-        # Use a function to adjust prediction based on proximity
-        # Here, we're using a simple inverse linear function for demonstration
-        proximity_factor = min(1, 1 / (current_distance + 1))  # +1 to avoid division by zero
+        # Use inverse function for proximity factor, with a minimum to prevent too sharp corrections
+        proximity_factor = max(0.1, min(1, 1 / (current_distance + 1)))  
+        
+        # Dynamic speed correction based on how much the distance has changed
+        if self.prev_distance is not None:
+            distance_change = abs(current_distance - self.prev_distance)
+            speed_correction = 1 + (distance_change / self.max_distance) * self.speed_correction_factor
+        else:
+            speed_correction = 1.0
+        
+        # Apply speed correction to prediction
+        predicted_x = target_x + velocity_x * prediction_interval * proximity_factor * speed_correction + 0.5 * acceleration_x * (prediction_interval ** 2) * proximity_factor * speed_correction
+        predicted_y = target_y + velocity_y * prediction_interval * proximity_factor * speed_correction + 0.5 * acceleration_y * (prediction_interval ** 2) * proximity_factor * speed_correction
 
-        # Adjust prediction with proximity factor to aim more towards the center
-        predicted_x = target_x + velocity_x * prediction_interval * proximity_factor + 0.5 * acceleration_x * (prediction_interval ** 2) * proximity_factor**2
-        predicted_y = target_y + velocity_y * prediction_interval * proximity_factor + 0.5 * acceleration_y * (prediction_interval ** 2) * proximity_factor**2
-
-        self.prev_x = target_x
-        self.prev_y = target_y
-        self.prev_velocity_x = velocity_x
-        self.prev_velocity_y = velocity_y
+        self.prev_x, self.prev_y = target_x, target_y
+        self.prev_velocity_x, self.prev_velocity_y = velocity_x, velocity_y
         self.prev_time = current_time
+        self.prev_distance = current_distance
 
         return predicted_x, predicted_y
+
     def calculate_speed_multiplier(self, distance):
+        # Adjust speed multiplier based on current distance and previous movement
         normalized_distance = min(distance / self.max_distance, 1)
-        speed_multiplier = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
+        base_speed = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
         
-        return speed_multiplier
+        if self.prev_distance is not None:
+            distance_change = abs(distance - self.prev_distance)
+            speed_adjustment = 1 + (distance_change / self.max_distance) * self.speed_correction_factor
+            return base_speed * speed_adjustment
+        
+        return base_speed
     
     def calc_movement(self, target_x, target_y, target_cls):
         if not cfg.AI_mouse_net:
@@ -215,25 +225,25 @@ class MouseThread:
             return move[0], move[1]
         
     def move_mouse(self, x, y):
-        if x is None:
-            x = 0
-        if y is None:
-            y = 0
+        x = x if x is not None else 0
+        y = y if y is not None else 0
         
         if x != 0 and y != 0:
-            if (self.get_shooting_key_state() and not cfg.mouse_auto_aim and not cfg.triggerbot) or cfg.mouse_auto_aim:
-
+            shooting = self.get_shooting_key_state()
+            mouse_aim = cfg.mouse_auto_aim
+            triggerbot = cfg.triggerbot
+            
+            if (shooting and not mouse_aim and not triggerbot) or mouse_aim:
+                x, y = int(x), int(y)
+                
                 if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:  # Native move
-                    win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
-
-                if cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:  # ghub move
-                    self.ghub.mouse_xy(int(x), int(y))
-
-                if cfg.arduino_move and not cfg.mouse_rzr:  # Arduino move
-                    arduino.move(int(x), int(y))
-
-                if cfg.mouse_rzr:  # Razer move
-                    self.rzr.mouse_move(int(x), int(y), True)  
+                    win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
+                elif cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:  # ghub move
+                    self.ghub.mouse_xy(x, y)
+                elif cfg.arduino_move and not cfg.mouse_rzr:  # Arduino move
+                    arduino.move(x, y)
+                elif cfg.mouse_rzr:  # Razer move
+                    self.rzr.mouse_move(x, y, True)
     
     def get_shooting_key_state(self):
         for key_name in cfg.hotkey_targeting_list:
