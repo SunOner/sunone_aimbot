@@ -1,11 +1,4 @@
-cuda_python
-bettercam
-numpy
-pywin32
-screeninfo
-asyncio
-onnxruntime
-onnxruntime-gpu
+
 pyserial
 requests
 opencv-python
