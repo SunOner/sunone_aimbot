@@ -31,6 +31,9 @@ class Config():
         self.Obs_capture = self.config_Obs_capture.getboolean("Obs_capture")
         self.Obs_camera_id = str(self.config_Obs_capture["Obs_camera_id"])
         self.Obs_capture_fps = int(self.config_Obs_capture["Obs_capture_fps"])
+        # Capture Method Mss
+        self.Mss_capture = self.config_Obs_capture.getboolean("Mss_capture")
+
         # Aim
         self.config_Aim = self.config["Aim"]
         self.body_y_offset = float(self.config_Aim["body_y_offset"])

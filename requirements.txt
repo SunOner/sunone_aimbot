@@ -1,5 +1,6 @@
 cuda_python
 bettercam
+mss
 numpy
 pywin32
 screeninfo

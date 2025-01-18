@@ -32,6 +32,7 @@ try:
     import requests
     import numpy
     import bettercam
+    import mss
     import win32api, win32con, win32gui
     import screeninfo
     import asyncio
@@ -498,7 +499,7 @@ elif st.session_state.current_tab == "CONFIG":
 
     # Capture Methods
     st.subheader("Capture Methods", divider=True)
-    selected_capture_method = st.radio(label="Capture Method", options=["Bettercam capture", "OBS"], key="config_selected_capture_method")
+    selected_capture_method = st.radio(label="Capture Method", options=["Bettercam capture", "OBS", "Mss"], key="config_selected_capture_method")
     
     if selected_capture_method == "Bettercam capture":        
         bettercam_capture_fps = st.number_input(label="Bettercam capture FPS", value=config.getint('Capture Methods', 'bettercam_capture_fps'), key="config_bettercam_capture_fps")
@@ -509,6 +510,8 @@ elif st.session_state.current_tab == "CONFIG":
         config.set('Capture Methods', 'bettercam_capture_fps', str(bettercam_capture_fps))
         config.set('Capture Methods', 'bettercam_monitor_id', str(bettercam_monitor_id))
         config.set('Capture Methods', 'bettercam_gpu_id', str(bettercam_gpu_id))
+    elif selected_capture_method == "Mss":
+        pass  # MSS doesn't need to be set up at all
     else:
         obs_camera_id = st.selectbox(label="Obs camera ID", options=["auto", "0","1","2","3","4","5","6","7","8","9","10"], index=0, key="config_obs_camera_id")
         obs_capture_fps = st.number_input(label="Obs capture FPS", value=config.getint('Capture Methods', 'Obs_capture_fps'), key="config_obs_capture_fps")

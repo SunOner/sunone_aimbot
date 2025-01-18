@@ -78,12 +78,12 @@ def run_checks():
             "Don't forget your CUDA version (Minimum version is 12.1, max version is 12.4).")
         quit()
         
-    if cfg.Bettercam_capture == False and cfg.Obs_capture == False:
-        print("Use at least one image capture method.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.")
+    if cfg.Bettercam_capture + cfg.Obs_capture + cfg.Mss_capture < 1:
+        print("Use at least one image capture method.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option or in the `mss_capture` option.")
         quit()
         
-    if cfg.Bettercam_capture and cfg.Obs_capture:
-        print("Only one capture method is possible.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.")
+    if cfg.Bettercam_capture + cfg.Obs_capture + cfg.Mss_capture > 1:
+        print("Only one capture method is possible.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option or in the `mss_capture` option.")
         quit()
 
     if not os.path.exists(f"models/{cfg.AI_model_name}"):
