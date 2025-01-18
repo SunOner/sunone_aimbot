@@ -29,7 +29,7 @@ class Mouse_net(nn.Module):
         x = torch.relu(self.fc3(x))
         x = self.fc4(x)
         return x
-        
+
 class MouseThread:
     def __init__(self):
         self.dpi = cfg.mouse_dpi
@@ -50,24 +50,24 @@ class MouseThread:
         self.max_distance = math.sqrt(self.screen_width**2 + self.screen_height**2) / 2
         self.min_speed_multiplier = cfg.mouse_min_speed_multiplier
         self.max_speed_multiplier = cfg.mouse_max_speed_multiplier
-        
+
         self.bScope = False
-        
+
         self.arch = self.get_arch()
-        
+
         if cfg.mouse_ghub:
             from logic.ghub import gHub
             self.ghub = gHub
 
         if cfg.mouse_rzr:
-            dll_name = "rzctl.dll" 
+            dll_name = "rzctl.dll"
             script_directory = os.path.dirname(os.path.abspath(__file__))
             dll_path = os.path.join(script_directory, dll_name)
             self.rzr = RZCONTROL(dll_path)
             if not self.rzr.init():
                 print("Failed to initialize rzctl")
 
-            
+
         if cfg.AI_mouse_net:
             self.device = torch.device(self.arch)
             self.model = Mouse_net(arch=self.arch).to(self.device)
@@ -92,15 +92,20 @@ class MouseThread:
         if cfg.AI_mouse_net == False:
             if (cfg.show_window and cfg.show_target_line) or (cfg.show_overlay and cfg.show_target_line):
                 visuals.draw_target_line(target_x, target_y, target_cls)
-        
+
         # bScope
         self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h, self.bScope_multiplier) if cfg.auto_shoot or cfg.triggerbot else False
         self.bScope = cfg.force_click or self.bScope
 
         # prediction
         if not self.disable_prediction:
-            current_time = time.time()
-            target_x, target_y = self.predict_target_position(target_x, target_y, current_time)
+            if cfg.disable_tracker:
+                current_time = time.time()
+                target_x, target_y = self.predict_target_position(target_x, target_y, current_time)
+            else:
+                # This target_x, target_y has been predicted by Yolo's Traker.
+                target_x, target_y = target_x, target_y  # This way is for draw_predicted_position
+
             if cfg.AI_mouse_net == False:
                 if (cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line):
                     visuals.draw_predicted_position(target_x, target_y, target_cls)
@@ -128,7 +133,7 @@ class MouseThread:
 
         velocity_x = (target_x - self.prev_x) / delta_time
         velocity_y = (target_y - self.prev_y) / delta_time
-        
+
         acceleration_x = (velocity_x - self.prev_velocity_x) / delta_time
         acceleration_y = (velocity_y - self.prev_velocity_y) / delta_time
 
@@ -144,31 +149,31 @@ class MouseThread:
         self.prev_time = current_time
 
         return predicted_x, predicted_y
-    
+
     def calculate_speed_multiplier(self, distance):
         normalized_distance = min(distance / self.max_distance, 1)
         speed_multiplier = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
-        
+
         return speed_multiplier
-    
+
     def calc_movement(self, target_x, target_y, target_cls):
         if not cfg.AI_mouse_net:
             offset_x = target_x - self.center_x
             offset_y = target_y - self.center_y
 
             distance = math.sqrt(offset_x**2 + offset_y**2)
-            
+
             speed_multiplier = self.calculate_speed_multiplier(distance)
 
             degrees_per_pixel_x = self.fov_x / self.screen_width
             degrees_per_pixel_y = self.fov_y / self.screen_height
-            
+
             mouse_move_x = offset_x * degrees_per_pixel_x
             move_x = (mouse_move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
 
             mouse_move_y = offset_y * degrees_per_pixel_y
             move_y = (mouse_move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
-                
+
             return move_x, move_y
         else:
             input_data = [
@@ -183,22 +188,22 @@ class MouseThread:
                 target_x,
                 target_y
             ]
-            
+
             input_tensor = torch.tensor(input_data, dtype=torch.float32).to(self.device)
             with torch.no_grad():
                 move = self.model(input_tensor).cpu().numpy()
-                
+
             if (cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line):
                     visuals.draw_predicted_position(move[0] + self.center_x, move[1] + self.center_y, target_cls)
-                    
+
             return move[0], move[1]
-        
+
     def move_mouse(self, x, y):
         if x is None:
             x = 0
         if y is None:
             y = 0
-        
+
         if x != 0 and y != 0:
             if (self.get_shooting_key_state() and not cfg.mouse_auto_aim and not cfg.triggerbot) or cfg.mouse_auto_aim:
 
@@ -212,8 +217,8 @@ class MouseThread:
                     arduino.move(int(x), int(y))
 
                 if cfg.mouse_rzr:  # Razer move
-                    self.rzr.mouse_move(int(x), int(y), True)  
-    
+                    self.rzr.mouse_move(int(x), int(y), True)
+
     def get_shooting_key_state(self):
         for key_name in cfg.hotkey_targeting_list:
             key_code = Buttons.KEY_CODES.get(key_name.strip())
@@ -222,7 +227,7 @@ class MouseThread:
                 if state < 0 or state == 1:
                     return True
         return False
-      
+
     def check_target_in_scope(self, target_x, target_y, target_w, target_h, reduction_factor):
         reduced_w = target_w * reduction_factor / 2
         reduced_h = target_h * reduction_factor / 2
@@ -233,10 +238,10 @@ class MouseThread:
         y2 = target_y + reduced_h
 
         bScope = self.center_x > x1 and self.center_x < x2 and self.center_y > y1 and self.center_y < y2
-            
+
         if cfg.show_window and cfg.show_bScope_box:
             visuals.draw_bScope(x1, x2, y1, y2, bScope)
-        
+
         return bScope
 
     def update_settings(self):
@@ -251,5 +256,5 @@ class MouseThread:
         self.screen_height = cfg.detection_window_height
         self.center_x = self.screen_width / 2
         self.center_y = self.screen_height / 2
-        
+
 mouse = MouseThread()

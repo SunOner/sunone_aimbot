@@ -65,7 +65,10 @@ def Warnings():
         selected_methods = sum([cfg.arduino_move, cfg.mouse_ghub, cfg.mouse_rzr])
         if selected_methods > 1:
             raise ValueError("WARNING: You use more than one mouse input method.")
-        
+
+        # tracker
+        if cfg.disable_tracker == False:
+            print("WARNING: The tracking mode places a heavier demand on higher computer performances.")
 def run_checks():
     if torch.cuda.is_available() is False:
         print("You need to install a version of pytorch that supports CUDA.\n"

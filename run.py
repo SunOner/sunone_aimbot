@@ -30,7 +30,31 @@ def perform_detection(model, image):
         show_conf=False,
         save=False,
         show=False)
-        
+
+@torch.inference_mode()
+def perform_detection_track(model, image):
+    return model.track(
+        source=image,
+        persist=True,
+        tracker="custom_tracker.yaml",
+        imgsz=cfg.ai_model_image_size,
+        stream=True,
+        conf=cfg.AI_conf,
+        iou=0.5,
+        device=cfg.AI_device,
+        half=False if "cpu" in cfg.AI_device else True,
+        max_det=20,
+        agnostic_nms=False,
+        augment=False,
+        vid_stride=False,
+        visualize=False,
+        verbose=False,
+        show_boxes=False,
+        show_labels=False,
+        show_conf=False,
+        save=False,
+        show=False)
+
 def init():
     run_checks()
     
@@ -49,8 +73,11 @@ def init():
             
             if cfg.show_window or cfg.show_overlay:
                 visuals.queue.put(image)
-                
-            result = perform_detection(model, image)
+
+            if cfg.disable_tracker:
+                result = perform_detection(model, image)
+            else:
+                result = perform_detection_track(model, image)
 
             if hotkeys_watcher.app_pause == 0:
                 frameParser.parse(result)
