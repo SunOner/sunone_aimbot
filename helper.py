@@ -426,8 +426,8 @@ if st.session_state.current_tab == "HELPER":
         if st.button(label="Reinstall TensorRT", key="install_tensorrt_button"):
             if find_cuda_path():
                 with st.spinner("Installing TensorRT. After installation, the application will restart and a new window will open."):
-                    os.system("pip uninstall tensorrt tensorrt-bindings tensorrt-cu12 tensorrt-cu12_bindings tensorrt-cu12_libs tensorrt-libs -y")
-                    os.system("pip install tensorrt")
+                    os.system("pip uninstall tensorrt torch-tensorrt tensorrt-bindings tensorrt-cu12 tensorrt-cu12_bindings tensorrt-cu12_libs tensorrt-libs -y")
+                    os.system("pip install torch-tensorrt ")  # install torch-tensorrt instead of TensorRT
                     restart()
             else:
                 st.error("❌ Please, download and install CUDA first.")
