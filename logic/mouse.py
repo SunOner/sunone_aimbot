@@ -1,86 +1,276 @@
-_B=False
-_A=None
-import torch,win32con,win32api,torch.nn as nn,time,math,os
+import torch
+import win32con, win32api
+import torch.nn as nn
+import time
+import math
+import os
+import supervision as sv
 from logic.config_watcher import cfg
 from logic.visual import visuals
 from logic.shooting import shooting
 from logic.buttons import Buttons
-if cfg.mouse_rzr:from logic.rzctl import RZCONTROL
-if cfg.arduino_move or cfg.arduino_shoot:from logic.arduino import arduino
+
+# Conditional imports
+if cfg.mouse_rzr:
+    from logic.rzctl import RZCONTROL
+
+if cfg.arduino_move or cfg.arduino_shoot:
+    from logic.arduino import arduino
+
 class Mouse_net(nn.Module):
-        def __init__(A,arch):B=arch;super(Mouse_net,A).__init__();A.fc1=nn.Linear(10,128,B);A.fc2=nn.Linear(128,128,B);A.fc3=nn.Linear(128,64,B);A.fc4=nn.Linear(64,2,B)
-        def forward(A,x):x=torch.relu(A.fc1(x));x=torch.relu(A.fc2(x));x=torch.relu(A.fc3(x));x=A.fc4(x);return x
+    def __init__(self, arch):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(10, 128, arch),
+            nn.ReLU(),
+            nn.Linear(128, 128, arch),
+            nn.ReLU(),
+            nn.Linear(128, 64, arch),
+            nn.ReLU(),
+            nn.Linear(64, 2, arch)
+        )
+
+    def forward(self, x):
+        return self.layers(x)
+
 class MouseThread:
-        def __init__(A):
-                A.dpi=cfg.mouse_dpi;A.mouse_sensitivity=cfg.mouse_sensitivity;A.fov_x=cfg.mouse_fov_width;A.fov_y=cfg.mouse_fov_height;A.disable_prediction=cfg.disable_prediction;A.prediction_interval=cfg.prediction_interval;A.bScope_multiplier=cfg.bScope_multiplier;A.screen_width=cfg.detection_window_width;A.screen_height=cfg.detection_window_height;A.center_x=A.screen_width/2;A.center_y=A.screen_height/2;A.prev_x=0;A.prev_y=0;A.prev_time=_A;A.max_distance=math.sqrt(A.screen_width**2+A.screen_height**2)/2;A.min_speed_multiplier=cfg.mouse_min_speed_multiplier;A.max_speed_multiplier=cfg.mouse_max_speed_multiplier;A.prev_distance=_A;A.speed_correction_factor=.1;A.bScope=_B;A.arch=A.get_arch()
-                if cfg.mouse_ghub:from logic.ghub import gHub;A.ghub=gHub
-                if cfg.mouse_rzr:
-                        B='rzctl.dll';C=os.path.dirname(os.path.abspath(__file__));D=os.path.join(C,B);A.rzr=RZCONTROL(D)
-                        if not A.rzr.init():print('Failed to initialize rzctl')
-                if cfg.AI_mouse_net:
-                        A.device=torch.device(A.arch);A.model=Mouse_net(arch=A.arch).to(A.device)
-                        try:A.model.load_state_dict(torch.load('mouse_net.pth',map_location=A.device))
-                        except Exception as E:print(E);print('Please train mouse_net model, or download latest trained mouse_net.pth model from repository and place in base folder. Instruction here: https://github.com/SunOner/mouse_net');exit()
-                        A.model.eval()
-        def get_arch(B):
-                A='cpu'
-                if cfg.AI_enable_AMD:return f"hip:{cfg.AI_device}"
-                if A in cfg.AI_device:return A
-                return f"cuda:{cfg.AI_device}"
-        def process_data(A,data):
-                B,C,E,F,D=data
-                if cfg.AI_mouse_net==_B:
-                        if cfg.show_window and cfg.show_target_line or cfg.show_overlay and cfg.show_target_line:visuals.draw_target_line(B,C,D)
-                A.bScope=A.check_target_in_scope(B,C,E,F,A.bScope_multiplier)if cfg.auto_shoot or cfg.triggerbot else _B;A.bScope=cfg.force_click or A.bScope
-                if not A.disable_prediction:
-                        G=time.time();B,C=A.predict_target_position(B,C,G)
-                        if cfg.AI_mouse_net==_B:
-                                if cfg.show_window and cfg.show_target_prediction_line or cfg.show_overlay and cfg.show_target_prediction_line:visuals.draw_predicted_position(B,C,D)
-                B,C=A.calc_movement(B,C,D)
-                if cfg.show_window and cfg.show_history_points or cfg.show_overlay and cfg.show_history_points:visuals.draw_history_point_add_point(B,C)
-                shooting.queue.put((A.bScope,A.get_shooting_key_state()));A.move_mouse(B,C)
-        def predict_target_position(A,target_x,target_y,current_time):
-                H=current_time;C=target_y;B=target_x
-                if A.prev_time is _A:A.prev_time=H;A.prev_x=B;A.prev_y=C;A.prev_velocity_x=0;A.prev_velocity_y=0;return B,C
-                D=H-A.prev_time;I=(B-A.prev_x)/D;J=(C-A.prev_y)/D;L=(I-A.prev_velocity_x)/D;M=(J-A.prev_velocity_y)/D;F=D*A.prediction_interval;K=math.sqrt((B-A.prev_x)**2+(C-A.prev_y)**2);G=max(.1,min(1,1/(K+1)))
-                if A.prev_distance is not _A:N=abs(K-A.prev_distance);E=1+N/A.max_distance*A.speed_correction_factor
-                else:E=1.
-                O=B+I*F*G*E+.5*L*F**2*G*E;P=C+J*F*G*E+.5*M*F**2*G*E;A.prev_x,A.prev_y=B,C;A.prev_velocity_x,A.prev_velocity_y=I,J;A.prev_time=H;A.prev_distance=K;return O,P
-        def calculate_speed_multiplier(A,distance):
-                B=distance;D=min(B/A.max_distance,1);C=A.min_speed_multiplier+(A.max_speed_multiplier-A.min_speed_multiplier)*(1-D)
-                if A.prev_distance is not _A:E=abs(B-A.prev_distance);F=1+E/A.max_distance*A.speed_correction_factor;return C*F
-                return C
-        def calc_movement(A,target_x,target_y,target_cls):
-                G=target_y;F=target_x
-                if not cfg.AI_mouse_net:
-                        H=F-A.center_x;I=G-A.center_y;K=math.sqrt(H**2+I**2);J=A.calculate_speed_multiplier(K);L=A.fov_x/A.screen_width;M=A.fov_y/A.screen_height;N=H*L;O=I*M;B=.8
-                        if not hasattr(A,'last_move_x'):A.last_move_x,A.last_move_y=0,0
-                        C=B*N+(1-B)*A.last_move_x;D=B*O+(1-B)*A.last_move_y;A.last_move_x,A.last_move_y=C,D;C=C/360*(A.dpi*(1/A.mouse_sensitivity))*J;D=D/360*(A.dpi*(1/A.mouse_sensitivity))*J;return C,D
-                else:
-                        P=[A.screen_width,A.screen_height,A.center_x,A.center_y,A.dpi,A.mouse_sensitivity,A.fov_x,A.fov_y,F,G];Q=torch.tensor(P,dtype=torch.float32).to(A.device)
-                        with torch.no_grad():E=A.model(Q).cpu().numpy()
-                        if cfg.show_window and cfg.show_target_prediction_line or cfg.show_overlay and cfg.show_target_prediction_line:visuals.draw_predicted_position(E[0]+A.center_x,E[1]+A.center_y,target_cls)
-                        return E[0],E[1]
-        def move_mouse(A,x,y):
-                x=x if x is not _A else 0;y=y if y is not _A else 0
-                if x!=0 and y!=0:
-                        C=A.get_shooting_key_state();B=cfg.mouse_auto_aim;D=cfg.triggerbot
-                        if C and not B and not D or B:
-                                x,y=int(x),int(y)
-                                if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:win32api.mouse_event(win32con.MOUSEEVENTF_MOVE,x,y,0,0)
-                                elif cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:A.ghub.mouse_xy(x,y)
-                                elif cfg.arduino_move and not cfg.mouse_rzr:arduino.move(x,y)
-                                elif cfg.mouse_rzr:A.rzr.mouse_move(x,y,True)
-        def get_shooting_key_state(D):
-                for C in cfg.hotkey_targeting_list:
-                        A=Buttons.KEY_CODES.get(C.strip())
-                        if A is not _A:
-                                B=win32api.GetKeyState(A)if cfg.mouse_lock_target else win32api.GetAsyncKeyState(A)
-                                if B<0 or B==1:return True
-                return _B
-        def check_target_in_scope(A,target_x,target_y,target_w,target_h,reduction_factor):
-                D=reduction_factor;C=target_y;B=target_x;E=target_w*D/2;F=target_h*D/2;G=B-E;H=B+E;I=C-F;J=C+F;K=A.center_x>G and A.center_x<H and A.center_y>I and A.center_y<J
-                if cfg.show_window and cfg.show_bScope_box:visuals.draw_bScope(G,H,I,J,K)
-                return K
-        def update_settings(A):A.dpi=cfg.mouse_dpi;A.mouse_sensitivity=cfg.mouse_sensitivity;A.fov_x=cfg.mouse_fov_width;A.fov_y=cfg.mouse_fov_height;A.disable_prediction=cfg.disable_prediction;A.prediction_interval=cfg.prediction_interval;A.bScope_multiplier=cfg.bScope_multiplier;A.screen_width=cfg.detection_window_width;A.screen_height=cfg.detection_window_height;A.center_x=A.screen_width/2;A.center_y=A.screen_height/2
-mouse=MouseThread()
+    def __init__(self):
+        self.initialize_parameters()
+        self.setup_hardware()
+        self.setup_ai()
+
+    def initialize_parameters(self):
+        self.dpi = cfg.mouse_dpi
+        self.mouse_sensitivity = cfg.mouse_sensitivity
+        self.fov_x = cfg.mouse_fov_width
+        self.fov_y = cfg.mouse_fov_height
+        self.disable_prediction = cfg.disable_prediction
+        self.prediction_interval = cfg.prediction_interval
+        self.bScope_multiplier = cfg.bScope_multiplier
+        self.screen_width = cfg.detection_window_width
+        self.screen_height = cfg.detection_window_height
+        self.center_x = self.screen_width / 2
+        self.center_y = self.screen_height / 2
+        self.prev_x = 0
+        self.prev_y = 0
+        self.prev_time = None
+        self.max_distance = math.sqrt(self.screen_width**2 + self.screen_height**2) / 2
+        self.min_speed_multiplier = cfg.mouse_min_speed_multiplier
+        self.max_speed_multiplier = cfg.mouse_max_speed_multiplier
+        self.prev_distance = None
+        self.speed_correction_factor = 0.1
+        self.bScope = False
+        self.arch = self.get_arch()
+        self.section_size_x = self.screen_width / 100
+        self.section_size_y = self.screen_height / 100
+
+    def get_arch(self):
+        if cfg.AI_enable_AMD:
+            return f'hip:{cfg.AI_device}'
+        if 'cpu' in cfg.AI_device:
+            return 'cpu'
+        return f'cuda:{cfg.AI_device}'
+
+    def setup_hardware(self):
+        if cfg.mouse_ghub:
+            from logic.ghub import gHub
+            self.ghub = gHub()
+
+        if cfg.mouse_rzr:
+            dll_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rzctl.dll")
+            self.rzr = RZCONTROL(dll_path)
+            if not self.rzr.init():
+                print("Failed to initialize rzctl")
+
+    def setup_ai(self):
+        if cfg.AI_mouse_net:
+            self.device = torch.device(self.arch)
+            self.model = Mouse_net(arch=self.arch).to(self.device)
+            try:
+                self.model.load_state_dict(torch.load('mouse_net.pth', map_location=self.device))
+            except Exception as e:
+                print(e)
+                print('Please train mouse_net model, or download latest trained mouse_net.pth model from repository.')
+                exit()
+            self.model.eval()
+
+    def process_data(self, data):
+        if isinstance(data, sv.Detections):
+            target_x, target_y = data.xyxy.mean(axis=1)
+            target_w, target_h = data.xyxy[:, 2] - data.xyxy[:, 0], data.xyxy[:, 3] - data.xyxy[:, 1]
+            target_cls = data.class_id[0] if data.class_id.size > 0 else None
+        else:
+            target_x, target_y, target_w, target_h, target_cls = data
+
+        self.visualize_target(target_x, target_y, target_cls)
+        self.bScope = self.check_target_in_scope(target_x, target_y, target_w, target_h, self.bScope_multiplier) if cfg.auto_shoot or cfg.triggerbot else False
+        self.bScope = cfg.force_click or self.bScope
+
+        if not self.disable_prediction:
+            current_time = time.time()
+            if not isinstance(data, sv.Detections):
+                target_x, target_y = self.predict_target_position(target_x, target_y, current_time)
+            self.visualize_prediction(target_x, target_y, target_cls)
+
+        move_x, move_y = self.calc_movement(target_x, target_y, target_cls)
+        
+        self.visualize_history(target_x, target_y)
+        shooting.queue.put((self.bScope, self.get_shooting_key_state()))
+        self.move_mouse(move_x, move_y)
+
+    def predict_target_position(self, target_x, target_y, current_time):
+        if self.prev_time is None:
+            self.prev_time = current_time
+            self.prev_x = target_x
+            self.prev_y = target_y
+            self.prev_velocity_x = 0
+            self.prev_velocity_y = 0
+            return target_x, target_y
+
+        delta_time = current_time - self.prev_time
+        velocity_x = (target_x - self.prev_x) / delta_time
+        velocity_y = (target_y - self.prev_y) / delta_time
+        acceleration_x = (velocity_x - self.prev_velocity_x) / delta_time
+        acceleration_y = (velocity_y - self.prev_velocity_y) / delta_time
+
+        prediction_interval = delta_time * self.prediction_interval
+        current_distance = math.sqrt((target_x - self.prev_x)**2 + (target_y - self.prev_y)**2)
+        proximity_factor = max(0.1, min(1, 1 / (current_distance + 1)))
+
+        speed_correction = 1 + (abs(current_distance - (self.prev_distance or 0)) / self.max_distance) * self.speed_correction_factor if self.prev_distance is not None else .0001
+
+        predicted_x = target_x + velocity_x * prediction_interval * proximity_factor * speed_correction + 0.5 * acceleration_x * (prediction_interval ** 2) * proximity_factor * speed_correction
+        predicted_y = target_y + velocity_y * prediction_interval * proximity_factor * speed_correction + 0.5 * acceleration_y * (prediction_interval ** 2) * proximity_factor * speed_correction
+
+        self.prev_x, self.prev_y = target_x, target_y
+        self.prev_velocity_x, self.prev_velocity_y = velocity_x, velocity_y
+        self.prev_time = current_time
+        self.prev_distance = current_distance
+
+        return predicted_x, predicted_y
+
+    def calculate_speed_multiplier(self, target_x, target_y, distance):
+        normalized_distance = min(distance / self.max_distance, 1)
+        base_speed = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
+
+        target_x_section = int((target_x - self.center_x + self.screen_width / 2) / self.section_size_x)
+        target_y_section = int((target_y - self.center_y + self.screen_height / 2) / self.section_size_y)
+        
+        distance_from_center = max(abs(50 - target_x_section), abs(50 - target_y_section))
+
+        if distance_from_center == 0:
+            return 1
+        elif 5 <= distance_from_center <= 10:
+            return self.max_speed_multiplier
+        else:
+            speed_reduction = min(distance_from_center - 10, 45) / 100.0
+            speed_multiplier = base_speed * (1 - speed_reduction)
+
+        if self.prev_distance is not None:
+            speed_adjustment = 1 + (abs(distance - self.prev_distance) / self.max_distance) * self.speed_correction_factor
+            return speed_multiplier * speed_adjustment
+        
+        return speed_multiplier
+
+    def calc_movement(self, target_x, target_y, target_cls):
+        if not cfg.AI_mouse_net:
+            offset_x = target_x - self.center_x
+            offset_y = target_y - self.center_y
+            distance = math.sqrt(offset_x**2 + offset_y**2)
+            speed_multiplier = self.calculate_speed_multiplier(target_x, target_y, distance)
+
+            degrees_per_pixel_x = self.fov_x / self.screen_width
+            degrees_per_pixel_y = self.fov_y / self.screen_height
+
+            mouse_move_x = offset_x * degrees_per_pixel_x
+            mouse_move_y = offset_y * degrees_per_pixel_y
+
+            # Apply smoothing
+            alpha = 0.85
+            if not hasattr(self, 'last_move_x'):
+                self.last_move_x, self.last_move_y = 0, 0
+            
+            move_x = alpha * mouse_move_x + (1 - alpha) * self.last_move_x
+            move_y = alpha * mouse_move_y + (1 - alpha) * self.last_move_y
+            
+            self.last_move_x, self.last_move_y = move_x, move_y
+
+            move_x = (move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
+            move_y = (move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
+
+            return move_x, move_y
+        else:
+            input_data = [
+                self.screen_width, self.screen_height, self.center_x, self.center_y, 
+                self.dpi, self.mouse_sensitivity, self.fov_x, self.fov_y, target_x, target_y
+            ]
+            
+            input_tensor = torch.tensor(input_data, dtype=torch.float32).to(self.device)
+            with torch.no_grad():
+                move = self.model(input_tensor).cpu().numpy()
+                
+            self.visualize_prediction(move[0] + self.center_x, move[1] + self.center_y, target_cls)
+            return move[0], move[1]
+
+    def move_mouse(self, x, y):
+        if x == 0 and y == 0:
+            return
+
+        shooting_state = self.get_shooting_key_state()
+        mouse_aim = cfg.mouse_auto_aim
+        triggerbot = cfg.triggerbot
+
+        if shooting_state or mouse_aim:
+            if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:
+                win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
+            elif cfg.mouse_ghub:
+                self.ghub.mouse_xy(int(x), int(y))
+            elif cfg.arduino_move:
+                arduino.move(int(x), int(y))
+            elif cfg.mouse_rzr:
+                self.rzr.mouse_move(int(x), int(y), True)
+
+    def get_shooting_key_state(self):
+        for key_name in cfg.hotkey_targeting_list:
+            key_code = Buttons.KEY_CODES.get(key_name.strip())
+            if key_code and (win32api.GetKeyState(key_code) if cfg.mouse_lock_target else win32api.GetAsyncKeyState(key_code)) < 0:
+                return True
+        return False
+
+    def check_target_in_scope(self, target_x, target_y, target_w, target_h, reduction_factor):
+        reduced_w, reduced_h = target_w * reduction_factor / 2, target_h * reduction_factor / 2
+        x1, x2, y1, y2 = target_x - reduced_w, target_x + reduced_w, target_y - reduced_h, target_y + reduced_h
+        bScope = self.center_x > x1 and self.center_x < x2 and self.center_y > y1 and self.center_y < y2
+        
+        if cfg.show_window and cfg.show_bScope_box:
+            visuals.draw_bScope(x1, x2, y1, y2, bScope)
+        
+        return bScope
+
+    def update_settings(self):
+        # Update all configuration parameters here
+        self.dpi = cfg.mouse_dpi
+        self.mouse_sensitivity = cfg.mouse_sensitivity
+        self.fov_x = cfg.mouse_fov_width
+        self.fov_y = cfg.mouse_fov_height
+        self.disable_prediction = cfg.disable_prediction
+        self.prediction_interval = cfg.prediction_interval
+        self.bScope_multiplier = cfg.bScope_multiplier
+        self.screen_width = cfg.detection_window_width
+        self.screen_height = cfg.detection_window_height
+        self.center_x = self.screen_width / 2
+        self.center_y = self.screen_height / 2
+
+    def visualize_target(self, target_x, target_y, target_cls):
+        if cfg.AI_mouse_net == False and ((cfg.show_window and cfg.show_target_line) or (cfg.show_overlay and cfg.show_target_line)):
+            visuals.draw_target_line(target_x, target_y, target_cls)
+
+    def visualize_prediction(self, target_x, target_y, target_cls):
+        if cfg.AI_mouse_net == False and ((cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line)):
+            visuals.draw_predicted_position(target_x, target_y, target_cls)
+
+    def visualize_history(self, target_x, target_y):
+        if (cfg.show_window and cfg.show_history_points) or (cfg.show_overlay and cfg.show_history_points):
+            visuals.draw_history_point_add_point(target_x, target_y)
+
+mouse = MouseThread()
