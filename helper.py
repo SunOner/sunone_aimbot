@@ -143,14 +143,20 @@ def get_aimbot_offline_version():
             return 0, 0
 
 def get_aimbot_online_version():
-    content = requests.get('https://raw.githubusercontent.com/SunOner/sunone_aimbot/main/version').content.decode('utf-8').split('\n')
-    app, config = 0, 0
+    app = 0
+    config = 0
+    try:
+        content = requests.get('https://raw.githubusercontent.com/SunOner/sunone_aimbot/main/version').content.decode('utf-8').split('\n')
+    except:
+        logger.info("[Error] It is impossible to get the current щтдшту version.")
+    
     for line in content:
-        key, value = line.strip().split("=")
-        if key == "app":
-            app = value
-        if key == 'config':
-            config = value
+        if line:
+            key, value = line.strip().split('=')
+            if key == "app":
+                app = value
+            if key == 'config':
+                config = value
     return app, config
 
 def upgrade_pip():
