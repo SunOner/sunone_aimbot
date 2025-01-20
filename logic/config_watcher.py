@@ -21,8 +21,8 @@ class Config():
         self.detection_window_height = int(self.config_Detection_window["detection_window_height"])
         self.circle_capture = self.config_Detection_window.getboolean("circle_capture")
         self.disable_move_window = self.config_Detection_window.getboolean("disable_move_window")
-        self.execution_window_width = int(self.config_Detection_window["execution_window_width"])
-        self.execution_window_height = int(self.config_Detection_window["execution_window_height"])
+        self.move_window_width = int(self.config_Detection_window["move_window_width"])
+        self.move_window_height = int(self.config_Detection_window["move_window_height"])
 
         # Capture Method mss
         self.config_mss_capture = self.config["Capture Methods"]
