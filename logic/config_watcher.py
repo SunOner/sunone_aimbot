@@ -20,6 +20,10 @@ class Config():
         self.detection_window_width = int(self.config_Detection_window["detection_window_width"])
         self.detection_window_height = int(self.config_Detection_window["detection_window_height"])
         self.circle_capture = self.config_Detection_window.getboolean("circle_capture")
+        # Capture Method mss
+        self.config_mss_capture = self.config["Capture Methods"]
+        self.mss_capture = self.config_mss_capture.getboolean("mss_capture")
+        self.mss_capture_fps = int(self.config_mss_capture["mss_fps"])
         # Capture Method Bettercam
         self.config_Bettercam_Capture = self.config["Capture Methods"]
         self.Bettercam_capture = self.config_Bettercam_Capture.getboolean("Bettercam_capture")
@@ -79,6 +83,7 @@ class Config():
         self.AI_device = str(self.config_AI["AI_device"])
         self.AI_enable_AMD = self.config_AI.getboolean("AI_enable_AMD")
         self.AI_mouse_net = self.config_AI.getboolean("AI_mouse_net")
+        self.disable_tracker = self.config_AI.getboolean("disable_tracker")
         # Overlay
         self.config_overlay = self.config["overlay"]
         self.show_overlay = self.config_overlay.getboolean("show_overlay")

@@ -10,7 +10,6 @@ import ctypes
 import configparser
 import threading
 import signal
-
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -30,6 +29,8 @@ st.set_page_config(page_title="HELPER",
 try:
     import streamlit as st
     import requests
+    import mss
+    import supervision
     import numpy
     import bettercam
     import win32api, win32con, win32gui
@@ -498,7 +499,7 @@ elif st.session_state.current_tab == "CONFIG":
 
     # Capture Methods
     st.subheader("Capture Methods", divider=True)
-    selected_capture_method = st.radio(label="Capture Method", options=["Bettercam capture", "OBS"], key="config_selected_capture_method")
+    selected_capture_method = st.radio(label="Capture Method", options=["Bettercam capture", "OBS", "mss"], key="config_selected_capture_method")
     
     if selected_capture_method == "Bettercam capture":        
         bettercam_capture_fps = st.number_input(label="Bettercam capture FPS", value=config.getint('Capture Methods', 'bettercam_capture_fps'), key="config_bettercam_capture_fps")
@@ -506,17 +507,25 @@ elif st.session_state.current_tab == "CONFIG":
         bettercam_gpu_id = st.number_input(label="Bettercam GPU ID", value=config.getint('Capture Methods', 'bettercam_gpu_id'), key="config_bettercam_gpu_id")
         config.set('Capture Methods', 'Bettercam_capture', "True")
         config.set('Capture Methods', 'Obs_capture', "False")
+        config.set('Capture Methods', 'Obs_capture', "False")
         config.set('Capture Methods', 'bettercam_capture_fps', str(bettercam_capture_fps))
         config.set('Capture Methods', 'bettercam_monitor_id', str(bettercam_monitor_id))
         config.set('Capture Methods', 'bettercam_gpu_id', str(bettercam_gpu_id))
+    elif selected_capture_method == "mss":
+        mss_fps = st.number_input(label="mss_fps", value=config.getint('Capture Methods', 'mss_fps'), key="mss_fps")
+        config.set('Capture Methods', 'Bettercam_capture', "False")
+        config.set('Capture Methods', 'Obs_capture', "False")
+        config.set('Capture Methods', 'Mss_capture', "True")
+        config.set('Capture Methods', 'mss_fps', str(mss_fps))
     else:
         obs_camera_id = st.selectbox(label="Obs camera ID", options=["auto", "0","1","2","3","4","5","6","7","8","9","10"], index=0, key="config_obs_camera_id")
         obs_capture_fps = st.number_input(label="Obs capture FPS", value=config.getint('Capture Methods', 'Obs_capture_fps'), key="config_obs_capture_fps")
         config.set('Capture Methods', 'Bettercam_capture', "False")
+        config.set('Capture Methods', 'mss_capture', "False")
         config.set('Capture Methods', 'Obs_capture', "True")
         config.set('Capture Methods', 'Obs_camera_id', obs_camera_id)
         config.set('Capture Methods', 'Obs_capture_fps', str(obs_capture_fps))
-
+    
     # Aim
     st.subheader("Aim", divider=True)
     body_y_offset = st.slider(label="Body Y offset", min_value=-0.99, max_value=0.99, value=config.getfloat('Aim', 'body_y_offset'), key="config_body_y_offset")
@@ -850,7 +859,7 @@ elif st.session_state.current_tab == "TESTS":
                 
                 annotated_frame = result[0].plot()
                 
-                cv2.putText(annotated_frame, "When life gives you lemons, don't make lemonade.", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
+                cv2.putText(annotated_frame, "When life gives you lemons, Make orange juice.", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1, cv2.LINE_AA)
                 
                 frame_height, frame_width = frame.shape[:2]
                 height = int(frame_height * resize_factor / 100)

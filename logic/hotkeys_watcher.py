@@ -11,11 +11,11 @@ from logic.mouse import mouse
 from logic.visual import visuals
 from logic.shooting import shooting
 
-class HotkeysWatсher(threading.Thread):
+class HotkeysWatcher(threading.Thread):
     def __init__(self):
-        super(HotkeysWatсher, self).__init__()
+        super(HotkeysWatcher, self).__init__()
         self.daemon = True
-        self.name = 'HotkeysWatсher'
+        self.name = 'HotkeysWatcher'
         
         self.app_pause = 0
         self.clss = self.active_classes()
@@ -64,4 +64,4 @@ class HotkeysWatсher(threading.Thread):
         
         self.clss = clss
     
-hotkeys_watcher = HotkeysWatсher()
+hotkeys_watcher = HotkeysWatcher()

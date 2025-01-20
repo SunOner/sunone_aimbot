@@ -1,5 +1,6 @@
 import cv2
 import bettercam
+import mss
 from screeninfo import get_monitors
 import threading
 import queue
@@ -32,37 +33,44 @@ class Capture(threading.Thread):
     
         if cfg.Bettercam_capture:
             self.setup_bettercam()
-            
         elif cfg.Obs_capture:
             self.setup_obs()
-        
+        elif cfg.mss_capture:
+            self.setup_mss()
+
     def setup_bettercam(self):
-        self.bc = bettercam.create(device_idx=cfg.bettercam_monitor_id,
-                                   output_idx=cfg.bettercam_gpu_id,
-                                   output_color="BGR",
-                                   max_buffer_len=16,
-                                   region=self.Calculate_screen_offset())
+        self.bc = bettercam.create(
+            device_idx=cfg.bettercam_monitor_id,
+            output_idx=cfg.bettercam_gpu_id,
+            output_color="BGR",
+            max_buffer_len=16,
+            region=self.calculate_screen_offset()
+        )
         if not self.bc.is_capturing:
-            self.bc.start(region=self.Calculate_screen_offset(custom_region=[] if len(self._custom_region) <=0 else self._custom_region,
-                                                              x_offset=None if self._offset_x == None else self._offset_x,
-                                                              y_offset = None if self._offset_y == None else self._offset_y),
-                          target_fps=cfg.bettercam_capture_fps)
+            self.bc.start(
+                region=self.calculate_screen_offset(
+                    custom_region=[] if len(self._custom_region) == 0 else self._custom_region,
+                    x_offset=self._offset_x if self._offset_x is not None else 0,
+                    y_offset=self._offset_y if self._offset_y is not None else 0
+                ),
+                target_fps=cfg.bettercam_capture_fps
+            )
 
     def setup_obs(self):
-        if cfg.Obs_camera_id == 'auto':
-            camera_id = self.find_obs_virtual_camera()
-            if camera_id == -1:
-                print('OBS Virtual Camera not found')
-                exit(0)
-                
-        elif cfg.Obs_camera_id.isdigit:
-            camera_id = int(cfg.Obs_camera_id)
-            
+        camera_id = self.find_obs_virtual_camera() if cfg.Obs_camera_id == 'auto' else int(cfg.Obs_camera_id) if cfg.Obs_camera_id.isdigit() else None
+        if camera_id is None:
+            print('OBS Virtual Camera not found')
+            exit(0)
+        
         self.obs_camera = cv2.VideoCapture(camera_id)
         self.obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.detection_window_width)
         self.obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.detection_window_height)
         self.obs_camera.set(cv2.CAP_PROP_FPS, cfg.Obs_capture_fps)
-        
+
+    def setup_mss(self):
+        left, top, width, height = self.calculate_mss_offset()
+        self.monitor = {"left": left, "top": top, "width": width, "height": height}
+
     def run(self):
         while self.running:
             frame = self.capture_frame()
@@ -71,18 +79,19 @@ class Capture(threading.Thread):
                     self.frame_queue.get()
                 self.frame_queue.put(frame)
             
-    def capture_frame(self):          
+    def capture_frame(self):
         if cfg.Bettercam_capture:
             return self.bc.get_latest_frame()
-        
+        elif cfg.mss_capture:
+            with mss.mss() as sct:
+                screenshot = sct.grab(self.monitor)
+                raw = screenshot.bgra
+                img_array = np.frombuffer(raw, dtype=np.uint8).reshape((screenshot.height, screenshot.width, 4))
+                return cv2.cvtColor(img_array, cv2.COLOR_BGRA2BGR)
         elif cfg.Obs_capture:
             ret_val, img = self.obs_camera.read()
-            if ret_val:
-                return img
-            else:
-                print('Failed to capture frame from OBS Virtual Camera')
-                return None
-            
+            return img if ret_val else None
+
     def get_new_frame(self):
         try:
             return self.frame_queue.get(timeout=1)
@@ -90,9 +99,11 @@ class Capture(threading.Thread):
             return None
     
     def restart(self):
-        if cfg.Bettercam_capture and (self.prev_detection_window_height != cfg.detection_window_height or 
-                                      self.prev_detection_window_width != cfg.detection_window_width or 
-                                      self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps):
+        if cfg.Bettercam_capture and (
+            self.prev_detection_window_height != cfg.detection_window_height or 
+            self.prev_detection_window_width != cfg.detection_window_width or 
+            self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps
+        ):
             self.bc.stop()
             del self.bc
             self.setup_bettercam()
@@ -105,27 +116,32 @@ class Capture(threading.Thread):
 
             print('Capture reloaded')
             
-    def Calculate_screen_offset(self, custom_region = [], x_offset=None, y_offset=None):
+    def calculate_screen_offset(self, custom_region=[], x_offset=None, y_offset=None):
         if x_offset is None:
             x_offset = 0
         if y_offset is None:
             y_offset = 0
         
-        if len(custom_region) <= 0:
+        if not custom_region:
             left, top = self.get_primary_display_resolution()
         else:
             left, top = custom_region
         
         left = left / 2 - cfg.detection_window_width / 2 + x_offset
         top = top / 2 - cfg.detection_window_height / 2 - y_offset
-        width = left + cfg.detection_window_width
-        height = top + cfg.detection_window_height
+        width = cfg.detection_window_width
+        height = cfg.detection_window_height
         
         return (int(left), int(top), int(width), int(height))
-    
+
+    def calculate_mss_offset(self):
+        x, y = self.get_primary_display_resolution()
+        left = x / 2 - cfg.detection_window_width / 2
+        top = y / 2 - cfg.detection_window_height / 2
+        return int(left), int(top), int(cfg.detection_window_width), int(cfg.detection_window_height)
+
     def get_primary_display_resolution(self):
-        _ = get_monitors()
-        for m in _:
+        for m in get_monitors():
             if m.is_primary:
                 return m.width, m.height
             
@@ -137,8 +153,7 @@ class Capture(threading.Thread):
             cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
             if not cap.isOpened():
                 continue
-            backend_name = cap.getBackendName()
-            if backend_name == obs_camera_name:
+            if cap.getBackendName() == obs_camera_name:
                 print(f'OBS Virtual Camera found at index {i}')
                 cap.release()
                 return i
@@ -149,39 +164,30 @@ class Capture(threading.Thread):
         version = 0
         try:
             with open('./version', 'r') as f:
-                lines = f.read().split('\n')
-                version = lines[0].split('=')[1]
-        except:
+                version = f.readline().split('=')[1].strip()
+        except FileNotFoundError:
             print('(version file is not found)')
 
         print(f'Sunone Aimbot is started! (Version {version})\n\n',
-                'Hotkeys:\n',
-                f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
-                f'[{cfg.hotkey_exit}] - EXIT\n',
-                f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
-                f'[{cfg.hotkey_reload_config}] - Reload config\n')
+              'Hotkeys:\n',
+              f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
+              f'[{cfg.hotkey_exit}] - EXIT\n',
+              f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
+              f'[{cfg.hotkey_reload_config}] - Reload config\n')
     
     def convert_to_circle(self, image):
         height, width = image.shape[:2]
-
         mask = np.zeros((height, width), dtype=np.uint8)
-
-        center = (width // 2, height // 2)
-        axes = (width // 2, height // 2)
-
-        cv2.ellipse(mask, center, axes, angle=0, startAngle=0, endAngle=360, color=(255), thickness=-1)
-
-        mask_3d = cv2.merge([mask, mask, mask])
-
-        return cv2.bitwise_and(image, mask_3d)
+        cv2.ellipse(mask, (width // 2, height // 2), (width // 2, height // 2), 0, 0, 360, 255, -1)
+        return cv2.bitwise_and(image, cv2.merge([mask, mask, mask]))
     
     def Quit(self):
         self.running = False
-        if cfg.Bettercam_capture and self.bc.is_capturing:
+        if cfg.Bettercam_capture and hasattr(self, 'bc') and self.bc.is_capturing:
             self.bc.stop()
-        if cfg.Obs_capture:
+        if cfg.Obs_capture and hasattr(self, 'obs_camera'):
             self.obs_camera.release()
         self.join()
-            
+
 capture = Capture()
 capture.start()

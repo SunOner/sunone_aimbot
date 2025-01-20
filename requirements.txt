@@ -12,3 +12,5 @@ opencv-python
 packaging
 ultralytics
 keyboard
+mss
+supervision

@@ -1,6 +1,5 @@
 import torch
 import os
-
 from logic.config_watcher import cfg
 
 def convert_onnx_to_fp16():
@@ -51,7 +50,9 @@ def Warnings():
             print("WARNING: The object detector window is more than 600 pixels in height, a large object detector window can have a bad effect on performance.")
         if cfg.AI_conf <= 0.15:
             print("WARNING: A small value of `AI_conf ` can lead to a large number of false positives.")
-        
+               # tracker
+        if cfg.disable_tracker == True:
+            print("ultralytics tracking system causes more overhead compute power, might cause performance issues")
         # mouse
         if cfg.mouse_ghub == False and cfg.arduino_move == False and cfg.arduino_shoot == False:
             print("WARNING: win32api is detected in some games.")
@@ -75,12 +76,12 @@ def run_checks():
             "Don't forget your CUDA version (Minimum version is 12.1, max version is 12.4).")
         quit()
         
-    if cfg.Bettercam_capture == False and cfg.Obs_capture == False:
-        print("Use at least one image capture method.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.")
+    if + cfg.mss_capture + cfg.Bettercam_capture + cfg.Obs_capture < 1:
+        print("Use at least one image capture method.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option or in the `mss_capture` option.")
         quit()
         
-    if cfg.Bettercam_capture and cfg.Obs_capture:
-        print("Only one capture method is possible.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option.")
+    if  cfg.mss_capture + cfg.Bettercam_capture + cfg.Obs_capture > 1:
+        print("Only one capture method is possible.\nSet the value to `True` in the `bettercam_capture` option or in the `obs_capture` option or in the `mss_capture` option.")
         quit()
 
     if not os.path.exists(f"models/{cfg.AI_model_name}"):
