@@ -42,9 +42,12 @@ class FrameParser:
         if target:
             if hotkeys_watcher.clss is None:
                 hotkeys_watcher.active_classes()
-            
+
             if target.cls in hotkeys_watcher.clss:
-                mouse.process_data((target.x, target.y, target.w, target.h, target.cls))
+                if cfg.disable_move_window:
+                    mouse.process_data((target.x, target.y, target.w, target.h, target.cls))
+                elif self.is_in_move_range(target.x, target.y):
+                    mouse.process_data((target.x, target.y, target.w, target.h, target.cls))
 
     def _visualize_frame(self, frame):
         if cfg.show_window or cfg.show_overlay:
@@ -114,6 +117,11 @@ class FrameParser:
         target_class = classes_tensor[nearest_idx].item()
 
         return Target(*target_data, target_class)
+
+    def is_in_move_range(self, target_x, target_y):
+        offset_x = abs(target_x - capture.screen_x_center)
+        offset_y = abs(target_y - capture.screen_y_center)
+        return offset_x <= cfg.execution_x and offset_y <= cfg.execution_y
 
     def get_arch(self):
         if cfg.AI_enable_AMD:
