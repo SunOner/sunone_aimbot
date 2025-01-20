@@ -121,7 +121,7 @@ class FrameParser:
     def is_in_move_range(self, target_x, target_y):
         offset_x = abs(target_x - capture.screen_x_center)
         offset_y = abs(target_y - capture.screen_y_center)
-        return offset_x <= cfg.execution_x and offset_y <= cfg.execution_y
+        return offset_x <= cfg.move_window_width and offset_y <= cfg.move_window_height
 
     def get_arch(self):
         if cfg.AI_enable_AMD:
