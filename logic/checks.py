@@ -11,15 +11,17 @@ def convert_onnx_to_fp16():
     new_model_name = cfg.AI_model_name.replace(".onnx", "_fp16.onnx")
     onnx.save(model_fp16, f"models/{new_model_name}")
     
-    print(f"Converted model saved as 'models/{new_model_name}'.\n"
-          f"Please change the ai_model_name option to the converted version of the model ({new_model_name}).")
+    print(f"""
+    Converted model saved as 'models/{new_model_name}'.
+    Please change the ai_model_name option to the converted version of the model ({new_model_name}).
+    """)
     
 def check_model_fp16():
     try:
         import onnx
         from onnxconverter_common import float16
     except ModuleNotFoundError:
-        os.system("pip install onnx onnxconverter-common")
+        os.system("pip install onnx onnxconverter-common -U")
     
     model = onnx.load(f"models/{cfg.AI_model_name}")
     
@@ -38,42 +40,46 @@ def check_model_fp16():
     return False
 
 def Warnings():
-        if ".pt" in cfg.AI_model_name:
-            print("WARNING: Export the model to `.engine` for better performance!\nHOW TO EXPORT TO ENGINE: 'https://github.com/SunOner/sunone_aimbot_docs/blob/main/ai_models/ai_models.md'")
-        if cfg.show_window:
-            print("WARNING: An open debug window can affect performance.")
-        if cfg.bettercam_capture_fps >= 120:
-            print("WARNING: A large number of frames per second can affect the behavior of automatic aiming. (Shaking).")
-        if cfg.detection_window_width >= 600:
-            print("WARNING: The object detector window is more than 600 pixels wide, and a large object detector window can have a bad effect on performance.")
-        if cfg.detection_window_height >= 600:
-            print("WARNING: The object detector window is more than 600 pixels in height, a large object detector window can have a bad effect on performance.")
-        if cfg.AI_conf <= 0.15:
-            print("WARNING: A small value of `AI_conf ` can lead to a large number of false positives.")
-               # tracker
-        if cfg.disable_tracker == True:
-            print("ultralytics tracking system causes more overhead compute power, might cause performance issues")
-        # mouse
-        if cfg.mouse_ghub == False and cfg.arduino_move == False and cfg.arduino_shoot == False:
-            print("WARNING: win32api is detected in some games.")
-        if cfg.mouse_ghub and cfg.arduino_move == False and cfg.arduino_shoot == False:
-            print("WARNING: ghub is detected in some games.")
-        if cfg.arduino_move == False:
-            print("WARNING: Using standard libraries for mouse moving such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.")
-        if cfg.arduino_shoot == False and cfg.auto_shoot:
-            print("WARNING: Using standard libraries for mouse shooting such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.")
-        
-        selected_methods = sum([cfg.arduino_move, cfg.mouse_ghub, cfg.mouse_rzr])
-        if selected_methods > 1:
-            raise ValueError("WARNING: You use more than one mouse input method.")
-        
+    # Capture
+    if cfg.capture_fps >= 120:
+        print("WARNING: A large number of frames per second can affect the behavior of automatic aiming. (Shaking).")
+    if cfg.detection_window_width >= 600:
+        print("WARNING: The object detector window is more than 600 pixels wide, and a large object detector window can have a bad effect on performance.")
+    if cfg.detection_window_height >= 600:
+        print("WARNING: The object detector window is more than 600 pixels in height, a large object detector window can have a bad effect on performance.")
+    
+    # AI
+    if cfg.AI_model_name.endswith(".pt"):
+        print("WARNING: Export the model to `.engine` for better performance!\nHOW TO EXPORT TO ENGINE: 'https://github.com/SunOner/sunone_aimbot_docs/blob/main/ai_models/ai_models.md'")
+    if cfg.AI_conf <= 0.10:
+        print("WARNING: A small value of `AI_conf ` can lead to a large number of false positives.")
+    if cfg.disable_tracker == True:
+        print("ultralytics tracking system causes more overhead compute power, might cause performance issues")
+    
+    # Mouse
+    if cfg.mouse_ghub == False and cfg.arduino_move == False and cfg.arduino_shoot == False:
+        print("WARNING: win32api is detected in some games.")
+    if cfg.mouse_ghub and cfg.arduino_move == False and cfg.arduino_shoot == False:
+        print("WARNING: ghub is detected in some games.")
+    if cfg.arduino_move == False:
+        print("WARNING: Using standard libraries for mouse moving such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.")
+    if cfg.arduino_shoot == False and cfg.auto_shoot:
+        print("WARNING: Using standard libraries for mouse shooting such as `win32` or `Ghub driver` without bypassing, for example, how Arduino can speed up the account blocking process, use it at your own risk.")
+    selected_methods = sum([cfg.arduino_move, cfg.mouse_ghub, cfg.mouse_rzr])
+    if selected_methods > 1:
+        raise ValueError("WARNING: You use more than one mouse input method.")
+    
+    # Debug
+    if cfg.show_window:
+        print("WARNING: An open debug window can affect performance.")
+
 def run_checks():
     if torch.cuda.is_available() is False:
         print("You need to install a version of pytorch that supports CUDA.\n"
             "First uninstall all torch packages.\n"
             "Run command 'pip uninstall torch torchvision torchaudio'\n"
             "Next go to 'https://pytorch.org/get-started/locally/' and install torch with CUDA support.\n"
-            "Don't forget your CUDA version (Minimum version is 12.1, max version is 12.4).")
+            "Don't forget your CUDA version (Minimum version is 12.1).")
         quit()
         
     if + cfg.mss_capture + cfg.Bettercam_capture + cfg.Obs_capture < 1:

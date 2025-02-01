@@ -20,21 +20,26 @@ class Config():
         self.detection_window_width = int(self.config_Detection_window["detection_window_width"])
         self.detection_window_height = int(self.config_Detection_window["detection_window_height"])
         self.circle_capture = self.config_Detection_window.getboolean("circle_capture")
-        # Capture Method mss
-        self.config_mss_capture = self.config["Capture Methods"]
-        self.mss_capture = self.config_mss_capture.getboolean("mss_capture")
-        self.mss_capture_fps = int(self.config_mss_capture["mss_fps"])
+        
+        # Capture Global
+        self.config_Capture_Global = self.config["Capture Methods"]
+        self.capture_fps = int(self.config_Capture_Global["capture_fps"])
+        
         # Capture Method Bettercam
         self.config_Bettercam_Capture = self.config["Capture Methods"]
         self.Bettercam_capture = self.config_Bettercam_Capture.getboolean("Bettercam_capture")
-        self.bettercam_capture_fps = int(self.config_Bettercam_Capture["bettercam_capture_fps"])
         self.bettercam_monitor_id = int(self.config_Bettercam_Capture["bettercam_monitor_id"])
         self.bettercam_gpu_id = int(self.config_Bettercam_Capture["bettercam_gpu_id"])
+        
         # Capture Method Obs
         self.config_Obs_capture = self.config["Capture Methods"]
         self.Obs_capture = self.config_Obs_capture.getboolean("Obs_capture")
         self.Obs_camera_id = str(self.config_Obs_capture["Obs_camera_id"])
-        self.Obs_capture_fps = int(self.config_Obs_capture["Obs_capture_fps"])
+        
+        # Capture Method mss
+        self.config_mss_capture = self.config["Capture Methods"]
+        self.mss_capture = self.config_mss_capture.getboolean("mss_capture")
+        
         # Aim
         self.config_Aim = self.config["Aim"]
         self.body_y_offset = float(self.config_Aim["body_y_offset"])
@@ -43,6 +48,7 @@ class Config():
         self.disable_prediction = self.config_Aim.getboolean("disable_prediction")
         self.prediction_interval = float(self.config_Aim["prediction_interval"])
         self.third_person = self.config_Aim.getboolean("third_person")
+        
         # Hotkeys
         self.config_Hotkeys_settings = self.config["Hotkeys"]
         self.hotkey_targeting = str(self.config_Hotkeys_settings["hotkey_targeting"])
@@ -50,6 +56,7 @@ class Config():
         self.hotkey_exit = str(self.config_Hotkeys_settings["hotkey_exit"])
         self.hotkey_pause = str(self.config_Hotkeys_settings["hotkey_pause"])
         self.hotkey_reload_config = str(self.config_Hotkeys_settings["hotkey_reload_config"])
+        
         # Mouse
         self.config_Mouse = self.config["Mouse"]
         self.mouse_dpi = int(self.config_Mouse["mouse_dpi"])
@@ -62,12 +69,14 @@ class Config():
         self.mouse_auto_aim = self.config_Mouse.getboolean("mouse_auto_aim")
         self.mouse_ghub = self.config_Mouse.getboolean("mouse_ghub")
         self.mouse_rzr = self.config_Mouse.getboolean("mouse_rzr")
+        
         # Shooting
         self.config_Shooting = self.config["Shooting"]
         self.auto_shoot = self.config_Shooting.getboolean("auto_shoot")
         self.triggerbot = self.config_Shooting.getboolean("triggerbot")
         self.force_click = self.config_Shooting.getboolean("force_click")
         self.bScope_multiplier = float(self.config_Shooting["bScope_multiplier"])
+        
         # Arduino
         self.config_Arduino = self.config["Arduino"]
         self.arduino_move = self.config_Arduino.getboolean("arduino_move")
@@ -75,6 +84,7 @@ class Config():
         self.arduino_port = str(self.config_Arduino["arduino_port"])
         self.arduino_baudrate = int(self.config_Arduino["arduino_baudrate"])
         self.arduino_16_bit_mouse = self.config_Arduino.getboolean("arduino_16_bit_mouse")
+        
         # AI
         self.config_AI = self.config["AI"]
         self.AI_model_name = str(self.config_AI["AI_model_name"])
@@ -84,6 +94,7 @@ class Config():
         self.AI_enable_AMD = self.config_AI.getboolean("AI_enable_AMD")
         self.AI_mouse_net = self.config_AI.getboolean("AI_mouse_net")
         self.disable_tracker = self.config_AI.getboolean("disable_tracker")
+        
         # Overlay
         self.config_overlay = self.config["overlay"]
         self.show_overlay = self.config_overlay.getboolean("show_overlay")
@@ -93,6 +104,7 @@ class Config():
         self.overlay_show_target_prediction_line = self.config_overlay.getboolean("overlay_show_target_prediction_line")
         self.overlay_show_labels = self.config_overlay.getboolean("overlay_show_labels")
         self.overlay_show_conf = self.config_overlay.getboolean("overlay_show_conf")
+        
         # Debug window
         self.config_Debug_window = self.config["Debug window"]
         self.show_window = self.config_Debug_window.getboolean("show_window")
@@ -113,7 +125,7 @@ class Config():
         self.debug_window_name = self.window_name
         
         if verbose:
-            print("Config reloaded")
+            print("[Config] Config reloaded")
             
     def get_random_window_name(self):
         try:
@@ -123,5 +135,5 @@ class Config():
         except FileNotFoundError:
             print("window_names.txt file not found, using default window name.")
             return "Calculator"
-            
+
 cfg = Config()

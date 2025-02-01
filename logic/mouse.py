@@ -5,12 +5,12 @@ import time
 import math
 import os
 import supervision as sv
+
 from logic.config_watcher import cfg
 from logic.visual import visuals
 from logic.shooting import shooting
 from logic.buttons import Buttons
 
-# Conditional imports
 if cfg.mouse_rzr:
     from logic.rzctl import RZCONTROL
 
@@ -248,7 +248,6 @@ class MouseThread:
         return bScope
 
     def update_settings(self):
-        # Update all configuration parameters here
         self.dpi = cfg.mouse_dpi
         self.mouse_sensitivity = cfg.mouse_sensitivity
         self.fov_x = cfg.mouse_fov_width

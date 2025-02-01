@@ -11,6 +11,7 @@ import configparser
 import threading
 import signal
 import logging
+import streamlit as st
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
@@ -27,7 +28,6 @@ st.set_page_config(page_title="HELPER",
                    initial_sidebar_state="expanded")
 
 try:
-    import streamlit as st
     import requests
     import mss
     import supervision
@@ -63,7 +63,7 @@ try:
     from logic.buttons import Buttons
 except ModuleNotFoundError:
     st.error("Some modules not found. Please, reinstall Aimbot.")
-        
+
 def download_file(url, filename):
     if os.path.exists(filename):
         existing_file_size = os.path.getsize(filename)
@@ -210,16 +210,11 @@ def upgrade_ultralytics():
     ).content.decode('utf-8')
     ultralytics_repo_version = re.search(r"__version__\s*=\s*\"([^\"]+)", ultralytics_repo_version).group(1)
 
-    if ultralytics_current_version != "8.3.40":
-        os.system("pip install ultralytics==8.3.40")
+    if ultralytics_current_version != ultralytics_repo_version:
+        os.system("pip install ultralytics -U")
         return ultralytics_repo_version
-    return ultralytics_repo_version
-
-    # if ultralytics_current_version != ultralytics_repo_version:
-    #     os.system("pip install ultralytics -U")
-        # return ultralytics_repo_version
-    # else:
-        # return ultralytics_current_version
+    else:
+        return ultralytics_current_version
 
 def update_config(new_config_path, current_config_path='config.ini'):
     logger.info("Updating config...")
@@ -447,12 +442,12 @@ elif st.session_state.current_tab == "EXPORT":
         for file in files:
             if file.endswith(".pt"):
                 models.append(file)
-                
+    
     selected_model = st.selectbox(label="**Select model to export.**", options=models, key="export_selected_model_selectbox")
     
     image_size = st.radio(label="**Select model size**",options=(320, 480, 640), help="The size of the model image must be correct.", key="export_image_size_radio")
     
-    if st.button(label="Export model", key="export_export_model_button"):
+    if st.button(label="Export model", key="export_export_model_button") and selected_model is not None:
         yolo_model = YOLO(f"./models/{selected_model}")
         
         with st.spinner(text=f"Model {selected_model} exporting..."):
@@ -498,46 +493,81 @@ elif st.session_state.current_tab == "CONFIG":
 
     # Detection window
     st.subheader(body="Detection window", divider=True)
-    detection_window_width = st.number_input(label="Detection window width", value=config.getint('Detection window', 'detection_window_width'), key="config_detection_window_width")
-    detection_window_height = st.number_input(label="Detection window height", value=config.getint('Detection window', 'detection_window_height'), key="config_detection_window_height")
+    detection_window_width = st.number_input(label="Detection window width",
+                                             value=config.getint('Detection window', 'detection_window_width'),
+                                             key="config_detection_window_width")
+    
+    detection_window_height = st.number_input(label="Detection window height",
+                                              value=config.getint('Detection window', 'detection_window_height'),
+                                              key="config_detection_window_height")
+    
     config.set('Detection window', 'detection_window_width', str(detection_window_width))
     config.set('Detection window', 'detection_window_height', str(detection_window_height))
 
     # Capture Methods
     st.subheader("Capture Methods", divider=True)
-    selected_capture_method = st.radio(label="Capture Method", options=["Bettercam capture", "OBS", "mss"], key="config_selected_capture_method")
+    selected_capture_method = st.radio(label="Capture Method",
+                                       options=["Bettercam capture", "OBS", "mss"],
+                                       key="config_selected_capture_method")
+    
+    global_capture_fps = st.number_input(label="Global capture FPS",
+                                         min_value=1,
+                                         max_value=240,
+                                         value=cfg.capture_fps,
+                                         key="config_global_capture_fps")
+    config.set('Capture Methods', 'capture_fps', str(global_capture_fps))
     
     if selected_capture_method == "Bettercam capture":        
-        bettercam_capture_fps = st.number_input(label="Bettercam capture FPS", value=config.getint('Capture Methods', 'bettercam_capture_fps'), key="config_bettercam_capture_fps")
-        bettercam_monitor_id = st.number_input(label="Bettercam monitor ID", value=config.getint('Capture Methods', 'bettercam_monitor_id'), key="config_bettercam_monitor_id")
-        bettercam_gpu_id = st.number_input(label="Bettercam GPU ID", value=config.getint('Capture Methods', 'bettercam_gpu_id'), key="config_bettercam_gpu_id")
+        bettercam_monitor_id = st.number_input(label="Bettercam monitor ID",
+                                               value=config.getint('Capture Methods', 'bettercam_monitor_id'),
+                                               key="config_bettercam_monitor_id")
+        
+        bettercam_gpu_id = st.number_input(label="Bettercam GPU ID",
+                                           value=config.getint('Capture Methods', 'bettercam_gpu_id'),
+                                           key="config_bettercam_gpu_id")
+        
         config.set('Capture Methods', 'Bettercam_capture', "True")
         config.set('Capture Methods', 'Obs_capture', "False")
         config.set('Capture Methods', 'Obs_capture', "False")
-        config.set('Capture Methods', 'bettercam_capture_fps', str(bettercam_capture_fps))
         config.set('Capture Methods', 'bettercam_monitor_id', str(bettercam_monitor_id))
         config.set('Capture Methods', 'bettercam_gpu_id', str(bettercam_gpu_id))
-    elif selected_capture_method == "mss":
-        mss_fps = st.number_input(label="mss_fps", value=config.getint('Capture Methods', 'mss_fps'), key="mss_fps")
+        
+    if selected_capture_method == "mss":
         config.set('Capture Methods', 'Bettercam_capture', "False")
         config.set('Capture Methods', 'Obs_capture', "False")
         config.set('Capture Methods', 'Mss_capture', "True")
-        config.set('Capture Methods', 'mss_fps', str(mss_fps))
-    else:
-        obs_camera_id = st.selectbox(label="Obs camera ID", options=["auto", "0","1","2","3","4","5","6","7","8","9","10"], index=0, key="config_obs_camera_id")
-        obs_capture_fps = st.number_input(label="Obs capture FPS", value=config.getint('Capture Methods', 'Obs_capture_fps'), key="config_obs_capture_fps")
-        config.set('Capture Methods', 'Bettercam_capture', "False")
+
+    if selected_capture_method == "OBS":
+        obs_camera_id = st.selectbox(label="Obs camera ID",
+                                     options=["auto", "0","1","2","3","4","5","6","7","8","9","10"],
+                                     index=0,
+                                     key="config_obs_camera_id")
+        
         config.set('Capture Methods', 'mss_capture', "False")
         config.set('Capture Methods', 'Obs_capture', "True")
         config.set('Capture Methods', 'Obs_camera_id', obs_camera_id)
-        config.set('Capture Methods', 'Obs_capture_fps', str(obs_capture_fps))
     
     # Aim
     st.subheader("Aim", divider=True)
-    body_y_offset = st.slider(label="Body Y offset", min_value=-0.99, max_value=0.99, value=config.getfloat('Aim', 'body_y_offset'), key="config_body_y_offset")
-    hideout_targets = st.checkbox(label="Hideout targets", value=config.getboolean('Aim', 'hideout_targets'), key="config_hideout_targets")
-    disable_headshot = st.checkbox(label="Disable headshot", value=config.getboolean('Aim', 'disable_headshot'), key="config_disable_headshot")
-    disable_prediction = st.checkbox(label="Disable prediction", value=config.getboolean('Aim', 'disable_prediction'), key="config_disable_prediction")
+    
+    body_y_offset = st.slider(label="Body Y offset",
+                              min_value=-0.99,
+                              max_value=0.99,
+                              value=config.getfloat('Aim', 'body_y_offset'),
+                              key="config_body_y_offset")
+    
+    hideout_targets = st.checkbox(label="Hideout targets",
+                                  value=config.getboolean('Aim', 'hideout_targets'),
+                                  key="config_hideout_targets")
+    
+    disable_headshot = st.checkbox(label="Disable headshot",
+                                   value=config.getboolean('Aim', 'disable_headshot'),
+                                   key="config_disable_headshot")
+    
+    disable_prediction = st.checkbox(label="Disable prediction",
+                                     value=config.getboolean('Aim', 'disable_prediction'),
+                                     key="config_disable_prediction")
+    
     if not disable_prediction:
         prediction_interval = st.number_input(label="Prediction interval", value=config.getfloat('Aim', 'prediction_interval'), format="%.1f", min_value=0.1, max_value=5.0, step=0.1, key="config_prediction_interval")
         config.set('Aim', 'disable_prediction', str(disable_prediction))

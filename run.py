@@ -1,19 +1,21 @@
 from ultralytics import YOLO
 import torch
+
 from logic.config_watcher import cfg
 from logic.capture import capture
 from logic.visual import visuals
 from logic.frame_parser import frameParser
 from logic.hotkeys_watcher import hotkeys_watcher
 from logic.checks import run_checks
-import supervision as sv  # Import this for ByteTrack
 
+# Init ByteTrack
+if cfg.disable_tracker == False:
+    import supervision as sv
+    byte_tracker = sv.ByteTrack()
+    
 @torch.inference_mode()
-def perform_detection(model, image):
-    if cfg.disable_tracker == False:
-        # Initialize ByteTrack
-        byte_tracker = sv.ByteTrack()
-        
+def perform_detection(model, image, tracker=None):
+    if tracker is not None:
         results = model.predict(
             source=image,
             cfg="logic/tracker.yaml",
@@ -36,13 +38,11 @@ def perform_detection(model, image):
             show=False)
         
         for result in results:
-            # Convert each result to detections
+            # Convert results to detections
             detections = sv.Detections.from_ultralytics(result)
             tracked_detections = byte_tracker.update_with_detections(detections)
-            return tracked_detections  # Assuming you want to return the first frame's detection for simplicity
-        
+            return tracked_detections
     else:
-        # If not using tracker, return the first result from the generator
         result = next(model.predict(
             source=image,
             cfg="logic/game.yaml",
@@ -74,7 +74,7 @@ def init():
     except Exception as e:
         print("An error occurred when loading the AI model:\n", e)
         quit(0)
-    
+        
     while True:
         image = capture.get_new_frame()
         
@@ -85,7 +85,7 @@ def init():
             if cfg.show_window or cfg.show_overlay:
                 visuals.queue.put(image)
                 
-            result = perform_detection(model, image)
+            result = perform_detection(model, image, byte_tracker)
 
             if hotkeys_watcher.app_pause == 0:
                 frameParser.parse(result)

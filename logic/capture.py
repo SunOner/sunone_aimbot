@@ -4,7 +4,6 @@ import mss
 from screeninfo import get_monitors
 import threading
 import queue
-import ctypes
 import numpy as np
 
 from logic.config_watcher import cfg
@@ -26,7 +25,7 @@ class Capture(threading.Thread):
 
         self.prev_detection_window_width = cfg.detection_window_width
         self.prev_detection_window_height = cfg.detection_window_height
-        self.prev_bettercam_capture_fps = cfg.bettercam_capture_fps
+        self.prev_bettercam_capture_fps = cfg.capture_fps
         
         self.frame_queue = queue.Queue(maxsize=1)
         self.running = True
@@ -53,19 +52,19 @@ class Capture(threading.Thread):
                     x_offset=self._offset_x if self._offset_x is not None else 0,
                     y_offset=self._offset_y if self._offset_y is not None else 0
                 ),
-                target_fps=cfg.bettercam_capture_fps
+                target_fps=cfg.capture_fps
             )
 
     def setup_obs(self):
         camera_id = self.find_obs_virtual_camera() if cfg.Obs_camera_id == 'auto' else int(cfg.Obs_camera_id) if cfg.Obs_camera_id.isdigit() else None
         if camera_id is None:
-            print('OBS Virtual Camera not found')
+            print('[Capture] OBS Virtual Camera not found')
             exit(0)
         
         self.obs_camera = cv2.VideoCapture(camera_id)
         self.obs_camera.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.detection_window_width)
         self.obs_camera.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.detection_window_height)
-        self.obs_camera.set(cv2.CAP_PROP_FPS, cfg.Obs_capture_fps)
+        self.obs_camera.set(cv2.CAP_PROP_FPS, cfg.capture_fps)
 
     def setup_mss(self):
         left, top, width, height = self.calculate_mss_offset()
@@ -82,15 +81,17 @@ class Capture(threading.Thread):
     def capture_frame(self):
         if cfg.Bettercam_capture:
             return self.bc.get_latest_frame()
-        elif cfg.mss_capture:
+        
+        if cfg.Obs_capture:
+            ret_val, img = self.obs_camera.read()
+            return img if ret_val else None
+
+        if cfg.mss_capture:
             with mss.mss() as sct:
                 screenshot = sct.grab(self.monitor)
                 raw = screenshot.bgra
                 img_array = np.frombuffer(raw, dtype=np.uint8).reshape((screenshot.height, screenshot.width, 4))
                 return cv2.cvtColor(img_array, cv2.COLOR_BGRA2BGR)
-        elif cfg.Obs_capture:
-            ret_val, img = self.obs_camera.read()
-            return img if ret_val else None
 
     def get_new_frame(self):
         try:
@@ -102,7 +103,7 @@ class Capture(threading.Thread):
         if cfg.Bettercam_capture and (
             self.prev_detection_window_height != cfg.detection_window_height or 
             self.prev_detection_window_width != cfg.detection_window_width or 
-            self.prev_bettercam_capture_fps != cfg.bettercam_capture_fps
+            self.prev_bettercam_capture_fps != cfg.capture_fps
         ):
             self.bc.stop()
             del self.bc
@@ -114,7 +115,7 @@ class Capture(threading.Thread):
             self.prev_detection_window_width = cfg.detection_window_width
             self.prev_detection_window_height = cfg.detection_window_height
 
-            print('Capture reloaded')
+            print('[Capture] Capture reloaded')
             
     def calculate_screen_offset(self, custom_region=[], x_offset=None, y_offset=None):
         if x_offset is None:
@@ -154,7 +155,7 @@ class Capture(threading.Thread):
             if not cap.isOpened():
                 continue
             if cap.getBackendName() == obs_camera_name:
-                print(f'OBS Virtual Camera found at index {i}')
+                print(f'[Capture] OBS Virtual Camera found at index {i}')
                 cap.release()
                 return i
             cap.release()
