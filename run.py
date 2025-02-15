@@ -7,12 +7,10 @@ from logic.visual import visuals
 from logic.frame_parser import frameParser
 from logic.hotkeys_watcher import hotkeys_watcher
 from logic.checks import run_checks
-
-# Init ByteTrack
-if cfg.disable_tracker == False:
-    import supervision as sv
-    byte_tracker = sv.ByteTrack()
+import supervision as sv
     
+byte_tracker = sv.ByteTrack()
+
 @torch.inference_mode()
 def perform_detection(model, image, tracker=None):
     if tracker is not None:
