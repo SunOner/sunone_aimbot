@@ -738,7 +738,7 @@ elif st.session_state.current_tab == "CONFIG":
         config.set('Debug window', 'debug_window_scale_percent', str(debug_window_scale_percent))
         config.set('Debug window', 'debug_window_screenshot_key', str(debug_window_screenshot_key))
     else:
-        config.set('Debug window', 'show_window', "False")
+        config.set('Debug window', 'show_wpip indow', "False")
 
     with st.sidebar:
         if st.button('Save Config', key="sidebar_config_save_button"):
@@ -766,17 +766,17 @@ elif st.session_state.current_tab == "TRAIN":
         selected_model_path = st.selectbox(label="Select model", options=last_pt_files, key="TRAIN_ai_model")
         resume = st.checkbox(label="Resume training", value=False, key="TRAIN_resume")
     else:
-        selected_model_path = st.selectbox(label="Select model", options=pretrained_models, index=4, key="TRAIN_ai_model")
+        selected_model_path = st.selectbox(label="Select model", options=pretrained_models, index=7, key="TRAIN_ai_model")
     
     if not resume:
         # data yaml
         data_yaml = st.text_input(label="Path to the dataset configuration file", value="logic/game.yaml", key="TRAIN_data_yaml")
         
         # epochs
-        epochs = st.number_input(label="Epochs", value=80, format="%u", min_value=10, step=10, key="TRAIN_epochs")
+        epochs = st.number_input(label="Epochs", value=80, format="%u", min_value=1, step=10, key="TRAIN_epochs")
         
         # image size
-        img_size = st.number_input(label="Image size", value=640, format="%u", min_value=120, max_value=1280, step=10, key="TRAIN_img_size")
+        img_size = st.selectbox(label="Image size", options=[1280, 640, 320, 160], index=1, key="TRAIN_img_size")
         
         # cache
         use_cache = st.checkbox(label="Enables caching of dataset images in memory", value=False, key="TRAIN_use_cache")
@@ -798,15 +798,25 @@ elif st.session_state.current_tab == "TRAIN":
         train_device = int(train_device)
     
     # batch size
-    batch_size_options = ["auto", "4", "8", "16", "32", "64", "128", "256"]
+    batch_size_options = ["Percentage ratio", "auto", "4", "8", "16", "32", "64", "128", "256"]
     batch_size = st.selectbox(label="Batch size",
                             options=batch_size_options,
-                            index=0,
+                            index=1,
                             key="TRAIN_batch_size")
     
     if batch_size == "auto":
         batch_size = "-1"
-    batch_size = int(batch_size)
+    
+    if batch_size == "Percentage ratio":
+        batch_size = st.number_input(label="Enter percentage ratio usage GPU vram",
+                                     min_value=0.05,
+                                     max_value=0.95,
+                                     step=0.05,
+                                     value=0.70,
+                                     format="%0.02f",
+                                     key="TRAIN_custom_percentage_ratio")
+    # batch_size = int(batch_size)
+    profile = st.checkbox(label="Profile", value=False, key="TRAIN_profile")
         
     # WANDB
     wandb = st.checkbox(label="Force disable WANDB logger", value=True, key="TRAIN_wandb")
@@ -834,6 +844,7 @@ if __name__ == '__main__':
                     data='{data_yaml}',
                     epochs={epochs},
                     imgsz={img_size},
+                    profile={profile},
                     cache={use_cache},
                     augment={augment},
                     degrees={augment_degrees},
