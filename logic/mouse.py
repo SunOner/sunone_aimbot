@@ -152,6 +152,9 @@ class MouseThread:
     def calculate_speed_multiplier(self, target_x, target_y, distance):
         normalized_distance = min(distance / self.max_distance, 1)
         base_speed = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
+        
+        if self.section_size_x == 0:
+            return self.min_speed_multiplier
 
         target_x_section = int((target_x - self.center_x + self.screen_width / 2) / self.section_size_x)
         target_y_section = int((target_y - self.center_y + self.screen_height / 2) / self.section_size_y)
