@@ -33,8 +33,8 @@ Before you get started, make sure you have the following prerequisites installed
 <br></br>
 - To launch the aimbot after all installations, start run_ai.bat or type `py run.py`.
 
-## C++ Version
-- [Sunone_aimbot_cpp](https://github.com/SunOner/sunone_aimbot_cpp): This is a version rewritten in C++. It is currently under active development.
+# Use the new C++ version of the AI-Aimbot!
+- [Sunone_aimbot_cpp](https://github.com/SunOner/sunone_aimbot_cpp): The Python version is good, but C++ is even better. It has an overlay, is faster, and much more. Currently, it is updated much more frequently than the Python version. It's better to use the C++ version.
 
 ## Working environment:
 <table>
@@ -42,9 +42,9 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
   <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.8.0.43</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.3.70</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.3.78</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6 (YOLOv10)</td></tr></thead>
-  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.4_up (YOLOv11)</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.5 (YOLOv12)</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
