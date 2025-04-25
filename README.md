@@ -4,7 +4,7 @@
 [![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/sunone_aimbot)
 [![License MIT](https://badgen.net/github/license/SunOner/sunone_aimbot)](https://github.com/SunOner/sunone_aimbot/blob/main/LICENSE)
 [![Github stars](https://img.shields.io/github/stars/SunOner/sunone_aimbot?color=ffb500)](https://github.com/SunOner/sunone_aimbot)
-[![Discord server](https://badgen.net/discord/online-members/sunone)](https://discord.gg/sunone)
+[![Discord server](https://badgen.net/discord/online-members/sunone)](https://discord.gg/37WVp6sNEh)
   <p>
     <a href="https://github.com/SunOner/sunone_aimbot/releases" target="_blank">
       <img width="75%" src="https://raw.githubusercontent.com/SunOner/sunone_aimbot/main/media/one.gif"></a>
@@ -44,7 +44,7 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>TensorRT:</th><td>10.8.0.43</td></tr></thead>
   <thead><tr><th>Ultralytics:</th><td>8.3.78</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6 (YOLOv10)</td></tr></thead>
-  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.5 (YOLOv12)</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.6 (YOLOv12)</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
