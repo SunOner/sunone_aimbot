@@ -1,6 +1,4 @@
-import torch
 import win32con, win32api
-import torch.nn as nn
 import time
 import math
 import os
@@ -10,6 +8,7 @@ from logic.config_watcher import cfg
 from logic.visual import visuals
 from logic.shooting import shooting
 from logic.buttons import Buttons
+from logic.logger import logger
 
 if cfg.mouse_rzr:
     from logic.rzctl import RZCONTROL
@@ -17,27 +16,10 @@ if cfg.mouse_rzr:
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import arduino
 
-class Mouse_net(nn.Module):
-    def __init__(self, arch):
-        super().__init__()
-        self.layers = nn.Sequential(
-            nn.Linear(10, 128, arch),
-            nn.ReLU(),
-            nn.Linear(128, 128, arch),
-            nn.ReLU(),
-            nn.Linear(128, 64, arch),
-            nn.ReLU(),
-            nn.Linear(64, 2, arch)
-        )
-
-    def forward(self, x):
-        return self.layers(x)
-
 class MouseThread:
     def __init__(self):
         self.initialize_parameters()
         self.setup_hardware()
-        self.setup_ai()
 
     def initialize_parameters(self):
         self.dpi = cfg.mouse_dpi
@@ -74,25 +56,13 @@ class MouseThread:
     def setup_hardware(self):
         if cfg.mouse_ghub:
             from logic.ghub import gHub
-            self.ghub = gHub()
+            self.ghub = gHub
 
         if cfg.mouse_rzr:
             dll_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rzctl.dll")
             self.rzr = RZCONTROL(dll_path)
             if not self.rzr.init():
-                print("Failed to initialize rzctl")
-
-    def setup_ai(self):
-        if cfg.AI_mouse_net:
-            self.device = torch.device(self.arch)
-            self.model = Mouse_net(arch=self.arch).to(self.device)
-            try:
-                self.model.load_state_dict(torch.load('mouse_net.pth', map_location=self.device))
-            except Exception as e:
-                print(e)
-                print('Please train mouse_net model, or download latest trained mouse_net.pth model from repository.')
-                exit()
-            self.model.eval()
+                logger.error("Failed to initialize rzctl")
 
     def process_data(self, data):
         if isinstance(data, sv.Detections):
@@ -119,6 +89,7 @@ class MouseThread:
         self.move_mouse(move_x, move_y)
 
     def predict_target_position(self, target_x, target_y, current_time):
+        # First target
         if self.prev_time is None:
             self.prev_time = current_time
             self.prev_x = target_x
@@ -126,8 +97,21 @@ class MouseThread:
             self.prev_velocity_x = 0
             self.prev_velocity_y = 0
             return target_x, target_y
+        
+        # Next target?
+        max_jump = max(self.screen_width, self.screen_height) * 0.3 # 30%
+        if abs(target_x - self.prev_x) > max_jump or abs(target_y - self.prev_y) > max_jump:
+            self.prev_x, self.prev_y = target_x, target_y
+            self.prev_velocity_x = 0
+            self.prev_velocity_y = 0
+            self.prev_time = current_time
+            return target_x, target_y
 
         delta_time = current_time - self.prev_time
+        
+        if delta_time == 0:
+            delta_time = 1e-6
+    
         velocity_x = (target_x - self.prev_x) / delta_time
         velocity_y = (target_y - self.prev_y) / delta_time
         acceleration_x = (velocity_x - self.prev_velocity_x) / delta_time
@@ -150,6 +134,9 @@ class MouseThread:
         return predicted_x, predicted_y
 
     def calculate_speed_multiplier(self, target_x, target_y, distance):
+        if any(map(math.isnan, (target_x, target_y))) or self.section_size_x == 0:
+            return self.min_speed_multiplier
+    
         normalized_distance = min(distance / self.max_distance, 1)
         base_speed = self.min_speed_multiplier + (self.max_speed_multiplier - self.min_speed_multiplier) * (1 - normalized_distance)
         
@@ -160,7 +147,7 @@ class MouseThread:
         target_y_section = int((target_y - self.center_y + self.screen_height / 2) / self.section_size_y)
         
         distance_from_center = max(abs(50 - target_x_section), abs(50 - target_y_section))
-
+        
         if distance_from_center == 0:
             return 1
         elif 5 <= distance_from_center <= 10:
@@ -176,54 +163,39 @@ class MouseThread:
         return speed_multiplier
 
     def calc_movement(self, target_x, target_y, target_cls):
-        if not cfg.AI_mouse_net:
-            offset_x = target_x - self.center_x
-            offset_y = target_y - self.center_y
-            distance = math.sqrt(offset_x**2 + offset_y**2)
-            speed_multiplier = self.calculate_speed_multiplier(target_x, target_y, distance)
+        offset_x = target_x - self.center_x
+        offset_y = target_y - self.center_y
+        distance = math.sqrt(offset_x**2 + offset_y**2)
+        speed_multiplier = self.calculate_speed_multiplier(target_x, target_y, distance)
 
-            degrees_per_pixel_x = self.fov_x / self.screen_width
-            degrees_per_pixel_y = self.fov_y / self.screen_height
+        degrees_per_pixel_x = self.fov_x / self.screen_width
+        degrees_per_pixel_y = self.fov_y / self.screen_height
 
-            mouse_move_x = offset_x * degrees_per_pixel_x
-            mouse_move_y = offset_y * degrees_per_pixel_y
+        mouse_move_x = offset_x * degrees_per_pixel_x
+        mouse_move_y = offset_y * degrees_per_pixel_y
 
-            # Apply smoothing
-            alpha = 0.85
-            if not hasattr(self, 'last_move_x'):
-                self.last_move_x, self.last_move_y = 0, 0
-            
-            move_x = alpha * mouse_move_x + (1 - alpha) * self.last_move_x
-            move_y = alpha * mouse_move_y + (1 - alpha) * self.last_move_y
-            
-            self.last_move_x, self.last_move_y = move_x, move_y
+        # Apply smoothing
+        alpha = 0.85
+        if not hasattr(self, 'last_move_x'):
+            self.last_move_x, self.last_move_y = 0, 0
+        
+        move_x = alpha * mouse_move_x + (1 - alpha) * self.last_move_x
+        move_y = alpha * mouse_move_y + (1 - alpha) * self.last_move_y
+        
+        self.last_move_x, self.last_move_y = move_x, move_y
 
-            move_x = (move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
-            move_y = (move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
+        move_x = (move_x / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
+        move_y = (move_y / 360) * (self.dpi * (1 / self.mouse_sensitivity)) * speed_multiplier
 
-            return move_x, move_y
-        else:
-            input_data = [
-                self.screen_width, self.screen_height, self.center_x, self.center_y, 
-                self.dpi, self.mouse_sensitivity, self.fov_x, self.fov_y, target_x, target_y
-            ]
-            
-            input_tensor = torch.tensor(input_data, dtype=torch.float32).to(self.device)
-            with torch.no_grad():
-                move = self.model(input_tensor).cpu().numpy()
-                
-            self.visualize_prediction(move[0] + self.center_x, move[1] + self.center_y, target_cls)
-            return move[0], move[1]
+        return move_x, move_y
 
     def move_mouse(self, x, y):
         if x == 0 and y == 0:
             return
 
         shooting_state = self.get_shooting_key_state()
-        mouse_aim = cfg.mouse_auto_aim
-        triggerbot = cfg.triggerbot
 
-        if shooting_state or mouse_aim:
+        if shooting_state or cfg.mouse_auto_aim:
             if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
             elif cfg.mouse_ghub:
@@ -264,11 +236,11 @@ class MouseThread:
         self.center_y = self.screen_height / 2
 
     def visualize_target(self, target_x, target_y, target_cls):
-        if cfg.AI_mouse_net == False and ((cfg.show_window and cfg.show_target_line) or (cfg.show_overlay and cfg.show_target_line)):
+        if (cfg.show_window and cfg.show_target_line) or (cfg.show_overlay and cfg.show_target_line):
             visuals.draw_target_line(target_x, target_y, target_cls)
 
     def visualize_prediction(self, target_x, target_y, target_cls):
-        if cfg.AI_mouse_net == False and ((cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line)):
+        if (cfg.show_window and cfg.show_target_prediction_line) or (cfg.show_overlay and cfg.show_target_prediction_line):
             visuals.draw_predicted_position(target_x, target_y, target_cls)
 
     def visualize_history(self, target_x, target_y):

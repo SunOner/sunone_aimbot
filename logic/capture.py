@@ -7,6 +7,7 @@ import queue
 import numpy as np
 
 from logic.config_watcher import cfg
+from logic.logger import logger
 
 class Capture(threading.Thread):
     def __init__(self):
@@ -28,6 +29,9 @@ class Capture(threading.Thread):
         self.prev_bettercam_capture_fps = cfg.capture_fps
         
         self.frame_queue = queue.Queue(maxsize=1)
+        
+        self.sct = None
+        
         self.running = True
     
         if cfg.Bettercam_capture:
@@ -35,7 +39,8 @@ class Capture(threading.Thread):
         elif cfg.Obs_capture:
             self.setup_obs()
         elif cfg.mss_capture:
-            self.setup_mss()
+            left, top, w, h = self.calculate_mss_offset()
+            self.monitor = {"left": left, "top": top, "width": w, "height": h}
 
     def setup_bettercam(self):
         self.bc = bettercam.create(
@@ -58,7 +63,7 @@ class Capture(threading.Thread):
     def setup_obs(self):
         camera_id = self.find_obs_virtual_camera() if cfg.Obs_camera_id == 'auto' else int(cfg.Obs_camera_id) if cfg.Obs_camera_id.isdigit() else None
         if camera_id is None:
-            print('[Capture] OBS Virtual Camera not found')
+            logger.info('[Capture] OBS Virtual Camera not found')
             exit(0)
         
         self.obs_camera = cv2.VideoCapture(camera_id)
@@ -71,12 +76,18 @@ class Capture(threading.Thread):
         self.monitor = {"left": left, "top": top, "width": width, "height": height}
 
     def run(self):
-        while self.running:
-            frame = self.capture_frame()
-            if frame is not None:
-                if self.frame_queue.full():
-                    self.frame_queue.get()
-                self.frame_queue.put(frame)
+        if cfg.mss_capture and self.sct is None:
+            self.sct = mss.mss()
+        try:
+            while self.running:
+                frame = self.capture_frame()
+                if frame is not None:
+                    if self.frame_queue.full():
+                        self.frame_queue.get()
+                    self.frame_queue.put(frame, block=False)
+        finally:
+            if cfg.mss_capture and self.sct is not None:
+                self.sct.close()
             
     def capture_frame(self):
         if cfg.Bettercam_capture:
@@ -87,11 +98,9 @@ class Capture(threading.Thread):
             return img if ret_val else None
 
         if cfg.mss_capture:
-            with mss.mss() as sct:
-                screenshot = sct.grab(self.monitor)
-                raw = screenshot.bgra
-                img_array = np.frombuffer(raw, dtype=np.uint8).reshape((screenshot.height, screenshot.width, 4))
-                return cv2.cvtColor(img_array, cv2.COLOR_BGRA2BGR)
+            screenshot = self.sct.grab(self.monitor)
+            img = np.frombuffer(screenshot.bgra, np.uint8).reshape((screenshot.height, screenshot.width, 4))
+            return cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
     def get_new_frame(self):
         try:
@@ -115,7 +124,7 @@ class Capture(threading.Thread):
             self.prev_detection_window_width = cfg.detection_window_width
             self.prev_detection_window_height = cfg.detection_window_height
 
-            print('[Capture] Capture reloaded')
+            logger.info('[Capture] Capture reloaded')
             
     def calculate_screen_offset(self, custom_region=[], x_offset=None, y_offset=None):
         if x_offset is None:
@@ -155,7 +164,7 @@ class Capture(threading.Thread):
             if not cap.isOpened():
                 continue
             if cap.getBackendName() == obs_camera_name:
-                print(f'[Capture] OBS Virtual Camera found at index {i}')
+                logger.info(f'[Capture] OBS Virtual Camera found at index {i}')
                 cap.release()
                 return i
             cap.release()
@@ -167,14 +176,18 @@ class Capture(threading.Thread):
             with open('./version', 'r') as f:
                 version = f.readline().split('=')[1].strip()
         except FileNotFoundError:
-            print('(version file is not found)')
+            logger.info('(version file is not found)')
+        except Exception as e:
+            logger.info(f'Error with read version file: {str(e)}')
 
-        print(f'Sunone Aimbot is started! (Version {version})\n\n',
-              'Hotkeys:\n',
-              f'[{cfg.hotkey_targeting}] - Aiming at the target\n',
-              f'[{cfg.hotkey_exit}] - EXIT\n',
-              f'[{cfg.hotkey_pause}] - PAUSE AIM\n',
-              f'[{cfg.hotkey_reload_config}] - Reload config\n')
+        logger.info(f"""
+Sunone Aimbot is started! (Version {version})
+Hotkeys:
+[{cfg.hotkey_targeting}] - Aiming at the target
+[{cfg.hotkey_exit}] - EXIT
+[{cfg.hotkey_pause}] - PAUSE AIM
+[{cfg.hotkey_reload_config}] - Reload config
+""")
     
     def convert_to_circle(self, image):
         height, width = image.shape[:2]
@@ -186,8 +199,10 @@ class Capture(threading.Thread):
         self.running = False
         if cfg.Bettercam_capture and hasattr(self, 'bc') and self.bc.is_capturing:
             self.bc.stop()
+        
         if cfg.Obs_capture and hasattr(self, 'obs_camera'):
             self.obs_camera.release()
+        
         self.join()
 
 capture = Capture()

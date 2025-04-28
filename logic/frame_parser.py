@@ -1,12 +1,13 @@
 import torch
+import supervision as sv
+import numpy as np
+
 from logic.hotkeys_watcher import hotkeys_watcher
 from logic.config_watcher import cfg
 from logic.capture import capture
 from logic.visual import visuals
 from logic.mouse import mouse
 from logic.shooting import shooting
-import supervision as sv
-import numpy as np
 
 class Target:
     def __init__(self, x, y, w, h, cls):
@@ -28,8 +29,13 @@ class FrameParser:
 
     def _process_sv_detections(self, detections):
         if detections.xyxy.any():
+            visuals.draw_helpers(detections)
             target = self.sort_targets(detections)
             self._handle_target(target)
+        else:
+            visuals.clear()
+            if cfg.auto_shoot or cfg.triggerbot:
+                shooting.shoot(False, False)
 
     def _process_yolo_detections(self, results):
         for frame in results:

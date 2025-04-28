@@ -2,7 +2,6 @@ import queue
 import threading
 import time
 import cv2
-import torch
 import win32gui, win32con
 import win32api
 import os
@@ -11,6 +10,7 @@ from logic.config_watcher import cfg
 from logic.capture import capture
 from logic.overlay import overlay
 from logic.buttons import Buttons
+from logic.logger import logger
 
 class Visuals(threading.Thread):
     def __init__(self):
@@ -66,8 +66,6 @@ class Visuals(threading.Thread):
             screenshot_key_state = win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.debug_window_screenshot_key))
             if screenshot_key_state == -32768:
                 if not self.screenshot_taken:
-                    if not os.path.isdir("screenshots"):
-                        os.makedirs("screenshots")
                     cv2.imwrite(f"./screenshots/{time.time()}.jpg", self.image)
                     self.screenshot_taken = True
             else:
@@ -82,58 +80,68 @@ class Visuals(threading.Thread):
                     overlay.draw_line(capture.screen_x_center, capture.screen_y_center, int(self.draw_line_data[0]), int(self.draw_line_data[1]), 'green', 2)
 
             # boxes
-            if self.draw_boxes_data: 
-                for item in self.draw_boxes_data:
-                    if item:
-                        for xyxy, cls, conf in zip(item.xyxy, item.cls, item.conf):
-                            x0, y0, x1, y1 = map(int, map(torch.Tensor.item, xyxy))
-                            
-                            if cfg.show_window and cfg.show_boxes:
-                                cv2.rectangle(self.image, (x0, y0), (x1, y1), (0, 200, 0), 2)
-                                
-                            if cfg.show_overlay and cfg.overlay_show_boxes:
-                                overlay.draw_square(x0, y0, x1, y1, 'green', 2)
-                                
-                            # cv2 and overlay labels and conf
-                            str_cls = self.cls_model_data.get(cls.item(), '')
-                            
-                            # cv2 labels
-                            if cfg.show_window and cfg.show_labels and not cfg.show_conf:
-                                cv2.putText(self.image, str_cls, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
-                            
-                            # format conf text for cv2 and overlay
-                            if cfg.show_window or cfg.show_overlay:
-                                conf_text = '{} {:.2f}'.format(str_cls, conf.item())
-                            
-                            # cv2 conf
-                            if cfg.show_window and cfg.show_conf:
-                                cv2.putText(self.image, conf_text, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
-                            
-                            if cfg.show_overlay and cfg.overlay_show_conf or cfg.show_overlay and cfg.overlay_show_labels:
-                                # out of overlay
-                                x_out = 0
-                                y_out = 0
-                                
-                                if y0 <= 15:
-                                    x_out = x0 - 45
-                                    y_out = y0 + 15
-                                else:
-                                    x_out = x0 + 45
-                                    y_out = y0 - 15
-                                
-                                if x0 <= 40:
-                                    x_out = x0 + 40
-                                
-                                if x0 >= cfg.detection_window_width - 80:
-                                    x_out = x0 - 40
+            if self.draw_boxes_data is not None:
+                boxes = self.draw_boxes_data
 
-                                # overlay conf
-                                if cfg.overlay_show_conf:
-                                    overlay.draw_text(x_out, y_out, conf_text)
+                
+                if hasattr(boxes, "cls"): # Ultralytics Boxes
+                    xyxy_iter = boxes.xyxy
+                    cls_iter  = boxes.cls
+                    conf_iter = boxes.conf
+                else:
+                    xyxy_iter = boxes.xyxy # supervision.Detections
+                    cls_iter  = boxes.class_id
+                    conf_iter = boxes.confidence
 
-                                # overlay labels
-                                if cfg.overlay_show_labels and not cfg.overlay_show_conf:
-                                    overlay.draw_text(x_out, y_out, str_cls)
+                for xyxy, cls, conf in zip(xyxy_iter, cls_iter, conf_iter):
+                    x0, y0, x1, y1 = map(int, map(float, xyxy))
+                            
+                    if cfg.show_window and cfg.show_boxes:
+                        cv2.rectangle(self.image, (x0, y0), (x1, y1), (0, 200, 0), 2)
+                        
+                    if cfg.show_overlay and cfg.overlay_show_boxes:
+                        overlay.draw_square(x0, y0, x1, y1, 'green', 2)
+                        
+                    # cv2 and overlay labels and conf
+                    str_cls = self.cls_model_data.get(cls.item(), '')
+                    
+                    # cv2 labels
+                    if cfg.show_window and cfg.show_labels and not cfg.show_conf:
+                        cv2.putText(self.image, str_cls, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
+                    
+                    # format conf text for cv2 and overlay
+                    if cfg.show_window or cfg.show_overlay:
+                        conf_text = '{} {:.2f}'.format(str_cls, conf.item())
+                    
+                    # cv2 conf
+                    if cfg.show_window and cfg.show_conf:
+                        cv2.putText(self.image, conf_text, (x0, y0 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 1, cv2.LINE_AA)
+                    
+                    if cfg.show_overlay and cfg.overlay_show_conf or cfg.show_overlay and cfg.overlay_show_labels:
+                        # out of overlay
+                        x_out = 0
+                        y_out = 0
+                        
+                        if y0 <= 15:
+                            x_out = x0 - 45
+                            y_out = y0 + 15
+                        else:
+                            x_out = x0 + 45
+                            y_out = y0 - 15
+                        
+                        if x0 <= 40:
+                            x_out = x0 + 40
+                        
+                        if x0 >= cfg.detection_window_width - 80:
+                            x_out = x0 - 40
+
+                        # overlay conf
+                        if cfg.overlay_show_conf:
+                            overlay.draw_text(x_out, y_out, conf_text)
+
+                        # overlay labels
+                        if cfg.overlay_show_labels and not cfg.overlay_show_conf:
+                            overlay.draw_text(x_out, y_out, str_cls)
                                 
             # speed
             if self.draw_speed_data:
@@ -199,18 +207,21 @@ class Visuals(threading.Thread):
                 
     def spawn_debug_window(self):
         cv2.namedWindow(cfg.debug_window_name)
+        
         if cfg.debug_window_always_on_top:
             try:
                 x = cfg.spawn_window_pos_x
                 y = cfg.spawn_window_pos_y
+                
                 if x <= -1:
                     x = 0
                 if y <= -1:
                     y = 0
+                
                 debug_window_hwnd = win32gui.FindWindow(None, cfg.debug_window_name)
                 win32gui.SetWindowPos(debug_window_hwnd, win32con.HWND_TOPMOST, x, y, cfg.detection_window_width, cfg.detection_window_height, 0)
             except Exception as e:
-                print(f'Error with on top window, skipping this option `debug_window_always_on_top`: {e}')
+                logger.error(f'[Visuals] Error with on top window, skipping this option `debug_window_always_on_top`: {e}')
                 
     def draw_target_line(self, target_x, target_y, target_cls):
         if target_cls not in self.disabled_line_classes:

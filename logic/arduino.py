@@ -1,8 +1,9 @@
 import os
 import psutil
-import serial
-import serial.tools.list_ports
+import serial, serial.tools.list_ports
+
 from logic.config_watcher import *
+from logic.logger import logger
 
 class ArduinoMouse:
     def __init__(self):
@@ -20,9 +21,9 @@ class ArduinoMouse:
         
         try:
             self.serial_port.open()
-            print(f'Arduino: Connected! Port: {self.serial_port.port}')
+            logger.info(f'[Arduino] Connected! Port: {self.serial_port.port}')
         except Exception as e:
-            print(f'Arduino: Not Connected...\n{e}')
+            logger.error(f'[Arduino] Not Connected...\n{e}')
             self.checks()
 
         if not self.serial_port.is_open:
@@ -49,6 +50,9 @@ class ArduinoMouse:
                 self.serial_port.write(data)
         
     def _split_value(self, value):
+        if value == 0:
+            return [0]
+        
         values = []
         sign = -1 if value < 0 else 1
 
@@ -69,6 +73,7 @@ class ArduinoMouse:
 
     def __detect_port(self):
         ports = serial.tools.list_ports.comports()
+        
         for port in ports:
             if "Arduino" in port.description:
                 return port.device
@@ -87,13 +92,18 @@ class ArduinoMouse:
     def checks(self):
         for process in psutil.process_iter(['pid', 'name']):
             if process.info['name'] == 'Arduino IDE.exe':
-                print('Arduino: Arduino IDE is open, close IDE and restart app.')
+                logger.error('[Arduino] Arduino IDE is open, close IDE and restart app.')
                 break
         
         try:
             documents_path = os.path.join(os.environ['USERPROFILE'], 'Documents')
             arduino_libraries_path = os.path.join(documents_path, 'Arduino', 'libraries')
+            
             USB_Host_Shield_library_path = self.find_library_directory(arduino_libraries_path, 'USB_Host_Shield')
+            if USB_Host_Shield_library_path is None:
+                logger.error("[Arduino] Usb host shield library not found")
+                return
+            
             hid_settings = os.path.join(USB_Host_Shield_library_path, 'settings.h')
             
             if os.path.exists(hid_settings):
@@ -104,9 +114,9 @@ class ArduinoMouse:
                             if len(parts) == 3 and parts[1] == 'ENABLE_UHS_DEBUGGING':
                                 value = parts[2]
                                 if value == '1':
-                                    print(f'Arduino: Disable `ENABLE_UHS_DEBUGGING` setting in {hid_settings} file.')
+                                    logger.error(f'[Arduino] Disable `ENABLE_UHS_DEBUGGING` setting in {hid_settings} file.')
                                     break
         except Exception as e:
-            print(f'Arduino: USB_Host_Shield lib not found.\n{e}')
+            logger.error(f'[Arduino] USB_Host_Shield lib not found.\n{e}')
             
 arduino = ArduinoMouse()

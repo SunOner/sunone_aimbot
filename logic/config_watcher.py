@@ -1,6 +1,8 @@
 import configparser
 import random
 
+from logic.logger import logger
+
 class Config():
     def __init__(self):
         self.config = configparser.ConfigParser()
@@ -12,8 +14,10 @@ class Config():
             with open("config.ini", "r", encoding="utf-8",) as f:
                 self.config.read_file(f)
         except FileNotFoundError:
-            print("Config file not found!")
+            logger.error("[Config] Config file not found!")
             quit()
+        except Exception as e:
+            logger.error(f"[Config] Unknown exception: {str(e)}")
             
         # Detection window
         self.config_Detection_window = self.config["Detection window"]
@@ -92,7 +96,6 @@ class Config():
         self.AI_conf = float(self.config_AI["AI_conf"])
         self.AI_device = str(self.config_AI["AI_device"])
         self.AI_enable_AMD = self.config_AI.getboolean("AI_enable_AMD")
-        self.AI_mouse_net = self.config_AI.getboolean("AI_mouse_net")
         self.disable_tracker = self.config_AI.getboolean("disable_tracker")
         
         # Overlay
@@ -125,7 +128,7 @@ class Config():
         self.debug_window_name = self.window_name
         
         if verbose:
-            print("[Config] Config reloaded")
+            logger.info("[Config] Config reloaded")
             
     def get_random_window_name(self):
         try:
@@ -133,7 +136,10 @@ class Config():
                 window_names = file.read().splitlines()
             return random.choice(window_names) if window_names else "Calculator"
         except FileNotFoundError:
-            print("window_names.txt file not found, using default window name.")
+            logger.error("[Config] window_names.txt file not found, using default window name.")
+            return "Calculator"
+        except Exception as e:
+            logger.error(f"[Config] Unknown exception: {str(e)}")
             return "Calculator"
 
 cfg = Config()
