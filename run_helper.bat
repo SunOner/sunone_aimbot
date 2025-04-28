@@ -20,4 +20,4 @@ if %errorlevel% neq 0 (
     )
 )
 
-streamlit run helper.py
+streamlit run helper.py --server.fileWatcherType none
