@@ -6,9 +6,7 @@ import re
 import sys
 import shutil
 import zipfile
-import ctypes
 import configparser
-import threading
 import signal
 import streamlit as st
 
@@ -104,42 +102,51 @@ def download_file(url, filename):
         st.success("File downloaded successfully.")
             
 def install_cuda():
-        st.write("Cuda 12.4 is being downloaded, and installation will begin after downloading.")
-        download_file("https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda_12.4.0_551.61_windows.exe", "./cuda_12.4.0_551.61_windows.exe")
-        try:
-            subprocess.call(f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), "cuda_12.4.0_551.61_windows.exe")}')
-        except OSError:
-            st.error("The Cuda file has been downloaded but cannot be executed because administrator permission is required, please install cuda manually, the file (cuda_12.4.0_551.61_windows.exe) is available in the project folder.")
+    file_name = "cuda_12.8.0_571.96_windows.exe"
+    st.write("Cuda 12.8 is being downloaded, and installation will begin after downloading.")
+    download_file("https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_571.96_windows.exe", file_name)
+    try:
+        subprocess.call(f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name)}')
+    except OSError:
+        st.error(f"The Cuda file has been downloaded but cannot be executed because administrator permission is required, please install cuda manually, the file ({file_name}) is available in the project folder.")
         
 def delete_files_in_folder(folder):
-        for filename in os.listdir(folder):
-            file_path = os.path.join(folder, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except: pass
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except: pass
                 
-def find_cuda_path():
-    cuda_paths = [path for key, value in os.environ.items() if key == "PATH" for path in value.split(";") if "CUDA" in path and "12.4" in path]
+def find_cuda_path(cuda_version: str = "12.8"):
+    cuda_paths = [path for key, value in os.environ.items() if key == "PATH" for path in value.split(";") if "CUDA" in path and cuda_version in path]
     return cuda_paths if cuda_paths else None
     
 def get_aimbot_offline_version():
-        try:
-            with open('./version', 'r') as file:
-                lines = file.readlines()
-            app, config = 0, 0
-            for line in lines:
-                key, value = line.strip().split('=')
-                if key == "app":
-                    app = value
-                if key == 'config':
-                    config = value
-            return app, config
-        except FileNotFoundError:
-            st.toast("The version file was not found, we will consider it an old version of the program.")
-            return 0, 0
+    version_filename = "version"
+    
+    app, config = 0, 0
+    
+    if not os.path.exists(version_filename):
+        st.toast("The version file was not found, we will consider it an old version of the program.")
+        return app, config
+    
+    try:
+        with open(version_filename, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+        
+        for line in lines:
+            key, value = line.strip().split('=')
+            if key == "app":
+                app = value
+            if key == 'config':
+                config = value
+        return app, config
+    except Exception:
+        st.toast("Error, can't read version file, we will consider it an old version of the program.")
+        return app, config
 
 def get_aimbot_online_version():
     app = 0
@@ -157,49 +164,6 @@ def get_aimbot_online_version():
             if key == 'config':
                 config = value
     return app, config
-
-def upgrade_pip():
-    try:
-        result = subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True, text=True, check=True, timeout=5)
-        
-        current_version_match = re.search(r'pip (\d+(?:\.\d+)*)', result.stdout)
-        if not current_version_match:
-            st.toast("Unable to determine current pip version")
-            return None
-        
-        current_version = current_version_match.group(1)
-        
-        result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip", "--dry-run"], capture_output=True, text=True, check=True, timeout=30)
-        
-        new_version_match = re.search(r'pip (\d+(?:\.\d+)*)', result.stdout)
-        
-        if new_version_match:
-            latest_version = new_version_match.group(1)
-            if version.parse(current_version) < version.parse(latest_version):
-                st.info(f"Upgrading pip from {current_version} to {latest_version}")
-                subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], check=True, timeout=60)
-                
-                result = subprocess.run([sys.executable, "-m", "pip", "--version"], capture_output=True, text=True, check=True, timeout=10)
-                updated_version_match = re.search(r'pip (\d+\.\d+\.\d+)', result.stdout)
-                if updated_version_match:
-                    updated_version = updated_version_match.group(1)
-                    return updated_version
-                else:
-                    return current_version
-            else:
-                return current_version
-        else:
-            return current_version
-    
-    except subprocess.TimeoutExpired:
-        st.error("Pip upgrade process timed out")
-        return current_version
-    except subprocess.CalledProcessError as e:
-        st.error(f'pip: An error occurred: {e}')
-        return current_version
-    except Exception as e:
-        st.error(f'pip: An unexpected error occurred: {e}')
-        return current_version
             
 def upgrade_ultralytics():
     ultralytics_current_version = ultralytics.__version__
@@ -297,10 +261,6 @@ if 'ultralytics_version' not in st.session_state:
     with st.spinner('Checking for ultralytics updates...'):
         st.session_state.ultralytics_version = upgrade_ultralytics()
 
-if 'pip_version' not in st.session_state:
-    with st.spinner('Checking for pip updates...'):
-        st.session_state.pip_version = upgrade_pip()
-
 if 'aimbot_versions' not in st.session_state:
     with st.spinner('Checking Aimbot versions...'):
         st.session_state.aimbot_versions = get_aimbot_offline_version(), get_aimbot_online_version()
@@ -335,19 +295,21 @@ with st.sidebar:
     
     send_c_w = False
     with send_buttons_col:
-        send_c_w = st.toggle(label="Send ctrl+w", value=True, key="sidebar_send_c_w_toggle", help="Use the automatic keyboard shortcut 'ctrl+w' to close the tab.")    
+        send_c_w = st.toggle(
+            label="Send ctrl+w",
+            value=True,
+            key="sidebar_send_c_w_toggle",
+            help="Use the automatic keyboard shortcut 'ctrl+w' to close the tab."
+        )    
     
     with exit_button_col:
-        if st.button(label="Exit"):
+        if st.button(label="Exit", key="sidebar_send_exit_button"):
             if send_c_w == True:
                 keyboard.press_and_release('ctrl+w')
             os.kill(os.getpid(), signal.SIGTERM)
     
 if st.session_state.current_tab == "HELPER":
     st.title("Helper")
-
-    if not st.session_state.python_version.major == 3 and st.session_state.python_version.minor == 11 and st.session_state.python_version.micro == 6:
-        st.error(f"❌ Running not from Python 3.11.6!")
 
     # AIMBOT
     st.subheader("Aimbot", divider=True)
@@ -383,12 +345,12 @@ if st.session_state.current_tab == "HELPER":
     
     with cuda_version_col:
         if st.session_state.cuda is not None:
-            st.markdown("✅ CUDA 12.4 FOUND")
+            st.markdown("✅ CUDA 12.8 FOUND")
         else:
-            st.markdown("❌ CUDA 12.4 NOT FOUND")
+            st.markdown("❌ CUDA 12.8 NOT FOUND")
     
     with cuda_install_button:
-        if st.button(label="Download CUDA 12.4", key="Download_cuda_button"):
+        if st.button(label="Download CUDA 12.8", key="Download_cuda_button"):
             install_cuda()
         
     # TORCH
@@ -411,7 +373,7 @@ if st.session_state.current_tab == "HELPER":
             else:
                 with st.spinner("Reinstalling Torch. After installation, the application will restart and a new window will open."):
                     os.system("pip uninstall torch torchvision torchaudio -y ")
-                    os.system("pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124")
+                    os.system("pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128")
                     restart()
     # TENSORRT
     st.subheader("TensorRT", divider=True)
@@ -463,12 +425,14 @@ elif st.session_state.current_tab == "CONFIG":
 
     def save_config(config):
         config_file_path = 'config.ini'
+        
         try:
-            with open(config_file_path, 'r') as configfile:
+            with open(config_file_path, 'r', encoding='utf-8') as configfile:
                 lines = configfile.readlines()
 
-            with open(config_file_path, 'w') as configfile:
+            with open(config_file_path, 'w', encoding='utf-8') as configfile:
                 current_section = None
+                
                 for line in lines:
                     stripped_line = line.strip()
                     if stripped_line.startswith('[') and stripped_line.endswith(']'):
