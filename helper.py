@@ -817,18 +817,17 @@ elif st.session_state.current_tab == "CONFIG":
         index=devices.index(config.get('AI', 'AI_device')),
         key="config_AI_device"
     )
-    
-    AI_enable_AMD = st.checkbox(
-        label="AI enable AMD",
-        value=config.getboolean('AI', 'AI_enable_AMD'),
-        key="config_AI_enable_AMD"
+    AI_enable_DML = st.checkbox(
+        label="AI enable DirectML",
+        value=config.getboolean('AI', 'AI_enable_DML'),
+        key="config_AI_enable_DML"
     )
     
     config.set('AI', 'AI_model_name', AI_model_name)
     config.set('AI', 'AI_model_image_size', str(AI_model_image_size))
     config.set('AI', 'AI_conf', str(AI_conf))
     config.set('AI', 'AI_device', AI_device)
-    config.set('AI', 'AI_enable_AMD', str(AI_enable_AMD))
+       config.set('AI', 'AI_enable_DML', str(AI_enable_DML))
 
     # Overlay
     st.subheader("Overlay", divider=True)
