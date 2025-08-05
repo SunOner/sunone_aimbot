@@ -9,12 +9,11 @@ import zipfile
 import configparser
 import signal
 import streamlit as st
+import importlib.util
 
 def restart():
     os.system("streamlit run helper.py")
     quit()
-
-import streamlit as st
 
 st.set_page_config(
     page_title="HELPER",
@@ -23,31 +22,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-try:
-    import requests
-    import mss
-    import supervision
-    import numpy
-    import bettercam
-    import win32api, win32con, win32gui
-    import screeninfo
-    import asyncio
-    import serial
-    import cuda
-    import onnxruntime
-    import keyboard
-    from packaging import version
-    import numpy as np
-    import ultralytics
-    from ultralytics import YOLO
-    from logic.logger import logger
-except (ModuleNotFoundError, ImportError):
-    with st.spinner("Installing the needed components"):
-        if os.path.exists("./requirements.txt"):
-            os.system("pip install -r requirements.txt")
-        else:
-            logger.info("requirements.txt file not found. Please, redownload aimbot.")
-    restart()
+required_modules = [
+    'requests', 'mss', 'supervision', 'numpy', 'bettercam', 'win32api', 'win32con', 'win32gui',
+    'screeninfo', 'asyncio', 'serial', 'onnxruntime', 'keyboard', 'packaging', 'ultralytics',
+    'cv2'
+]
+
+missing_modules = [mod for mod in required_modules if importlib.util.find_spec(mod) is None]
+
+if missing_modules:
+    with st.spinner(f"Installing missing modules: {', '.join(missing_modules)}"):
+        for mod in missing_modules:
+            subprocess.run(["pip", "install", mod], capture_output=True)
+    st.rerun()
+
+import requests
+import win32con, win32gui
+import keyboard
+
+from logic.logger import logger
 
 try:
     import cv2
@@ -166,6 +159,7 @@ def get_aimbot_online_version():
     return app, config
             
 def upgrade_ultralytics():
+    import ultralytics
     ultralytics_current_version = ultralytics.__version__
 
     ultralytics_repo_version = requests.get(
@@ -396,6 +390,7 @@ if st.session_state.current_tab == "HELPER":
                 st.error("❌ Please, download and install CUDA first.")
 
 elif st.session_state.current_tab == "EXPORT":
+    from ultralytics import YOLO
     st.title(body="Model exporter")
     
     models = []
@@ -1202,8 +1197,9 @@ elif st.session_state.current_tab == "TESTS":
         input_device = 0,
         input_delay = 30,
         resize_factor = 100,
-        ai_conf = 0.20
-):
+        ai_conf = 0.20):
+        from ultralytics import YOLO
+        
         if input_model is None:
             return ("error", "Model not selected")
         
