@@ -34,25 +34,25 @@ if missing_modules:
     with st.spinner(f"Installing missing modules: {', '.join(missing_modules)}"):
         for mod in missing_modules:
             subprocess.run(["pip", "install", mod], capture_output=True)
-    st.rerun()
+    restart()
 
 import requests
 import win32con, win32gui
 import keyboard
 
-from logic.logger import logger
+# Aimbot modules
+try:
+    from logic.config_watcher import cfg
+    from logic.buttons import Buttons
+    from logic.logger import logger
+except ModuleNotFoundError:
+    st.error("Some modules not found. Please, reinstall Aimbot.")
 
 try:
     import cv2
 except Exception as e:
     logger.info(f"OpenCV import error:\n{e}")
 
-# Aimbot modules
-try:
-    from logic.config_watcher import cfg
-    from logic.buttons import Buttons
-except ModuleNotFoundError:
-    st.error("Some modules not found. Please, reinstall Aimbot.")
 
 def download_file(url, filename):
     if os.path.exists(filename):
@@ -92,12 +92,12 @@ def download_file(url, filename):
     if total_size_in_bytes != 0 and downloaded_size != total_size_in_bytes:
         st.error("Error with downloading file.")
     else:
-        st.success("File downloaded successfully.")
+        st.success(f"File {filename} downloaded.")
             
 def install_cuda():
     file_name = "cuda_12.8.0_571.96_windows.exe"
     st.write("Cuda 12.8 is being downloaded, and installation will begin after downloading.")
-    download_file("https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_571.96_windows.exe", file_name)
+    download_file(f"https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/{file_name}", file_name)
     try:
         subprocess.call(f'{os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name)}')
     except OSError:
@@ -124,7 +124,10 @@ def get_aimbot_offline_version():
     
     if not os.path.exists(version_filename):
         st.toast("The version file was not found, we will consider it an old version of the program.")
-        return app, config
+        return {
+            "app_version": 0,
+            "config_version": 0
+        }
     
     try:
         with open(version_filename, 'r', encoding='utf-8') as file:
@@ -136,18 +139,29 @@ def get_aimbot_offline_version():
                 app = value
             if key == 'config':
                 config = value
-        return app, config
+        return {
+            "app_version": app,
+            "config_version": config
+        }
     except Exception:
         st.toast("Error, can't read version file, we will consider it an old version of the program.")
-        return app, config
+        return {
+            "app_version": 0,
+            "config_version": 0
+        }
 
 def get_aimbot_online_version():
     app = 0
     config = 0
+    
     try:
         content = requests.get('https://raw.githubusercontent.com/SunOner/sunone_aimbot/main/version').content.decode('utf-8').split('\n')
     except:
-        logger.info("[Error] It is impossible to get the current щтдшту version.")
+        logger.info("[Error] It is impossible to get the current version.")
+        return {
+            "app_version": 0,
+            "config_version": 0
+        }
     
     for line in content:
         if line:
@@ -156,7 +170,10 @@ def get_aimbot_online_version():
                 app = value
             if key == 'config':
                 config = value
-    return app, config
+    return {
+        "app_version": app,
+        "config_version": config
+    }
             
 def upgrade_ultralytics():
     import ultralytics
@@ -181,11 +198,8 @@ def update_config(new_config_path, current_config_path='config.ini'):
 
 def reinstall_aimbot():    
     logger.info("Checking config versions...")
-    config_online_version = int(get_aimbot_online_version()[1])
-    config_current_version = get_aimbot_offline_version()
-    
-    if config_current_version:
-        config_current_version = int(config_current_version[1])
+    config_online_version = int(get_aimbot_online_version().get("config_version"))
+    config_current_version = int(get_aimbot_offline_version().get("config_version"))
     
     logger.info(f"Config current version: {config_current_version}\nConfig online version {config_online_version}")
     
@@ -230,7 +244,10 @@ def reinstall_aimbot():
                 shutil.move(src_path, dest_path)
 
     logger.info("Cleaning up...")
-    os.remove("./main.zip")
+    try:
+        os.remove("./main.zip")
+    except: pass
+    
     shutil.rmtree("./temp_extract")
 
     logger.info("Reinstallation complete. Restarting...")
@@ -247,9 +264,15 @@ def torch_check():
 def tensorrt_version_check():
     try:
         import tensorrt
-        return (True, tensorrt.__version__)
+        return {
+            "available": True,
+            "version": str(tensorrt.__version__)
+        }
     except ModuleNotFoundError:
-        return (False, 0)
+        return {
+            "available": False,
+            "version": None
+        }
 
 if 'ultralytics_version' not in st.session_state:
     with st.spinner('Checking for ultralytics updates...'):
@@ -257,7 +280,10 @@ if 'ultralytics_version' not in st.session_state:
 
 if 'aimbot_versions' not in st.session_state:
     with st.spinner('Checking Aimbot versions...'):
-        st.session_state.aimbot_versions = get_aimbot_offline_version(), get_aimbot_online_version()
+        st.session_state.aimbot_versions = {
+            "offline": get_aimbot_offline_version(),
+            "online": get_aimbot_online_version()
+        }
 
 if 'cuda' not in st.session_state:
     with st.spinner('Searching CUDA...'):
@@ -311,7 +337,9 @@ if st.session_state.current_tab == "HELPER":
     aimbot_version_col, aimbot_reinstall_button = st.columns(2)
     
     with aimbot_version_col:
-        st.markdown(f"Installed Aimbot version: {st.session_state.aimbot_versions[0][0]}  \\\n Github version: {st.session_state.aimbot_versions[1][0]}")
+        offline_version = st.session_state.aimbot_versions["offline"].get("app_version", 0)
+        online_version = st.session_state.aimbot_versions["online"].get("app_version", 0)
+        st.markdown(f"Installed Aimbot version: {offline_version}  \\\n Github version: {online_version}")
     
     if 'show_confirm' not in st.session_state:
         st.session_state.show_confirm = False
@@ -374,8 +402,10 @@ if st.session_state.current_tab == "HELPER":
     tensorrt_ver_col, tensorrt_reinstall_col = st.columns(2)
     
     with tensorrt_ver_col:
-        if st.session_state.tensorrt_version[0] == True:
-            st.markdown(f"✅ TensorRT version: {st.session_state.tensorrt_version[1]}")
+        tensorrt_available = st.session_state.tensorrt_version.get("available", False)
+        if tensorrt_available == True:
+            tensorrt_version = st.session_state.tensorrt_version.get("version", None)
+            st.markdown(f"✅ TensorRT version: {tensorrt_version}")
         else:
             st.markdown("❌ TensorRT not installed")
         
