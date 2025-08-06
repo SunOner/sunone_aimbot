@@ -1,7 +1,7 @@
 <div align="center">
 
 # Sunone Aimbot
-[![Python Version](https://img.shields.io/badge/Python-3.11.6-FFD43B?logo=python)](https://github.com/SunOner/sunone_aimbot)
+[![Python Version](https://img.shields.io/badge/Python-3.12.0-FFD43B?logo=python)](https://github.com/SunOner/sunone_aimbot)
 [![License MIT](https://badgen.net/github/license/SunOner/sunone_aimbot)](https://github.com/SunOner/sunone_aimbot/blob/main/LICENSE)
 [![Github stars](https://img.shields.io/github/stars/SunOner/sunone_aimbot?color=ffb500)](https://github.com/SunOner/sunone_aimbot)
 [![Discord server](https://badgen.net/discord/online-members/sunone)](https://discord.gg/37WVp6sNEh)
@@ -39,12 +39,12 @@ Before you get started, make sure you have the following prerequisites installed
 ## Working environment:
 <table>
   <thead><tr><th>Windows</th><td>10 and 11(priority)</td></thead>
-  <thead><tr><th>Python:</th><td>3.11.6</td></tr></thead>
-  <thead><tr><th>CUDA:</th><td>12.4</td></tr></thead>
-  <thead><tr><th>TensorRT:</th><td>10.8.0.43</td></tr></thead>
-  <thead><tr><th>Ultralytics:</th><td>8.3.78</td></tr></thead>
+  <thead><tr><th>Python:</th><td>3.12.0</td></tr></thead>
+  <thead><tr><th>CUDA:</th><td>12.8</td></tr></thead>
+  <thead><tr><th>TensorRT:</th><td>10.13.0.35</td></tr></thead>
+  <thead><tr><th>Ultralytics:</th><td>8.3.174</td></tr></thead>
   <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6 (YOLOv10)</td></tr></thead>
-  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.6 (YOLOv12)</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.8 (YOLOv12)</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
