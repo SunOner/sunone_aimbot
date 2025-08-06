@@ -423,22 +423,85 @@ elif st.session_state.current_tab == "EXPORT":
     from ultralytics import YOLO
     st.title(body="Model exporter")
     
+    # Model selector
     models = []
     for root, dirs, files in os.walk("./models"):
         for file in files:
             if file.endswith(".pt"):
                 models.append(file)
     
-    selected_model = st.selectbox(label="**Select model to export.**", options=models, key="export_selected_model_selectbox")
+    selected_model = st.selectbox(
+        label="**Select model to export.**",
+        options=models,
+        key="export_selected_model_selectbox"
+    )
     
-    image_size = st.radio(label="**Select model size**",options=(320, 480, 640), help="The size of the model image must be correct.", key="export_image_size_radio")
+    # Image size
+    image_size = st.radio(
+        label="**Select model size**",
+        options=(320, 480, 640),
+        help="The size of the model image must be correct.",
+        key="export_image_size_radio"
+    )
+    
+    # Precision
+    export_half: bool = False
+    export_int8: bool = False
+    export_precision: bool = st.selectbox(
+        label="Precision",
+        index=0,
+        options=["half", "int8"],
+        key="export_precision"
+    )
+    if export_precision == "half":
+        export_half = True
+    else:
+        export_int8 = True
+    
+    # Configuration file path for int8 calibration.
+    if export_int8:    
+        data_yaml_path = st.text_input(
+            label="Path to dataset configuration file",
+            help="See logic/game.yaml for example",
+            value="logic/game.yaml"
+        )
+    
+    # NMS
+    add_nms: bool = st.toggle(
+        label="Add NMS module",
+        value=True,
+        disabled=True if export_int8 == True else False,
+        key="export_add_nms_module"
+    )
+    
+    export_params = {
+        "format": "engine",
+        "imgsz": image_size,
+        "half": export_half,
+        "int8": export_int8,
+        "device": 0,
+        "nms": add_nms
+    }
+    
+    if export_int8:
+        export_params["data"] = data_yaml_path if data_yaml_path else "data.yaml"
     
     if st.button(label="Export model", key="export_export_model_button") and selected_model is not None:
         yolo_model = YOLO(f"./models/{selected_model}")
         
-        with st.spinner(text=f"Model {selected_model} exporting..."):
-            yolo_model.export(format="engine", imgsz=image_size, half=True, device=0)
-            st.success("Model exported!", icon="✅")
+        with st.spinner(
+            text=f"Model {selected_model} exporting...",
+            show_time=True):
+            try:
+                exported_path = yolo_model.export(**export_params)
+                
+                if exported_path:
+                    st.success(f"Model {selected_model} exported! `{exported_path}`", icon="✅")
+                else:
+                    st.error("Error with model export. See console window for log error.")
+            except Exception as e:
+                logger.info(f"[Export] Error:\n{str(e)}")
+                st.error("Error with model export. See console window for log error.")
             
 elif st.session_state.current_tab == "CONFIG":
     st.title(body="Config Editor")
