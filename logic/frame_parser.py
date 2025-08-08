@@ -121,9 +121,10 @@ class FrameParser:
 
         return Target(*target_data, target_class)
 
-    def get_arch(self):
-        if cfg.AI_enable_AMD:
-            return f'hip:{cfg.AI_device}'
+      def get_arch(self):
+        if cfg.AI_enable_DML:
+            import torch_directml
+            return torch_directml.device(int(cfg.AI_device))
         elif 'cpu' in cfg.AI_device:
             return 'cpu'
         else:
