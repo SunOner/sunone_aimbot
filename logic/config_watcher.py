@@ -95,7 +95,7 @@ class Config():
         self.ai_model_image_size = int(self.config_AI["ai_model_image_size"])
         self.AI_conf = float(self.config_AI["AI_conf"])
         self.AI_device = str(self.config_AI["AI_device"])
-        self.AI_enable_AMD = self.config_AI.getboolean("AI_enable_AMD")
+        self.AI_enable_DML = self.config_AI.getboolean("AI_enable_DML")
         self.disable_tracker = self.config_AI.getboolean("disable_tracker")
         
         # Overlay

@@ -33,6 +33,10 @@ def perform_detection(model, image, tracker: sv.ByteTrack | None = None):
         show=False,
         stream=True
     )
+    if cfg.AI_enable_DML:
+        import torch_directml
+        kwargs["device"] = torch_directml.device(int(cfg.AI_device))
+        kwargs["half"] = False
 
     kwargs["cfg"] = "logic/tracker.yaml" if tracker else "logic/game.yaml"
 
