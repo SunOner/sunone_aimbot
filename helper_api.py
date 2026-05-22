@@ -3,6 +3,7 @@ from __future__ import annotations
 import configparser
 import json
 import os
+import platform
 import secrets
 import subprocess
 import sys
@@ -30,6 +31,7 @@ MODELS_DIR = PROJECT_DIR / "models"
 UI_DIST_DIR = PROJECT_DIR / "helper_ui" / "dist"
 CUDA_FILE_NAME = "cuda_12.8.0_571.96_windows.exe"
 CUDA_URL = f"https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/{CUDA_FILE_NAME}"
+IS_WINDOWS = platform.system() == "Windows"
 CONFIG_LOCK = threading.RLock()
 STREAM_STATUS_PREFIX = "__SUNONE_HELPER_STREAM_STATUS__"
 HELPER_TOKEN_COOKIE = "sunone_helper_token"
@@ -43,8 +45,8 @@ SYSTEM_STATUS_CACHE: dict[str, Any] | None = None
 SYSTEM_STATUS_CACHE_EXPIRES_AT = 0.0
 
 FIELD_MAP: dict[str, tuple[str, str, str, Any]] = {
-    "detection_window_width": ("Detection window", "detection_window_width", "int", 640),
-    "detection_window_height": ("Detection window", "detection_window_height", "int", 640),
+    "detection_window_width": ("Detection window", "detection_window_width", "int", 320),
+    "detection_window_height": ("Detection window", "detection_window_height", "int", 320),
     "circle_capture": ("Detection window", "circle_capture", "bool", False),
     "capture_fps": ("Capture Methods", "capture_fps", "int", 60),
     "bettercam_monitor_id": ("Capture Methods", "bettercam_monitor_id", "int", 0),
@@ -78,7 +80,7 @@ FIELD_MAP: dict[str, tuple[str, str, str, Any]] = {
     "arduino_port": ("Arduino", "arduino_port", "str", "COM3"),
     "arduino_baudrate": ("Arduino", "arduino_baudrate", "int", 115200),
     "arduino_16_bit_mouse": ("Arduino", "arduino_16_bit_mouse", "bool", False),
-    "ai_model_name": ("AI", "ai_model_name", "str", ""),
+    "ai_model_name": ("AI", "ai_model_name", "str", "sunxds_0.8.0.pt"),
     "ai_model_image_size": ("AI", "ai_model_image_size", "int", 640),
     "ai_conf": ("AI", "ai_conf", "float", 0.1),
     "ai_device": ("AI", "ai_device", "str", "0"),
@@ -91,7 +93,7 @@ FIELD_MAP: dict[str, tuple[str, str, str, Any]] = {
     "overlay_show_target_prediction_line": ("overlay", "overlay_show_target_prediction_line", "bool", False),
     "overlay_show_labels": ("overlay", "overlay_show_labels", "bool", False),
     "overlay_show_conf": ("overlay", "overlay_show_conf", "bool", False),
-    "show_window": ("Debug window", "show_window", "bool", True),
+    "show_window": ("Debug window", "show_window", "bool", False),
     "show_detection_speed": ("Debug window", "show_detection_speed", "bool", False),
     "show_window_fps": ("Debug window", "show_window_fps", "bool", False),
     "show_boxes": ("Debug window", "show_boxes", "bool", True),
@@ -184,7 +186,8 @@ def _online_version() -> dict[str, str | int]:
 
 
 def _find_cuda_paths(version: str = "12.8") -> list[str]:
-    return [item for item in os.environ.get("PATH", "").split(";") if "cuda" in item.lower() and version in item]
+    path_parts = os.environ.get("PATH", "").split(os.pathsep)
+    return [item for item in path_parts if "cuda" in item.lower() and version in item]
 
 
 def _python_probe(script: str, timeout: int = 30) -> dict[str, Any]:
@@ -556,6 +559,11 @@ def _stream_python_script(
 
 
 def _stream_download_cuda():
+    if not IS_WINDOWS:
+        yield "CUDA installer download is only automated on Windows. Install NVIDIA drivers/CUDA with your Ubuntu package manager or NVIDIA's Linux installer.\n"
+        yield _stream_status(False, "CUDA download helper is Windows-only.")
+        return
+
     destination = PROJECT_DIR / CUDA_FILE_NAME
     bytes_downloaded = 0
     last_report = 0.0
@@ -613,7 +621,7 @@ def _format_torch_info(info: dict[str, Any]) -> str:
 
 def _ensure_torch_cuda_for_aimbot() -> None:
     config = _snapshot_config()
-    if str(config.get("ai_device", "")).strip().lower() == "cpu":
+    if str(config.get("ai_device", "")).strip().lower().startswith("cpu") or bool(config.get("ai_enable_amd")):
         return
 
     info = _torch_info()
@@ -730,6 +738,7 @@ def _reinstall_aimbot() -> tuple[bool, str]:
 def _status() -> dict[str, Any]:
     torch_info = _torch_info()
     return {
+        "platform": platform.system(),
         "python": ".".join(str(part) for part in sys.version_info[:3]),
         "ultralytics": _ultralytics_version(),
         "aimbot_versions": {"offline": _offline_version(), "online": _online_version()},
@@ -949,8 +958,7 @@ def _build_tests_script(params: dict[str, Any]) -> str:
     return "\n".join(
         [
             "import cv2",
-            "import win32con",
-            "import win32gui",
+            "import platform",
             "from ultralytics import YOLO",
             "",
             f"model_path = {params['model_path']!r}",
@@ -970,10 +978,15 @@ def _build_tests_script(params: dict[str, Any]) -> str:
             "    raise RuntimeError('Could not open video source.')",
             "window_name = 'Detections test'",
             "cv2.namedWindow(window_name)",
-            "if topmost:",
-            "    hwnd = win32gui.FindWindow(None, window_name)",
-            "    if hwnd:",
-            "        win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)",
+            "if topmost and platform.system() == 'Windows':",
+            "    try:",
+            "        import win32con",
+            "        import win32gui",
+            "        hwnd = win32gui.FindWindow(None, window_name)",
+            "        if hwnd:",
+            "            win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, 100, 100, 200, 200, 0)",
+            "    except Exception as exc:",
+            "        print(f'Topmost window mode unavailable: {exc}', flush=True)",
             "frames = 0",
             "try:",
             "    while cap.isOpened():",
@@ -1215,6 +1228,9 @@ def api_reinstall_tensorrt_stream():
 
 @app.post("/api/actions/download-cuda")
 def api_download_cuda() -> dict[str, Any]:
+    if not IS_WINDOWS:
+        raise HTTPException(status_code=400, detail="CUDA download helper is Windows-only. Install CUDA manually on Ubuntu.")
+
     destination = PROJECT_DIR / CUDA_FILE_NAME
     ok, message = _download_file(CUDA_URL, destination)
     if not ok:

@@ -34,9 +34,22 @@ Before you get started, make sure you have the following prerequisites installed
 - To launch the aimbot after all installations, start `run_ai.bat` or type `py run.py`.
 - To launch the React helper panel (config/export/train/tests), run `run_helper.bat`.
   - `run_helper.bat` performs one-click setup (Python deps + npm deps + React build), starts helper API/UI, and opens the browser automatically.
+- On Ubuntu/Linux, use `bash run_ai.sh` or `bash run_helper.sh`.
 
-# Use the new C++ version of the AI-Aimbot!
-- [Sunone_aimbot_cpp](https://github.com/SunOner/sunone_aimbot_cpp): The Python version is good, but C++ is even better. It has an overlay, is faster, and much more. Currently, it is updated much more frequently than the Python version. It's better to use the C++ version.
+### Ubuntu / Linux
+- Use Python 3.12 in a virtual environment and install dependencies with `python -m pip install -r requirements.txt`.
+- Use `mss_capture = True` or `Obs_capture = True`; BetterCam, GHUB and Razer DLL input are Windows-only.
+- Native Linux hotkeys/mouse input use `pynput` and require an X11 session with input permissions. Wayland sessions can block global input and screen capture.
+- CUDA installation is not automated by the helper on Ubuntu. Install NVIDIA driver/CUDA with your package manager or NVIDIA's Linux installer, then install the matching PyTorch build.
+- Launch with `python run.py`. The `.bat` launchers are Windows-only.
+
+# Consider Sunone Aimbot 2 (C++)
+- [Sunone Aimbot 2](https://github.com/SunOner/sunone_aimbot_2) is the newer C++ branch and is the better choice for most Windows users who want a ready-to-run build instead of maintaining a Python environment.
+- It provides precompiled CUDA/TensorRT and DirectML builds, so NVIDIA users can use the high-performance TensorRT path while AMD, Intel, older NVIDIA and integrated GPUs can use the DirectML build.
+- It has an in-app overlay/settings UI opened with `Home`, while this Python version still relies mostly on `config.ini`, a helper panel and OpenCV/Tk debug windows.
+- Its capture layer is broader: Desktop Duplication, WinRT window/monitor capture, virtual camera and UDP capture are documented, while this Python version is limited to MSS, BetterCam and OBS virtual camera.
+- It has a larger runtime feature set: switchable TRT/DML backend, GPU direct capture options, Kalman prediction, WindMouse movement, depth-mask/depth-inference options, game overlay rendering, and more input devices such as KMBOX and MAKCU.
+- This Python repository is still useful for experiments, training/export tooling, Linux/Ubuntu work, and easier code changes. For daily Windows use, Sunone Aimbot 2 is currently the more complete and actively maintained path.
 
 ## Working environment:
 <table>

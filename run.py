@@ -6,28 +6,23 @@ import supervision as sv
 from trackers import ByteTrackTracker
 
 from logic.config_watcher import cfg
-from logic.capture import capture
-from logic.visual import visuals
-from logic.frame_parser import frameParser
-from logic.hotkeys_watcher import hotkeys_watcher
 from logic.checks import run_checks
 from logic.logger import logger
 
-tracker = ByteTrackTracker() if not cfg.disable_tracker else None
-
 @torch.inference_mode()
 def perform_detection(model, image, tracker: ByteTrackTracker | None = None):
+    ai_device = str(cfg.AI_device).lower()
     kwargs = dict(
         source=image,
         imgsz=cfg.ai_model_image_size,
         conf=cfg.AI_conf,
         iou=0.50,
         device=cfg.AI_device,
-        half=not "cpu" in cfg.AI_device,
+        half="cpu" not in ai_device,
         max_det=20,
         agnostic_nms=False,
         augment=False,
-        vid_stride=False,
+        vid_stride=1,
         visualize=False,
         verbose=False,
         show_boxes=False,
@@ -47,31 +42,45 @@ def perform_detection(model, image, tracker: ByteTrackTracker | None = None):
             det = sv.Detections.from_ultralytics(res)
             return tracker.update(det)
     else:
-        return next(results)
+        return next(results, None)
 
 def init():
     run_checks()
+    from logic.capture import capture
+    from logic.visual import visuals
+    from logic.frame_parser import frameParser
+    from logic.hotkeys_watcher import hotkeys_watcher
+    from logic.shooting import shooting
+
+    tracker = ByteTrackTracker() if not cfg.disable_tracker else None
     
     try:
         model = YOLO(f"models/{cfg.AI_model_name}", task="detect")
     except Exception as e:
-        logger.info("An error occurred when loading the AI model:\n", e)
-        quit(0)
+        logger.error(f"An error occurred when loading the AI model:\n{e}")
+        raise SystemExit(0)
         
     while True:
         image = capture.get_new_frame()
-        
-        if image is not None:
-            if cfg.circle_capture:
-                image = capture.convert_to_circle(image)
-                
-            if cfg.show_window or cfg.show_overlay:
-                visuals.queue.put(image)
-                
-            result = perform_detection(model, image, tracker)
 
-            if hotkeys_watcher.app_pause == 0:
-                frameParser.parse(result)
+        if image is None:
+            continue
+
+        if cfg.circle_capture:
+            image = capture.convert_to_circle(image)
+
+        if hotkeys_watcher.app_pause != 0:
+            visuals.clear()
+            shooting.shoot(False, False)
+            if cfg.show_window or cfg.show_overlay:
+                visuals.submit_frame(image)
+            continue
+
+        result = perform_detection(model, image, tracker)
+        frameParser.parse(result)
+
+        if cfg.show_window or cfg.show_overlay:
+            visuals.submit_frame(image)
 
 if __name__ == "__main__":
     init()

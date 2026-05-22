@@ -54,7 +54,7 @@ const CONFIG_SAVE_DEBOUNCE_MS = 350;
 const TOAST_LIMIT = 4;
 const TOAST_DURATION_MS = 4500;
 const ERROR_TOAST_DURATION_MS = 9000;
-const DETECTION_SIZE_PRESETS = [640, 320, 160];
+const DETECTION_SIZE_PRESETS = [320, 640, 160];
 const STREAM_STATUS_PREFIX = "__SUNONE_HELPER_STREAM_STATUS__";
 const HELPER_TOKEN_COOKIE = "sunone_helper_token";
 const HELPER_TOKEN_HEADER = "X-Sunone-Helper-Token";
@@ -860,6 +860,8 @@ function App() {
     const installedAimbotMissing = isMissingVersion(installedAimbotVersion);
     const githubAimbotMissing = isMissingVersion(githubAimbotVersion);
     const selectedMouseMethods = [config.arduino_move, config.mouse_ghub, config.mouse_rzr].filter(Boolean).length;
+    const aiDevice = String(config.ai_device || "").trim().toLowerCase();
+    const usesCudaDevice = aiDevice !== "cpu" && !config.ai_enable_amd;
 
     if (installedAimbotMissing) {
       warnings.push({ text: "Local version file is missing or unreadable. The helper cannot verify the installed aimbot version." });
@@ -870,10 +872,10 @@ function App() {
     if (!installedAimbotMissing && !githubAimbotMissing && compareVersions(installedAimbotVersion, githubAimbotVersion) < 0) {
       warnings.push({ text: `Installed version ${installedAimbotVersion} is older than GitHub version ${githubAimbotVersion}. Use Update/Reinstall Aimbot.` });
     }
-    if (!status.cuda?.available) {
+    if (usesCudaDevice && !status.cuda?.available) {
       warnings.push({ text: "CUDA 12.8 was not found in PATH. Install CUDA 12.8 or use Download CUDA 12.8 before GPU features." });
     }
-    if (status.torch_gpu_support !== true) {
+    if (usesCudaDevice && status.torch_gpu_support !== true) {
       const torchDetails = status.torch?.executable
         ? ` Python: ${status.torch.executable}. Torch: ${status.torch.version || "not installed"}, CUDA build: ${status.torch.torch_cuda || "none"}.`
         : "";

@@ -2,12 +2,12 @@ import os
 import psutil
 import serial, serial.tools.list_ports
 
-from logic.config_watcher import *
+from logic.config_watcher import cfg
 from logic.logger import logger
 
 class ArduinoMouse:
     def __init__(self):
-        self.cfg = Config()
+        self.cfg = cfg
         
         self.serial_port = serial.Serial()
         self.serial_port.baudrate = self.cfg.arduino_baudrate

@@ -1,7 +1,7 @@
 cuda_python
-bettercam
+bettercam; platform_system == "Windows"
 numpy
-pywin32
+pywin32; platform_system == "Windows"
 screeninfo
 asyncio
 onnxruntime
@@ -13,11 +13,14 @@ packaging
 ultralytics
 keyboard
 mss
+pynput
 supervision
 trackers
 hid
 pyusb
 pandas
+psutil
 fastapi
+httpx
 uvicorn[standard]
 python-multipart

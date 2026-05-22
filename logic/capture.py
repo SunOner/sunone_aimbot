@@ -1,13 +1,14 @@
 import cv2
-import bettercam
 import mss
 from screeninfo import get_monitors
 import threading
 import queue
+import time
 import numpy as np
 
 from logic.config_watcher import cfg
 from logic.logger import logger
+
 
 class Capture(threading.Thread):
     def __init__(self):
@@ -24,45 +25,105 @@ class Capture(threading.Thread):
         self.screen_x_center = int(cfg.detection_window_width / 2)
         self.screen_y_center = int(cfg.detection_window_height / 2)
 
-        self.prev_detection_window_width = cfg.detection_window_width
-        self.prev_detection_window_height = cfg.detection_window_height
-        self.prev_bettercam_capture_fps = cfg.capture_fps
-        
         self.frame_queue = queue.Queue(maxsize=1)
-        
+
+        self._backend_lock = threading.RLock()
+        self._capture_backend = self._selected_backend()
+        self._settings_snapshot = self._capture_settings_snapshot()
+        self._frame_interval = self._calculate_frame_interval()
+
+        self.bc = None
+        self.obs_camera = None
+        self.monitor = None
         self.sct = None
-        
+        self._circle_mask = None
+        self._circle_mask_shape = None
+
         self.running = True
-    
+
+        if self._capture_backend is None:
+            raise SystemExit(1)
+        self._setup_backend()
+
+    def _selected_backend(self):
+        enabled = []
         if cfg.Bettercam_capture:
+            enabled.append("bettercam")
+        if cfg.Obs_capture:
+            enabled.append("obs")
+        if cfg.mss_capture:
+            enabled.append("mss")
+
+        if len(enabled) != 1:
+            logger.error("[Capture] Enable exactly one capture backend: BetterCam, OBS, or MSS.")
+            return None
+        return enabled[0]
+
+    def _capture_settings_snapshot(self, backend=None):
+        if backend is None:
+            backend = self._capture_backend
+
+        return (
+            backend,
+            cfg.detection_window_width,
+            cfg.detection_window_height,
+            cfg.capture_fps,
+            cfg.bettercam_monitor_id,
+            cfg.bettercam_gpu_id,
+            cfg.Obs_camera_id,
+        )
+
+    def _calculate_frame_interval(self):
+        return 1.0 / max(1, int(cfg.capture_fps))
+
+    def _setup_backend(self):
+        if self._capture_backend == "bettercam":
             self.setup_bettercam()
-        elif cfg.Obs_capture:
+        elif self._capture_backend == "obs":
             self.setup_obs()
-        elif cfg.mss_capture:
-            left, top, w, h = self.calculate_mss_offset()
-            self.monitor = {"left": left, "top": top, "width": w, "height": h}
+        elif self._capture_backend == "mss":
+            self.setup_mss()
+
+    def _release_backend(self):
+        if self.bc is not None:
+            try:
+                if self.bc.is_capturing:
+                    self.bc.stop()
+            finally:
+                self.bc = None
+
+        if self.obs_camera is not None:
+            self.obs_camera.release()
+            self.obs_camera = None
+
+        if self.sct is not None:
+            self.sct.close()
+            self.sct = None
 
     def setup_bettercam(self):
+        import bettercam
+
         self.bc = bettercam.create(
-            device_idx=cfg.bettercam_monitor_id,
-            output_idx=cfg.bettercam_gpu_id,
+            device_idx=cfg.bettercam_gpu_id,
+            output_idx=cfg.bettercam_monitor_id,
             output_color="BGR",
             max_buffer_len=16,
-            region=self.calculate_screen_offset()
+            region=None
+        )
+        region = self.calculate_screen_offset(
+            custom_region=(self.bc.width, self.bc.height) if len(self._custom_region) == 0 else self._custom_region,
+            x_offset=self._offset_x if self._offset_x is not None else 0,
+            y_offset=self._offset_y if self._offset_y is not None else 0
         )
         if not self.bc.is_capturing:
             self.bc.start(
-                region=self.calculate_screen_offset(
-                    custom_region=[] if len(self._custom_region) == 0 else self._custom_region,
-                    x_offset=self._offset_x if self._offset_x is not None else 0,
-                    y_offset=self._offset_y if self._offset_y is not None else 0
-                ),
+                region=region,
                 target_fps=cfg.capture_fps
             )
 
     def setup_obs(self):
         camera_id = self.find_obs_virtual_camera() if cfg.Obs_camera_id == 'auto' else int(cfg.Obs_camera_id) if cfg.Obs_camera_id.isdigit() else None
-        if camera_id is None:
+        if camera_id is None or camera_id < 0:
             logger.info('[Capture] OBS Virtual Camera not found')
             exit(0)
         
@@ -76,31 +137,63 @@ class Capture(threading.Thread):
         self.monitor = {"left": left, "top": top, "width": width, "height": height}
 
     def run(self):
-        if cfg.mss_capture and self.sct is None:
-            self.sct = mss.mss()
+        next_frame_at = time.perf_counter()
         try:
             while self.running:
                 frame = self.capture_frame()
                 if frame is not None:
-                    if self.frame_queue.full():
-                        self.frame_queue.get()
-                    self.frame_queue.put(frame, block=False)
-        finally:
-            if cfg.mss_capture and self.sct is not None:
-                self.sct.close()
-            
-    def capture_frame(self):
-        if cfg.Bettercam_capture:
-            return self.bc.get_latest_frame()
-        
-        if cfg.Obs_capture:
-            ret_val, img = self.obs_camera.read()
-            return img if ret_val else None
+                    self._publish_frame(frame)
 
-        if cfg.mss_capture:
-            screenshot = self.sct.grab(self.monitor)
-            img = np.frombuffer(screenshot.bgra, np.uint8).reshape((screenshot.height, screenshot.width, 4))
-            return cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+                if self._capture_backend != "bettercam":
+                    next_frame_at = self._sleep_until_next_frame(next_frame_at)
+        finally:
+            self._release_backend()
+
+    def capture_frame(self):
+        with self._backend_lock:
+            if self._capture_backend == "bettercam":
+                bc = self.bc
+            else:
+                bc = None
+
+            if self._capture_backend == "obs" and self.obs_camera is not None:
+                ret_val, img = self.obs_camera.read()
+                return img if ret_val else None
+
+            if self._capture_backend == "mss" and self.monitor is not None:
+                if self.sct is None:
+                    self.sct = mss.mss()
+                screenshot = self.sct.grab(self.monitor)
+                img = np.frombuffer(screenshot.bgra, np.uint8).reshape((screenshot.height, screenshot.width, 4))
+                return cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+
+        if bc is not None:
+            try:
+                return bc.get_latest_frame()
+            except Exception as e:
+                if self.running:
+                    logger.warning(f"[Capture] BetterCam frame read failed: {e}")
+
+        return None
+
+    def _publish_frame(self, frame):
+        try:
+            self.frame_queue.put_nowait(frame)
+        except queue.Full:
+            try:
+                self.frame_queue.get_nowait()
+            except queue.Empty:
+                pass
+            self.frame_queue.put_nowait(frame)
+
+    def _sleep_until_next_frame(self, next_frame_at):
+        next_frame_at += self._frame_interval
+        sleep_for = next_frame_at - time.perf_counter()
+        if sleep_for > 0:
+            time.sleep(sleep_for)
+        else:
+            next_frame_at = time.perf_counter()
+        return next_frame_at
 
     def get_new_frame(self):
         try:
@@ -109,51 +202,88 @@ class Capture(threading.Thread):
             return None
     
     def restart(self):
-        if cfg.Bettercam_capture and (
-            self.prev_detection_window_height != cfg.detection_window_height or 
-            self.prev_detection_window_width != cfg.detection_window_width or 
-            self.prev_bettercam_capture_fps != cfg.capture_fps
-        ):
-            self.bc.stop()
-            del self.bc
-            self.setup_bettercam()
+        with self._backend_lock:
+            new_backend = self._selected_backend()
+            if new_backend is None:
+                return
+            new_snapshot = self._capture_settings_snapshot(new_backend)
 
-            self.screen_x_center = cfg.detection_window_width / 2
-            self.screen_y_center = cfg.detection_window_height / 2
+            if new_snapshot == self._settings_snapshot:
+                return
 
-            self.prev_detection_window_width = cfg.detection_window_width
-            self.prev_detection_window_height = cfg.detection_window_height
+            self._release_backend()
+            self._capture_backend = new_backend
+            self._setup_backend()
+            self._clear_frame_queue()
+
+            self._settings_snapshot = new_snapshot
+            self._frame_interval = self._calculate_frame_interval()
+            self.screen_x_center = int(cfg.detection_window_width / 2)
+            self.screen_y_center = int(cfg.detection_window_height / 2)
 
             logger.info('[Capture] Capture reloaded')
-            
-    def calculate_screen_offset(self, custom_region=[], x_offset=None, y_offset=None):
+
+    def calculate_screen_offset(self, custom_region=None, x_offset=None, y_offset=None):
         if x_offset is None:
             x_offset = 0
         if y_offset is None:
             y_offset = 0
-        
+
         if not custom_region:
-            left, top = self.get_primary_display_resolution()
+            screen_width, screen_height = self.get_primary_display_resolution()
         else:
-            left, top = custom_region
-        
-        left = left / 2 - cfg.detection_window_width / 2 + x_offset
-        top = top / 2 - cfg.detection_window_height / 2 - y_offset
+            screen_width, screen_height = custom_region
+
         width = cfg.detection_window_width
         height = cfg.detection_window_height
-        
-        return (int(left), int(top), int(width), int(height))
+        left, top = self._center_region(screen_width, screen_height, width, height, x_offset, y_offset)
+
+        return (left, top, left + width, top + height)
+
+    def _clear_frame_queue(self):
+        while True:
+            try:
+                self.frame_queue.get_nowait()
+            except queue.Empty:
+                return
 
     def calculate_mss_offset(self):
-        x, y = self.get_primary_display_resolution()
-        left = x / 2 - cfg.detection_window_width / 2
-        top = y / 2 - cfg.detection_window_height / 2
+        monitor = self.get_primary_display()
+        left, top = self._center_region(
+            monitor.width,
+            monitor.height,
+            cfg.detection_window_width,
+            cfg.detection_window_height,
+            0,
+            0,
+        )
+        left += monitor.x
+        top += monitor.y
         return int(left), int(top), int(cfg.detection_window_width), int(cfg.detection_window_height)
 
+    def _center_region(self, screen_width, screen_height, width, height, x_offset, y_offset):
+        if width > screen_width or height > screen_height:
+            raise ValueError(
+                f"[Capture] Detection window {width}x{height} is larger than display {screen_width}x{screen_height}."
+            )
+
+        left = int((screen_width - width) / 2 + x_offset)
+        top = int((screen_height - height) / 2 - y_offset)
+
+        left = max(0, min(left, screen_width - width))
+        top = max(0, min(top, screen_height - height))
+        return left, top
+
+    def get_primary_display(self):
+        monitors = list(get_monitors())
+        if not monitors:
+            raise RuntimeError("[Capture] No displays found.")
+
+        return next((m for m in monitors if m.is_primary), monitors[0])
+
     def get_primary_display_resolution(self):
-        for m in get_monitors():
-            if m.is_primary:
-                return m.width, m.height
+        monitor = self.get_primary_display()
+        return monitor.width, monitor.height
             
     def find_obs_virtual_camera(self):
         max_tested = 20
@@ -191,19 +321,20 @@ Hotkeys:
     
     def convert_to_circle(self, image):
         height, width = image.shape[:2]
-        mask = np.zeros((height, width), dtype=np.uint8)
-        cv2.ellipse(mask, (width // 2, height // 2), (width // 2, height // 2), 0, 0, 360, 255, -1)
-        return cv2.bitwise_and(image, cv2.merge([mask, mask, mask]))
+        shape = (height, width)
+        if self._circle_mask is None or self._circle_mask_shape != shape:
+            mask = np.zeros(shape, dtype=np.uint8)
+            cv2.ellipse(mask, (width // 2, height // 2), (width // 2, height // 2), 0, 0, 360, 255, -1)
+            self._circle_mask = mask
+            self._circle_mask_shape = shape
+        return cv2.bitwise_and(image, image, mask=self._circle_mask)
     
     def Quit(self):
         self.running = False
-        if cfg.Bettercam_capture and hasattr(self, 'bc') and self.bc.is_capturing:
-            self.bc.stop()
-        
-        if cfg.Obs_capture and hasattr(self, 'obs_camera'):
-            self.obs_camera.release()
-        
+        with self._backend_lock:
+            self._release_backend()
         self.join()
+
 
 capture = Capture()
 capture.start()

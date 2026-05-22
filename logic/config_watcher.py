@@ -21,9 +21,9 @@ class Config:
 
         self.DEFAULTS: Dict[str, Dict[str, str]] = {
             "Detection window": {
-                "detection_window_width": "640",
-                "detection_window_height": "480",
-                "circle_capture": "false",
+                "detection_window_width": "320",
+                "detection_window_height": "320",
+                "circle_capture": "true",
             },
             "Capture Methods": {
                 "capture_fps": "60",
@@ -43,10 +43,10 @@ class Config:
                 "third_person": "false",
             },
             "Hotkeys": {
-                "hotkey_targeting": "alt",
-                "hotkey_exit": "esc",
-                "hotkey_pause": "p",
-                "hotkey_reload_config": "f5",
+                "hotkey_targeting": "RightMouseButton",
+                "hotkey_exit": "F2",
+                "hotkey_pause": "F3",
+                "hotkey_reload_config": "F4",
             },
             "Mouse": {
                 "mouse_dpi": "800",
@@ -74,10 +74,10 @@ class Config:
                 "arduino_16_bit_mouse": "false",
             },
             "AI": {
-                "AI_model_name": "model.onnx",
+                "AI_model_name": "sunxds_0.8.0.pt",
                 "ai_model_image_size": "640",
-                "AI_conf": "0.5",
-                "AI_device": "cpu",
+                "AI_conf": "0.2",
+                "AI_device": "0",
                 "AI_enable_AMD": "false",
                 "disable_tracker": "false",
             },
@@ -105,7 +105,7 @@ class Config:
                 "spawn_window_pos_x": "100",
                 "spawn_window_pos_y": "100",
                 "debug_window_scale_percent": "100",
-                "debug_window_screenshot_key": "f12",
+                "debug_window_screenshot_key": "F12",
             },
         }
 
@@ -115,6 +115,9 @@ class Config:
 
     def read(self, verbose: bool = False) -> None:
         """Load from disk, ensure defaults, expose typed attributes, and persist any missing keys."""
+        self._dirty = False
+        self.config = configparser.ConfigParser()
+
         if not self.CONFIG_PATH.exists():
             logger.warning("[Config] config.ini not found. Creating with defaults.")
             self._init_with_defaults()
@@ -217,9 +220,9 @@ class Config:
     def _bind_attributes(self) -> None:
         # Detection window
         s = "Detection window"
-        self.detection_window_width = self._ensure_and_get(s, "detection_window_width", 640, int)
-        self.detection_window_height = self._ensure_and_get(s, "detection_window_height", 480, int)
-        self.circle_capture = self._ensure_and_get(s, "circle_capture", False, lambda v: self._to_bool(v))
+        self.detection_window_width = self._ensure_and_get(s, "detection_window_width", 320, int)
+        self.detection_window_height = self._ensure_and_get(s, "detection_window_height", 320, int)
+        self.circle_capture = self._ensure_and_get(s, "circle_capture", True, lambda v: self._to_bool(v))
 
         # Capture Methods
         s = "Capture Methods"
@@ -245,11 +248,11 @@ class Config:
 
         # Hotkeys
         s = "Hotkeys"
-        self.hotkey_targeting = self._ensure_and_get(s, "hotkey_targeting", "alt", str)
+        self.hotkey_targeting = self._ensure_and_get(s, "hotkey_targeting", "RightMouseButton", str)
         self.hotkey_targeting_list = [t.strip() for t in self.hotkey_targeting.split(",") if t.strip()]
-        self.hotkey_exit = self._ensure_and_get(s, "hotkey_exit", "esc", str)
-        self.hotkey_pause = self._ensure_and_get(s, "hotkey_pause", "p", str)
-        self.hotkey_reload_config = self._ensure_and_get(s, "hotkey_reload_config", "f5", str)
+        self.hotkey_exit = self._ensure_and_get(s, "hotkey_exit", "F2", str)
+        self.hotkey_pause = self._ensure_and_get(s, "hotkey_pause", "F3", str)
+        self.hotkey_reload_config = self._ensure_and_get(s, "hotkey_reload_config", "F4", str)
 
         # Mouse
         s = "Mouse"
@@ -281,10 +284,10 @@ class Config:
 
         # AI
         s = "AI"
-        self.AI_model_name = self._ensure_and_get(s, "AI_model_name", "model.onnx", str)
+        self.AI_model_name = self._ensure_and_get(s, "AI_model_name", "sunxds_0.8.0.pt", str)
         self.ai_model_image_size = self._ensure_and_get(s, "ai_model_image_size", 640, int)
-        self.AI_conf = self._ensure_and_get(s, "AI_conf", 0.5, float)
-        self.AI_device = self._ensure_and_get(s, "AI_device", "cpu", str)
+        self.AI_conf = self._ensure_and_get(s, "AI_conf", 0.2, float)
+        self.AI_device = self._ensure_and_get(s, "AI_device", "0", str)
         self.AI_enable_AMD = self._ensure_and_get(s, "AI_enable_AMD", False, self._to_bool)
         self.disable_tracker = self._ensure_and_get(s, "disable_tracker", False, self._to_bool)
 
@@ -314,7 +317,7 @@ class Config:
         self.spawn_window_pos_x = self._ensure_and_get(s, "spawn_window_pos_x", 100, int)
         self.spawn_window_pos_y = self._ensure_and_get(s, "spawn_window_pos_y", 100, int)
         self.debug_window_scale_percent = self._ensure_and_get(s, "debug_window_scale_percent", 100, int)
-        self.debug_window_screenshot_key = self._ensure_and_get(s, "debug_window_screenshot_key", "f12", str)
+        self.debug_window_screenshot_key = self._ensure_and_get(s, "debug_window_screenshot_key", "F12", str)
 
         self.debug_window_name = self.window_name
 
