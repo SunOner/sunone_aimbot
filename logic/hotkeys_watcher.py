@@ -9,6 +9,11 @@ from logic.capture import capture
 from logic.mouse import mouse
 from logic.visual import visuals
 from logic.platform import input_backend
+from logic.model_classes import (
+    HEAD_CLASS_ID,
+    HIDEOUT_TARGET_CLASS_IDS,
+    PLAYER_CLASS_ID,
+)
 
 class HotkeysWatcher(threading.Thread):
     def __init__(self):
@@ -67,18 +72,15 @@ class HotkeysWatcher(threading.Thread):
             cv2.destroyAllWindows()
 
     def active_classes(self) -> List[int]:
-        clss = [0, 1]
+        clss = [PLAYER_CLASS_ID]
         
         if cfg.hideout_targets:
-            clss.extend([5, 6])
+            clss.extend(HIDEOUT_TARGET_CLASS_IDS)
 
         if not cfg.disable_headshot:
-            clss.append(7)
+            clss.append(HEAD_CLASS_ID)
             
-        if cfg.third_person:
-            clss.append(10)
-        
-        self.clss = clss
-        return clss
+        self.clss = sorted(set(clss))
+        return self.clss
     
 hotkeys_watcher = HotkeysWatcher()

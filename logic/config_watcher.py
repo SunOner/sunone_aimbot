@@ -40,7 +40,6 @@ class Config:
                 "disable_headshot": "false",
                 "disable_prediction": "false",
                 "prediction_interval": "0.05",
-                "third_person": "false",
             },
             "Hotkeys": {
                 "hotkey_targeting": "RightMouseButton",
@@ -244,7 +243,6 @@ class Config:
         self.disable_headshot = self._ensure_and_get(s, "disable_headshot", False, self._to_bool)
         self.disable_prediction = self._ensure_and_get(s, "disable_prediction", False, self._to_bool)
         self.prediction_interval = self._ensure_and_get(s, "prediction_interval", 0.05, float)
-        self.third_person = self._ensure_and_get(s, "third_person", False, self._to_bool)
 
         # Hotkeys
         s = "Hotkeys"

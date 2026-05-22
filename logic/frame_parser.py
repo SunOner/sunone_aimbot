@@ -8,12 +8,13 @@ from logic.capture import capture
 from logic.visual import visuals
 from logic.mouse import mouse
 from logic.shooting import shooting
+from logic.model_classes import HEAD_CLASS_ID, is_head_class
 
 class Target:
     def __init__(self, x, y, w, h, cls):
         self.cls = int(cls)
         self.x = x
-        self.y = y if self.cls == 7 else (y - cfg.body_y_offset * h)
+        self.y = y if is_head_class(self.cls) else (y - cfg.body_y_offset * h)
         self.w = w
         self.h = h
 
@@ -116,30 +117,46 @@ class FrameParser:
     def _find_nearest_target(self, boxes_array, classes_tensor):
         center = self._get_center(boxes_array.device)
         distances_sq = torch.sum((boxes_array[:, :2] - center) ** 2, dim=1)
+        candidate_idxs = self._get_active_candidate_idxs(classes_tensor)
+
+        if candidate_idxs.numel() == 0:
+            return None
+
+        head_candidate_mask = classes_tensor[candidate_idxs] == HEAD_CLASS_ID
 
         if cfg.disable_headshot:
-            non_head_mask = classes_tensor != 7
-            weights = torch.ones_like(distances_sq)
-            weights[classes_tensor == 7] *= 0.5
-            size_factor = (boxes_array[:, 2] * boxes_array[:, 3]).clamp_min(1.0)
-            distances_sq = weights * (distances_sq / size_factor)
+            non_head_candidate_idxs = candidate_idxs[~head_candidate_mask]
 
-            if not non_head_mask.any():
+            if non_head_candidate_idxs.numel() == 0:
                 return None
-            candidate_idxs = torch.nonzero(non_head_mask, as_tuple=False).flatten()
+
+            size_factor = (boxes_array[:, 2] * boxes_array[:, 3]).clamp_min(1.0)
+            distances_sq = distances_sq / size_factor
+            candidate_idxs = non_head_candidate_idxs
             nearest_idx = candidate_idxs[torch.argmin(distances_sq[candidate_idxs])].item()
         else:
-            head_mask = classes_tensor == 7
-            if head_mask.any():
-                candidate_idxs = torch.nonzero(head_mask, as_tuple=False).flatten()
-                nearest_idx = candidate_idxs[torch.argmin(distances_sq[candidate_idxs])].item()
-            else:
-                nearest_idx = torch.argmin(distances_sq)
+            if head_candidate_mask.any():
+                candidate_idxs = candidate_idxs[head_candidate_mask]
+            nearest_idx = candidate_idxs[torch.argmin(distances_sq[candidate_idxs])].item()
 
         target_data = boxes_array[nearest_idx, :4].cpu().numpy()
         target_class = int(classes_tensor[nearest_idx].item())
 
         return Target(*target_data, target_class)
+
+    def _get_active_candidate_idxs(self, classes_tensor):
+        if hotkeys_watcher.clss is None:
+            hotkeys_watcher.active_classes()
+
+        active_class_ids = hotkeys_watcher.clss or []
+        if not active_class_ids:
+            return torch.empty(0, dtype=torch.long, device=classes_tensor.device)
+
+        active_mask = torch.zeros_like(classes_tensor, dtype=torch.bool)
+        for class_id in active_class_ids:
+            active_mask |= classes_tensor == int(class_id)
+
+        return torch.nonzero(active_mask, as_tuple=False).flatten()
 
     def _get_center(self, device):
         key = (capture.screen_x_center, capture.screen_y_center, str(device))

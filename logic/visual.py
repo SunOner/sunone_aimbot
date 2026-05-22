@@ -10,6 +10,7 @@ from logic.overlay import overlay
 from logic.buttons import Buttons
 from logic.logger import logger
 from logic.platform import IS_WINDOWS, input_backend
+from logic.model_classes import CLASS_NAMES, NON_TARGET_CLASS_IDS
 
 if IS_WINDOWS:
     import win32gui
@@ -35,21 +36,8 @@ class Visuals(threading.Thread):
         self.draw_speed_data = None
         self.draw_bScope_data = None
         self.draw_history_point_data = []
-        self.cls_model_data = {
-            0: 'player',
-            1: 'bot',
-            2: 'weapon',
-            3: 'outline',
-            4: 'dead_body',
-            5: 'hideout_target_human',
-            6: 'hideout_target_balls',
-            7: 'head',
-            8: 'smoke',
-            9: 'fire',
-            10: 'third_person'
-        }
-
-        self.disabled_line_classes = [2, 3, 4, 8, 9, 10]
+        self.cls_model_data = CLASS_NAMES
+        self.disabled_line_classes = NON_TARGET_CLASS_IDS
         self.start()
 
     def submit_frame(self, image):

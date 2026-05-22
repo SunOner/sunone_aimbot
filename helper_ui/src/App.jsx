@@ -621,7 +621,6 @@ function App() {
           { key: "prediction_interval", label: "Prediction interval", type: "number", step: 0.1, min: 0.1, max: 5, advanced: true, visible: !config.disable_prediction },
           { key: "hideout_targets", label: "Hideout targets", type: "bool", advanced: true },
           { key: "disable_headshot", label: "Disable headshot", type: "bool", advanced: true },
-          { key: "third_person", label: "Third person mode", type: "bool", advanced: true },
           { key: "hotkey_reload_config", label: "Reload key", type: "select", options: hotkeyOptions, advanced: true }
         ]
       },

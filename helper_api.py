@@ -57,7 +57,6 @@ FIELD_MAP: dict[str, tuple[str, str, str, Any]] = {
     "disable_headshot": ("Aim", "disable_headshot", "bool", False),
     "disable_prediction": ("Aim", "disable_prediction", "bool", False),
     "prediction_interval": ("Aim", "prediction_interval", "float", 0.3),
-    "third_person": ("Aim", "third_person", "bool", False),
     "hotkey_exit": ("Hotkeys", "hotkey_exit", "str", "F2"),
     "hotkey_pause": ("Hotkeys", "hotkey_pause", "str", "F3"),
     "hotkey_reload_config": ("Hotkeys", "hotkey_reload_config", "str", "F4"),
