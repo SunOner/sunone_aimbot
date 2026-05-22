@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from ultralytics import YOLO
 import torch
+import supervision as sv
+from trackers import ByteTrackTracker
 
 from logic.config_watcher import cfg
 from logic.capture import capture
@@ -7,12 +11,12 @@ from logic.visual import visuals
 from logic.frame_parser import frameParser
 from logic.hotkeys_watcher import hotkeys_watcher
 from logic.checks import run_checks
-import supervision as sv
-    
-tracker = sv.ByteTrack() if not cfg.disable_tracker else None
+from logic.logger import logger
+
+tracker = ByteTrackTracker() if not cfg.disable_tracker else None
 
 @torch.inference_mode()
-def perform_detection(model, image, tracker: sv.ByteTrack | None = None):
+def perform_detection(model, image, tracker: ByteTrackTracker | None = None):
     kwargs = dict(
         source=image,
         imgsz=cfg.ai_model_image_size,
@@ -41,7 +45,7 @@ def perform_detection(model, image, tracker: sv.ByteTrack | None = None):
     if tracker:
         for res in results:
             det = sv.Detections.from_ultralytics(res)
-            return tracker.update_with_detections(det)
+            return tracker.update(det)
     else:
         return next(results)
 
@@ -51,7 +55,7 @@ def init():
     try:
         model = YOLO(f"models/{cfg.AI_model_name}", task="detect")
     except Exception as e:
-        print("An error occurred when loading the AI model:\n", e)
+        logger.info("An error occurred when loading the AI model:\n", e)
         quit(0)
         
     while True:

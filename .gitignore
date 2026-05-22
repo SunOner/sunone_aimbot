@@ -43,6 +43,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.helper_system_meta_cache.json
 nosetests.xml
 coverage.xml
 *.cover
@@ -153,3 +154,11 @@ cython_debug/
 runs/
 tools/
 utils/
+helper_ui/node_modules/
+.vscode/launch.json
+.vscode/settings.json
+close_mosa.py
+/datasets
+tranculdate_classes.py
+yolo11n.pt
+train.yaml

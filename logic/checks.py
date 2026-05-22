@@ -1,5 +1,6 @@
 import torch
 import os
+import sys
 
 from logic.config_watcher import cfg
 from logic.logger import logger
@@ -77,11 +78,19 @@ def run_checks():
     os.makedirs("screenshots", exist_ok=True)
     
     if torch.cuda.is_available() is False:
+        torch_details = (
+            f"Python executable: {sys.executable}\n"
+            f"Torch version: {getattr(torch, '__version__', 'unknown')}\n"
+            f"Torch CUDA build: {getattr(torch.version, 'cuda', None) or 'none'}\n"
+            f"Torch file: {getattr(torch, '__file__', 'unknown')}\n"
+            f"CUDA device count: {torch.cuda.device_count()}"
+        )
         logger.error("You need to install a version of pytorch that supports CUDA.\n"
+            f"{torch_details}\n"
             "First uninstall all torch packages.\n"
-            "Run command 'pip uninstall torch torchvision torchaudio'\n"
-            "Next go to 'https://pytorch.org/get-started/locally/' and install torch with CUDA support.\n"
-            "Don't forget your CUDA version (Minimum version is 12.1).")
+            "Run command 'pip uninstall torch torchvision torchaudio -y'\n"
+            "Then run command 'pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128'\n"
+            "If you use another Python environment, run the commands inside that environment.")
         quit()
         
     if + cfg.mss_capture + cfg.Bettercam_capture + cfg.Obs_capture < 1:

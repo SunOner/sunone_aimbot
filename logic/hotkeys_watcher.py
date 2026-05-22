@@ -1,4 +1,5 @@
 import threading
+import time
 from typing import List
 import cv2
 import win32api
@@ -19,6 +20,7 @@ class HotkeysWatcher(threading.Thread):
         
         self.app_pause = 0
         self.clss = self.active_classes()
+        self._next_config_poll_at = 0.0
 
         self.start()
         
@@ -26,6 +28,7 @@ class HotkeysWatcher(threading.Thread):
         cfg_reload_prev_state = 0
         while True:
             cfg_reload_prev_state = self.process_hotkeys(cfg_reload_prev_state)
+            self.reload_config_if_changed()
                 
             # terminate
             if win32api.GetAsyncKeyState(Buttons.KEY_CODES.get(cfg.hotkey_exit)) & 0xFF:
@@ -33,6 +36,7 @@ class HotkeysWatcher(threading.Thread):
                 if cfg.show_window:
                     visuals.queue.put(None)
                 os._exit(0)
+            time.sleep(0.01)
             
     def process_hotkeys(self, cfg_reload_prev_state):
         self.app_pause = win32api.GetKeyState(Buttons.KEY_CODES[cfg.hotkey_pause])
@@ -41,14 +45,25 @@ class HotkeysWatcher(threading.Thread):
         if app_reload_cfg != cfg_reload_prev_state:
             if app_reload_cfg in (1, 0):
                 cfg.Read(verbose=True)
-                capture.restart()
-                mouse.update_settings()
-                self.clss = self.active_classes()
-                if cfg.show_window == False:
-                    cv2.destroyAllWindows()
+                self.apply_config_changes()
                     
         cfg_reload_prev_state = app_reload_cfg
         return cfg_reload_prev_state
+
+    def reload_config_if_changed(self):
+        now = time.monotonic()
+        if now < self._next_config_poll_at:
+            return
+        self._next_config_poll_at = now + 0.25
+        if cfg.reload_if_changed(verbose=True):
+            self.apply_config_changes()
+
+    def apply_config_changes(self):
+        capture.restart()
+        mouse.update_settings()
+        self.clss = self.active_classes()
+        if cfg.show_window == False:
+            cv2.destroyAllWindows()
 
     def active_classes(self) -> List[int]:
         clss = [0.0, 1.0]
@@ -63,5 +78,6 @@ class HotkeysWatcher(threading.Thread):
             clss.append(10.0)
         
         self.clss = clss
+        return clss
     
 hotkeys_watcher = HotkeysWatcher()

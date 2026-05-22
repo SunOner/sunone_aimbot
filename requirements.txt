@@ -14,3 +14,10 @@ ultralytics
 keyboard
 mss
 supervision
+trackers
+hid
+pyusb
+pandas
+fastapi
+uvicorn[standard]
+python-multipart

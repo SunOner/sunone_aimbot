@@ -31,7 +31,9 @@ Before you get started, make sure you have the following prerequisites installed
 - [AI Models docs](https://github.com/SunOner/sunone_aimbot_docs/blob/main/ai_models/ai_models.md)
 
 <br></br>
-- To launch the aimbot after all installations, start run_ai.bat or type `py run.py`.
+- To launch the aimbot after all installations, start `run_ai.bat` or type `py run.py`.
+- To launch the React helper panel (config/export/train/tests), run `run_helper.bat`.
+  - `run_helper.bat` performs one-click setup (Python deps + npm deps + React build), starts helper API/UI, and opens the browser automatically.
 
 # Use the new C++ version of the AI-Aimbot!
 - [Sunone_aimbot_cpp](https://github.com/SunOner/sunone_aimbot_cpp): The Python version is good, but C++ is even better. It has an overlay, is faster, and much more. Currently, it is updated much more frequently than the Python version. It's better to use the C++ version.
@@ -43,8 +45,8 @@ Before you get started, make sure you have the following prerequisites installed
   <thead><tr><th>CUDA:</th><td>12.8</td></tr></thead>
   <thead><tr><th>TensorRT:</th><td>10.13.0.35</td></tr></thead>
   <thead><tr><th>Ultralytics:</th><td>8.3.174</td></tr></thead>
-  <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.5.6 (YOLOv10)</td></tr></thead>
-  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.7.8 (YOLOv12)</td></tr></thead>
+  <thead><tr><th>GitHub AI Model:</th><td>sunxds_0.8.0</td></tr></thead>
+  <thead><tr><th>Supporters AI Model:</th><td>sunxds_0.8.2</td></tr></thead>
 </table>
 
 ## Notes / Recommendations
